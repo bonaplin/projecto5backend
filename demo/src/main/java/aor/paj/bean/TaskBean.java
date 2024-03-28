@@ -40,7 +40,7 @@ public class TaskBean {
 
         taskEntity.setOwner(userEntity);
         taskEntity.setActive(true);
-        taskEntity.setId(generateTaskId());
+//        taskEntity.setId(generateTaskId());
         taskEntity.setStatus(State.TODO.getValue());
         taskEntity.setCategory(categoryEntity);
         if(taskEntity.getInitialDate() == null) {
@@ -60,21 +60,21 @@ public class TaskBean {
     }
 
     //Function that generates a unique id for new task checking in database mysql if the id already exists
-    public int generateTaskId() {
-        int id = 1;
-        boolean idAlreadyExists;
-
-        do {
-            idAlreadyExists = false;
-            TaskEntity taskEntity = taskDao.findTaskById(id);
-            if (taskEntity != null) {
-                id++;
-                idAlreadyExists = true;
-            }
-        } while (idAlreadyExists);
-
-        return id;
-    }
+//    public int generateTaskId() {
+//        int id = 1;
+//        boolean idAlreadyExists;
+//
+//        do {
+//            idAlreadyExists = false;
+//            TaskEntity taskEntity = taskDao.findTaskById(id);
+//            if (taskEntity != null) {
+//                id++;
+//                idAlreadyExists = true;
+//            }
+//        } while (idAlreadyExists);
+//
+//        return id;
+//    }
 
     //Function that returns all tasks from the database mysql
     public List<TaskDto> getAllTasks() {

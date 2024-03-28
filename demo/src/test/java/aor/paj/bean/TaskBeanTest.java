@@ -76,7 +76,7 @@ class TaskBeanTest {
         // Given
         int id = 1; // Define an id for the task
         TaskEntity taskEntity = new TaskEntity(); // Create a new TaskEntity object
-        taskEntity.setId(id); // Set the id of the TaskEntity object
+//        taskEntity.setId(id); // Set the id of the TaskEntity object
         taskEntity.setActive(true); // Set the active status of the TaskEntity object to true
         // When
         when(taskDao.findTaskById(id)).thenReturn(taskEntity);
@@ -108,7 +108,7 @@ class TaskBeanTest {
 
         // Create a UserEntity and set its id
         UserEntity userEntity = new UserEntity();
-        userEntity.setId(id);
+//        userEntity.setId(id);
 
         // Create a TaskEntity and set its owner
         TaskEntity taskEntity = new TaskEntity();

@@ -145,15 +145,15 @@ class UserBeanTest {
         String newUsername = "newUser";
 
         UserEntity oldUserEntity = new UserEntity();
-        oldUserEntity.setId(1);
+//        oldUserEntity.setId(1);
         oldUserEntity.setUsername(oldUsername);
 
         UserEntity newUserEntity = new UserEntity();
-        newUserEntity.setId(2);
+//        newUserEntity.setId(2);
         newUserEntity.setUsername(newUsername);
 
         TaskEntity taskEntity = new TaskEntity();
-        taskEntity.setId(1);
+//        taskEntity.setId(1);
         taskEntity.setOwner(oldUserEntity);
 
         // When: Define the behavior of the mocks

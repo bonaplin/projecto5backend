@@ -38,20 +38,20 @@ public class UserBean {
 
 
     //Function that generates a unique id for new user checking in database mysql if the id already exists
-    public int generateIdDataBase() {
-        int id = 1;
-        boolean idAlreadyExists;
-
-        do {
-            idAlreadyExists = false;
-            UserEntity userEntity = userDao.findUserById(id);
-            if (userEntity != null) {
-                id++;
-                idAlreadyExists = true;
-            }
-        } while (idAlreadyExists);
-        return id;
-    }
+//    public int generateIdDataBase() {
+//        int id = 1;
+//        boolean idAlreadyExists;
+//
+//        do {
+//            idAlreadyExists = false;
+//            UserEntity userEntity = userDao.findUserById(id);
+//            if (userEntity != null) {
+//                id++;
+//                idAlreadyExists = true;
+//            }
+//        } while (idAlreadyExists);
+//        return id;
+//    }
 
     //Add a user to the database mysql, encrypting the password, role to "dev" and generating a id
     public boolean addUser(UserDto user) {
@@ -59,7 +59,7 @@ public class UserBean {
             UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
             //Encrypt the password
             userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
-            userEntity.setId(generateIdDataBase());
+//            userEntity.setId(generateIdDataBase());
             if(userEntity.getUsername().equals("admin")){
                 userEntity.setRole("po");
             }else {
@@ -74,7 +74,7 @@ public class UserBean {
         UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
         //Encrypt the password
         userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
-        userEntity.setId(generateIdDataBase());
+//        userEntity.setId(generateIdDataBase());
         userEntity.setRole("dev");
         userEntity.setActive(true);
         userEntity.setRole(role);

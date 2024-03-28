@@ -1,8 +1,6 @@
 package aor.paj.entity;
 
-import aor.paj.dto.UserDto;
 import jakarta.persistence.*;
-import jdk.jfr.Category;
 
 import java.io.Serializable;
 import java.time.LocalDate;
@@ -30,6 +28,7 @@ public class TaskEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true, updatable = false)
     private int id;
 
@@ -62,6 +61,9 @@ public class TaskEntity implements Serializable {
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
+//    @Column(name="doneDate", nullable = true, unique = false, updatable = true)
+//    private LocalDate doneDate;
+
     public TaskEntity() {
     }
 
@@ -69,9 +71,9 @@ public class TaskEntity implements Serializable {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+//    public void setId(int id) {
+//        this.id = id;
+//    }
 
     public String getTitle() {
         return title;
@@ -144,6 +146,14 @@ public class TaskEntity implements Serializable {
     public void setCategory(CategoryEntity category) {
         this.category = category;
     }
+
+//    public LocalDate getDoneDate() {
+//        return doneDate;
+//    }
+//
+//    public void setDoneDate(LocalDate doneDate) {
+//        this.doneDate = doneDate;
+//    }
 
     @Override
     public String toString() {

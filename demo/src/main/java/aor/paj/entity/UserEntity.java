@@ -3,7 +3,6 @@ package aor.paj.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
-import org.mindrot.jbcrypt.BCrypt;
 
 @Entity
 @Table(name="user")
@@ -17,6 +16,7 @@ public class UserEntity implements Serializable {
     private static final long serialVersionUID = 1L;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name="id", nullable = false, unique = true, updatable = false)
     private int id;
 
@@ -50,6 +50,9 @@ public class UserEntity implements Serializable {
     @Column(name="active", nullable = false, unique = false, updatable = true)
     private Boolean active;
 
+//    @Column(name="created", nullable = false, unique = false, updatable = false)
+//    private LocalDate created;
+
     public UserEntity() {
     }
 
@@ -57,9 +60,9 @@ public class UserEntity implements Serializable {
         return id;
     }
 
-    public void setId(int id) {
-        this.id = id;
-    }
+//    public void setId(int id) {
+//        this.id = id;
+//    }
 
     public String getUsername() {
         return username;
@@ -144,6 +147,14 @@ public class UserEntity implements Serializable {
     public Boolean getActive() {
         return active;
     }
+
+//    public LocalDate getCreated() {
+//        return created;
+//    }
+//    @PrePersist
+//    public void setCreated() {
+//        this.created = LocalDate.now();
+//    }
 
 
     @Override

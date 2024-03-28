@@ -137,7 +137,7 @@ public class CategoryBean {
         UserEntity userEntity = userDao.findUserByUsername(categoryDto.getOwner());
         categoryEntity = CategoryMapper.convertCategoryDtoToCategoryEntity(categoryDto);
         categoryEntity.setOwner(userEntity);
-        categoryEntity.setId(generateIdDataBase());
+//        categoryEntity.setId(generateIdDataBase());
         categoryDao.addCategory(categoryEntity);
         return true;
     }
@@ -151,20 +151,20 @@ public class CategoryBean {
 
 
     //Function that verifys all categories in the database my sql and generates a unique id for new category
-    public int generateIdDataBase() {
-        int id = 1;
-        boolean idAlreadyExists;
-
-        do {
-            idAlreadyExists = false;
-            CategoryEntity categoryEntity = categoryDao.findCategoryById(id);
-            if (categoryEntity != null) {
-                id++;
-                idAlreadyExists = true;
-            }
-        } while (idAlreadyExists);
-        return id;
-    }
+//    public int generateIdDataBase() {
+//        int id = 1;
+//        boolean idAlreadyExists;
+//
+//        do {
+//            idAlreadyExists = false;
+//            CategoryEntity categoryEntity = categoryDao.findCategoryById(id);
+//            if (categoryEntity != null) {
+//                id++;
+//                idAlreadyExists = true;
+//            }
+//        } while (idAlreadyExists);
+//        return id;
+//    }
 
     public void createDefaultCategoryIfNotExistent() {
         if (!categoryDao.findCategoryByName("Backlog")) {
