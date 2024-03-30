@@ -3,6 +3,8 @@ package aor.paj.service;
 import java.util.List;
 
 import aor.paj.bean.UserBean;
+import aor.paj.controller.EmailRequest;
+import aor.paj.controller.EmailService;
 import aor.paj.dto.*;
 import aor.paj.entity.UserEntity;
 import aor.paj.responses.ResponseMessage;
@@ -24,6 +26,11 @@ import java.util.stream.Collectors;
 
 public class UserService {
 
+    private final EmailService emailService;
+
+    public UserService() {
+        this.emailService = new EmailService();
+    }
     @Inject
     UserBean userBean;
 
@@ -308,6 +315,14 @@ public class UserService {
         return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
     }
 
+    @Path("/email/send")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.TEXT_PLAIN)
+    public Response sendEmail(EmailRequest emailRequest) {
+        emailService.sendEmail(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getContent());
+        return Response.ok("Email sent successfully").build();
+    }
 }
 
 
