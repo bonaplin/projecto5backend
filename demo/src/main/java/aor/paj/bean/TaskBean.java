@@ -277,4 +277,18 @@ public class TaskBean {
         }
         return taskDtos;
     }
+
+    public List<TaskDto> getTasksBasedOnQueryParams(String category, String username, Boolean active) {
+        if (category != null && !category.isEmpty() && username != null && !username.isEmpty()) {
+            return getTasksByCategoryAndOwner(category, username);
+        } else if (category != null && !category.isEmpty()) {
+            return getTasksByCategory(category);
+        } else if (username != null && !username.isEmpty()) {
+            return getTasksByOwner(username);
+        } else if (active != null) {
+            return active ? getActiveTasks() : getInactiveTasks();
+        } else {
+            return getActiveTasks();
+        }
+    }
 }

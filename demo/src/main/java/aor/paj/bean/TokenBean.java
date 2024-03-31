@@ -7,6 +7,7 @@ import aor.paj.dto.UserDto;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
+import aor.paj.utils.TokenStatus;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
@@ -32,30 +33,28 @@ public class TokenBean  {
     private TaskDao taskDao;
     @Transactional
     public TokenEntity createToken(String token, int userId) {
-        System.out.println("createToken");
+
         TokenEntity tokenEntity = new TokenEntity();
-        System.out.println("userId: " + userId);
+
         tokenEntity.setToken(token);
-        System.out.println("token: " + token);
+
         tokenEntity.setUser(userDao.findUserById(userId));
-        tokenEntity.setExpiration(LocalDateTime.now().plusHours(1));
-        System.out.println("antes de persist: user: " + userDao.findUserById(userId));
+        tokenEntity.setExpiration(LocalDateTime.now().plusMinutes(1));
 
         tokenDao.persist(tokenEntity);
-        System.out.println("depois de persist: user: " + userDao.findUserById(userId));
         return tokenEntity;
     }
 
 
     public String login(String username, String password) {
-        System.out.println(username + " & " + password);
+
         UserEntity userEntity = userDao.findUserByUsername(username);
         if (userEntity != null) {
-            System.out.println("userentity: "+ userEntity.getPassword());
+
             if (BCrypt.checkpw(password, userEntity.getPassword())) {
                 String token = UUID.randomUUID().toString();
                 createToken(token, userEntity.getId());
-                System.out.println("token: " + token);
+
                 return token;
             }
         }
@@ -99,12 +98,24 @@ public class TokenBean  {
         }
     }
 
-    public boolean isValidUserByToken(String token) {
+    public TokenStatus isValidUserByToken(String token) {
         TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
         // falta verificar se o já validou o registo e se a expiração do token ainda não passou.
         if(tokenEntity != null && tokenEntity.getUser().getActive()){
-            return true;
+            if (tokenEntity.getExpiration().isAfter(LocalDateTime.now())) {
+                // Atualiza a expiração do token
+                System.out.println("Token still valid, updated expiration" + tokenEntity.getExpiration());
+                tokenEntity.setExpiration(LocalDateTime.now().plusMinutes(1));
+                System.out.println("New expiration: " + tokenEntity.getExpiration());
+                // merge para atualizar a expiração
+                tokenDao.merge(tokenEntity);
+                return TokenStatus.VALID;
+            }else {
+                System.out.println("Token expired, cleaned from database");
+                tokenDao.remove(tokenEntity);
+                return TokenStatus.EXPIRED;
+            }
         }
-        return false;
+        return TokenStatus.NOT_FOUND;
     }
 }
