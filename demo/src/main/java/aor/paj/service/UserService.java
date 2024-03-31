@@ -4,32 +4,25 @@ import java.util.List;
 
 import aor.paj.bean.UserBean;
 import aor.paj.controller.EmailRequest;
-import aor.paj.controller.EmailService;
+import aor.paj.controller.EmailSender;
 import aor.paj.dto.*;
-import aor.paj.entity.UserEntity;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.validator.UserValidator;
 import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.transaction.Transactional;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
-import org.mindrot.jbcrypt.BCrypt;
-
-import java.util.stream.Collectors;
 
 //@Path("/user")
 @Path("/users")
 
 public class UserService {
 
-    private final EmailService emailService;
+    private final EmailSender emailSender;
 
     public UserService() {
-        this.emailService = new EmailService();
+        this.emailSender = new EmailSender();
     }
     @Inject
     UserBean userBean;
@@ -315,14 +308,14 @@ public class UserService {
         return Response .status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid Parameters")).toString()).build();
     }
 
-    @Path("/email/send")
-    @POST
-    @Consumes(MediaType.APPLICATION_JSON)
-    @Produces(MediaType.TEXT_PLAIN)
-    public Response sendEmail(EmailRequest emailRequest) {
-        emailService.sendEmail(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getContent());
-        return Response.ok("Email sent successfully").build();
-    }
+//    @Path("/email/send")
+//    @POST
+//    @Consumes(MediaType.APPLICATION_JSON)
+//    @Produces(MediaType.TEXT_PLAIN)
+//    public Response sendEmail(EmailRequest emailRequest) {
+//        emailSender.sendEmail(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getContent());
+//        return Response.ok("Email sent successfully").build();
+//    }
 }
 
 

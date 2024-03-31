@@ -1,6 +1,5 @@
 package aor.paj.controller;
 
-import jakarta.mail.PasswordAuthentication;
 import jakarta.mail.Session;
 import jakarta.mail.Message;
 import jakarta.mail.Transport;
@@ -9,7 +8,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
 
-public class EmailService {
+public class EmailSender {
 
     private final String username = "botsemgps@gmail.com";
     private final String password = "xlvi nhlq blnp olzf"; // replace with your actual password
@@ -42,7 +41,11 @@ public class EmailService {
             System.out.println("Recipients set");
             message.setSubject(subject);
             System.out.println("Subject set");
-            message.setText(content);
+
+            // Set the email content to HTML
+            message.setContent(content, "text/html; charset=utf-8");
+
+
             System.out.println("Content set");
             try{
                 Transport.send(message);
@@ -56,5 +59,20 @@ public class EmailService {
         } catch (MessagingException e) {
             throw new RuntimeException(e);
         }
+    }
+    public void sendVerificationEmail(String to, String userName, String verificationLink) {
+        String subject = "Verificação de conta";
+        String content = "<h1>Olá, " + userName + "!</h1>" +
+                "<p>Para verificar a sua conta, clique no link abaixo:</p>" +
+                "<p><a href=\"" + verificationLink + "\">Verificar conta</a></p>";
+        sendEmail(to, subject, content);
+    }
+
+    public void sendPasswordResetEmail(String to, String userName, String resetLink) {
+        String subject = "Redefinição de senha";
+        String content = "<h1>Olá, " + userName + "!</h1>" +
+                "<p>Para redefinir sua senha, clique no link abaixo:</p>" +
+                "<p><a href=\"" + resetLink + "\">Redefinir senha</a></p>";
+        sendEmail(to, subject, content);
     }
 }
