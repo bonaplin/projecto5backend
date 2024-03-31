@@ -3,12 +3,13 @@ package aor.paj.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.time.LocalDate;
 
 @Entity
 @Table(name="user")
 @NamedQuery(name = "User.findUserByUsername", query = "SELECT u FROM UserEntity u WHERE u.username = :username")
 @NamedQuery(name = "User.findUserByEmail", query = "SELECT u FROM UserEntity u WHERE u.email = :email")
-@NamedQuery(name = "User.findUserByToken", query = "SELECT DISTINCT u FROM UserEntity u WHERE u.token = :token")
+//@NamedQuery(name = "User.findUserByToken", query = "SELECT DISTINCT u FROM UserEntity u WHERE u.token = :token")
 @NamedQuery(name = "User.findUserById", query = "SELECT u FROM UserEntity u WHERE u.id = :id")
 @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u WHERE u.id != 1 AND u.id != 2")
 public class UserEntity implements Serializable {
@@ -44,14 +45,14 @@ public class UserEntity implements Serializable {
     @Column(name="role", nullable = false, unique = false, updatable = true)
     private String role;
 
-    @Column(name="token", nullable = true, unique = true, updatable = true)
-    private String token;
+//    @Column(name="token", nullable = true, unique = true, updatable = true)
+//    private String token;
 
     @Column(name="active", nullable = false, unique = false, updatable = true)
     private Boolean active;
 
-//    @Column(name="created", nullable = false, unique = false, updatable = false)
-//    private LocalDate created;
+    @Column(name="created", nullable = false, unique = false, updatable = false)
+    private LocalDate created;
 
     public UserEntity() {
     }
@@ -128,13 +129,13 @@ public class UserEntity implements Serializable {
         this.role = role;
     }
 
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
-    }
+//    public String getToken() {
+//        return token;
+//    }
+//
+//    public void setToken(String token) {
+//        this.token = token;
+//    }
 
     public Boolean isActive() {
         return active;
@@ -148,13 +149,13 @@ public class UserEntity implements Serializable {
         return active;
     }
 
-//    public LocalDate getCreated() {
-//        return created;
-//    }
-//    @PrePersist
-//    public void setCreated() {
-//        this.created = LocalDate.now();
-//    }
+    public LocalDate getCreated() {
+        return created;
+    }
+    @PrePersist // This method is called just before the entity is persisted to the database
+    public void setCreated() {
+        this.created = LocalDate.now();
+    }
 
 
     @Override
@@ -169,8 +170,9 @@ public class UserEntity implements Serializable {
                 ", phone='" + phone + '\'' +
                 ", photoURL='" + photoURL + '\'' +
                 ", role='" + role + '\'' +
-                ", token='" + token + '\'' +
+//                ", token='" + token + '\'' +
                 ", active=" + active +
+                ", created=" + created +
                 '}';
     }
 }

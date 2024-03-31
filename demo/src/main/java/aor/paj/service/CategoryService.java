@@ -1,6 +1,7 @@
 package aor.paj.service;
 
 import aor.paj.bean.CategoryBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.CategoryDto;
 import aor.paj.responses.ResponseMessage;
@@ -19,13 +20,15 @@ public class CategoryService {
     @Inject
     CategoryBean categoryBean;
 
+    @Inject
+    TokenBean tokenBean;
     //Service that gets all categories from database
     @GET
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getCategories(@HeaderParam("token") String token) {
-        if (userBean.isValidUserByToken(token)) {
+        if (tokenBean.isValidUserByToken(token)) {
             return Response.status(200).entity(categoryBean.getAllCategories()).build();
         } else {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
@@ -67,8 +70,8 @@ public class CategoryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteCategory(@HeaderParam("token") String token, @PathParam("id") int id) {
-        if (userBean.isValidUserByToken(token)) {
-            if (userBean.getUserRole(token).equals("po")) {
+        if (tokenBean.isValidUserByToken(token)) {
+            if (tokenBean.getUserRole(token).equals("po")) {
                 if (categoryBean.deleteCategory(id)) {
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Category deleted"))).build();
                 } else {
@@ -86,8 +89,8 @@ public class CategoryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addCategory(@HeaderParam("token") String token, CategoryDto category) {
-        if (userBean.isValidUserByToken(token)) {
-            if (userBean.getUserRole(token).equals("po")) {
+        if (tokenBean.isValidUserByToken(token)) {
+            if (tokenBean.getUserRole(token).equals("po")) {
                 if (categoryBean.isValidCategory(category)) {
                     if (categoryBean.addCategory(category)) {
                         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Category added"))).build();
@@ -108,8 +111,8 @@ public class CategoryService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateCategory(@HeaderParam("token") String token, CategoryDto
             category, @QueryParam("title") String title) {
-        if (userBean.isValidUserByToken(token)) {
-            if (userBean.getUserRole(token).equals("po")) {
+        if (tokenBean.isValidUserByToken(token)) {
+            if (tokenBean.getUserRole(token).equals("po")) {
                 if (categoryBean.isValidCategoryUpdate(category, title)) {
                     if (categoryBean.updateCategory(category, title)) {
                         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Category updated"))).build();
@@ -129,8 +132,8 @@ public class CategoryService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateCategory(@HeaderParam("token") String token, CategoryDto category, @PathParam("id") int id) {
-        if (userBean.isValidUserByToken(token)) {
-            if (userBean.getUserRole(token).equals("po")) {
+        if (tokenBean.isValidUserByToken(token)) {
+            if (tokenBean.getUserRole(token).equals("po")) {
                 if (categoryBean.isValidCategory(category)) {
                     if (categoryBean.updateCategory(category, id)) {
                         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Category updated"))).build();

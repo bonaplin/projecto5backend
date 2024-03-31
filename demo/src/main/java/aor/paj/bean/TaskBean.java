@@ -2,11 +2,13 @@ package aor.paj.bean;
 
 import aor.paj.dao.CategoryDao;
 import aor.paj.dao.TaskDao;
+import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.TaskDto;
 import aor.paj.dto.UserDto;
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
+import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.TaskMapper;
 import aor.paj.utils.JsonUtils;
@@ -31,24 +33,49 @@ public class TaskBean {
     @EJB
     CategoryDao categoryDao;
 
+    @EJB
+    TokenDao tokenDao;
+
 
    //Function that receives a token and a taskdto and creates a task with the user token as owner and adds the task to the database mysql
-    public boolean addTask(String token, TaskDto taskDto) {
-        UserEntity userEntity = userDao.findUserByToken(token);
-        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskDto.getCategory());
-        TaskEntity taskEntity = TaskMapper.convertTaskDtoToTaskEntity(taskDto);
+//    public boolean addTask(String token, TaskDto taskDto) {
+//        UserEntity userEntity = userDao.findUserByToken(token);
+//        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskDto.getCategory());
+//        TaskEntity taskEntity = TaskMapper.convertTaskDtoToTaskEntity(taskDto);
+//
+//        taskEntity.setOwner(userEntity);
+//        taskEntity.setActive(true);
+////        taskEntity.setId(generateTaskId());
+//        taskEntity.setStatus(State.TODO.getValue());
+//        taskEntity.setCategory(categoryEntity);
+//        if(taskEntity.getInitialDate() == null) {
+//            taskEntity.setInitialDate(LocalDate.now());
+//        }
+//        taskDao.persist(taskEntity);
+//        return true;
+//    }
 
-        taskEntity.setOwner(userEntity);
-        taskEntity.setActive(true);
-//        taskEntity.setId(generateTaskId());
-        taskEntity.setStatus(State.TODO.getValue());
-        taskEntity.setCategory(categoryEntity);
-        if(taskEntity.getInitialDate() == null) {
-            taskEntity.setInitialDate(LocalDate.now());
+    public boolean addTask(String token, TaskDto taskDto){
+        TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
+        if(tokenEntity != null){
+            UserEntity userEntity = tokenEntity.getUser();
+            CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskDto.getCategory());
+            TaskEntity taskEntity = TaskMapper.convertTaskDtoToTaskEntity(taskDto);
+
+            taskEntity.setOwner(userEntity);
+            taskEntity.setActive(true);
+            taskEntity.setStatus(State.TODO.getValue());
+            taskEntity.setCategory(categoryEntity);
+            if(taskEntity.getInitialDate() == null) {
+                taskEntity.setInitialDate(LocalDate.now());
+            }
+            taskDao.persist(taskEntity);
+            return true;
         }
-        taskDao.persist(taskEntity);
-        return true;
+        return false;
     }
+
+
 
     //Function that receives a taskdto and checks in database mysql if a task with the same title already exists
     public boolean taskTitleExists(TaskDto taskDto) {
@@ -119,10 +146,13 @@ public class TaskBean {
     
     //Function that receives a task id and a token and checks if the user its the owner of task with that id
     public boolean taskBelongsToUser(String token, int id) {
-        UserEntity userEntity = userDao.findUserByToken(token);
-        TaskEntity taskEntity = taskDao.findTaskById(id);
-        if (taskEntity.getOwner().getId() == userEntity.getId()) {
-            return true;
+        TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
+        if (tokenEntity != null) {
+            UserEntity userEntity = tokenEntity.getUser();
+            TaskEntity taskEntity = taskDao.findTaskById(id);
+            if (taskEntity.getOwner().getId() == userEntity.getId()) {
+                return true;
+            }
         }
         return false;
     }

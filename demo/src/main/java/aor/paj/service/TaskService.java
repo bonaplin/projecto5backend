@@ -1,6 +1,7 @@
 package aor.paj.service;
 
 import aor.paj.bean.TaskBean;
+import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.StatusUpdate;
 import aor.paj.dto.TaskDto;
@@ -27,13 +28,16 @@ public class TaskService {
     @Inject
     UserBean userBean;
 
+    @Inject
+    TokenBean tokenBean;
+
     //Service that receives a taskdto and a token and creates a new task with the user in token and adds the task to the task table in the database mysql
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response addTask(@HeaderParam("token") String token, TaskDto t) {
-        if (userBean.isValidUserByToken(token)) {
+        if (tokenBean.isValidUserByToken(token)) {
             if (TaskValidator.isValidTask(t) && !taskBean.taskTitleExists(t)) {
                 if (taskBean.addTask(token, t)) {
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is added"))).build();
@@ -52,7 +56,7 @@ public class TaskService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response getTasks(@HeaderParam("token") String token, @QueryParam("category") String category, @QueryParam("username") String username, @QueryParam("active") Boolean active, @QueryParam("id") Integer id) {
-        if (userBean.isValidUserByToken(token)) {
+        if (tokenBean.isValidUserByToken(token)) {
             if (id != null) {
                 return Response.status(200).entity(taskBean.getTaskById(id)).build();
             } else {
@@ -83,7 +87,7 @@ public class TaskService {
     @Consumes(MediaType.APPLICATION_JSON)
     public Response updateTaskStatus(@HeaderParam("token") String token, @PathParam("id") int id, StatusUpdate statusUpdate) {
         int status = statusUpdate.getStatus();
-        if (userBean.isValidUserByToken(token) && TaskValidator.isValidStatus(status)) {
+        if (tokenBean.isValidUserByToken(token) && TaskValidator.isValidStatus(status)) {
             taskBean.updateTaskStatus(id, status);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task status is updated"))).build();
         } else {
@@ -95,8 +99,8 @@ public class TaskService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response desactivateTask(@HeaderParam("token") String token, @PathParam("id") int id) {
-        if (userBean.isValidUserByToken(token)) {
-            String role = userBean.getUserRole(token);
+        if (tokenBean.isValidUserByToken(token)) {
+            String role = tokenBean.getUserRole(token);
             if (taskBean.taskBelongsToUser(token, id) || role.equals("sm") || role.equals("po")){
                 if (taskBean.desactivateTask(id)) {
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is desactivated"))).build();
@@ -142,8 +146,8 @@ public class TaskService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response updateTask(TaskDto t, @HeaderParam("token") String token, @PathParam("id") int id) {
-        if (userBean.isValidUserByToken(token)) {
-            if(userBean.hasPermissionToEdit(token, id)){
+        if (tokenBean.isValidUserByToken(token)) {
+            if(tokenBean.hasPermissionToEdit(token, id)){
                 if (TaskValidator.isValidTaskEdit(t)) {
                     taskBean.updateTask(t, id);
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is updated"))).build();
@@ -204,8 +208,8 @@ public class TaskService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteTask(@HeaderParam("token") String token, @PathParam ("id") int id){
-        if (userBean.isValidUserByToken(token)) {
-            String role = userBean.getUserRole(token);
+        if (tokenBean.isValidUserByToken(token)) {
+            String role = tokenBean.getUserRole(token);
             if (role.equals("po")) {
                 if (taskBean.deleteTask(id)) {
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is deleted"))).build();
@@ -225,8 +229,8 @@ public class TaskService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response restoreAllTasks(@HeaderParam("token") String token) {
-        if (userBean.isValidUserByToken(token)) {
-            String role = userBean.getUserRole(token);
+        if (tokenBean.isValidUserByToken(token)) {
+            String role = tokenBean.getUserRole(token);
             if (role.equals("sm") || role.equals("po")) {
                 if (taskBean.restoreAllTasks()) {
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All tasks are restored"))).build();
@@ -245,8 +249,8 @@ public class TaskService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response restoreTask(@HeaderParam("token") String token, @PathParam("id") int id) {
-        if (userBean.isValidUserByToken(token)) {
-            String role = userBean.getUserRole(token);
+        if (tokenBean.isValidUserByToken(token)) {
+            String role = tokenBean.getUserRole(token);
             if (role.equals("sm") || role.equals("po")) {
                 if (taskBean.restoreTask(id)) {
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is restored"))).build();
@@ -267,8 +271,8 @@ public class TaskService {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response deleteAllTasks(@HeaderParam("token") String token) {
-        if (userBean.isValidUserByToken(token)) {
-            String role = userBean.getUserRole(token);
+        if (tokenBean.isValidUserByToken(token)) {
+            String role = tokenBean.getUserRole(token);
             if (role.equals("po")) {
                 if (taskBean.deleteAllTasks()) {
                     return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All tasks are deleted"))).build();

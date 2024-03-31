@@ -1,5 +1,6 @@
 package aor.paj.validator;
 
+import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.UserDto;
 import aor.paj.dto.UserPasswordUpdateDto;
@@ -25,9 +26,11 @@ public class UserValidator {
 
     @EJB
     private static UserDao userDao;
+    @EJB
+    private static TokenDao tokenDao;
     //function that authenticates the user
     public static boolean isValidUser(String token) {
-        return userDao.findUserByToken(token) != null;
+        return tokenDao.findUserByTokenString(token) != null;
     }
 
     //function that authenticates the user by username
