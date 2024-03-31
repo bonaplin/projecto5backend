@@ -25,7 +25,7 @@ public class EmailService {
         return Response.ok("Email sent successfully").build();
     }
 
-    @Path("/account/activate")
+    @Path("/activate")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
@@ -34,7 +34,7 @@ public class EmailService {
         return Response.ok("Activation email sent successfully").build();
     }
 
-    @Path("/account/password")
+    @Path("/password")
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.TEXT_PLAIN)
