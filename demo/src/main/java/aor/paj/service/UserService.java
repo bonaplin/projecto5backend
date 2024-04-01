@@ -44,7 +44,11 @@ public class UserService {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
-        if (UserValidator.isNullorBlank(u) || !UserValidator.isValidEmail(u.getEmail()) || !UserValidator.isValidPhoneNumber(u.getPhone()) || !UserValidator.isValidURL(u.getPhotoURL()) || userBean.userExists(u)) {
+        if (UserValidator.isNullorBlank(u) ||
+                (!UserValidator.isValidEmail(u.getEmail()) && !userBean.isSameUserEmail(u.getEmail(), u.getId())) ||
+                !UserValidator.isValidPhoneNumber(u.getPhone()) ||
+                !UserValidator.isValidURL(u.getPhotoURL()) ||
+                userBean.userExists(u)) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid input"))).build();
         }
 

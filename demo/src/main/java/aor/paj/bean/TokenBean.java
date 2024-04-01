@@ -9,6 +9,7 @@ import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.TokenStatus;
 import jakarta.ejb.EJB;
+import jakarta.ejb.Schedule;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -18,33 +19,36 @@ import java.time.LocalDateTime;
 
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @ApplicationScoped
 public class TokenBean  {
 
-    @PersistenceContext
-    private EntityManager em;
     @EJB
     private UserDao userDao;
     @EJB
     private TokenDao tokenDao;
     @EJB
     private TaskDao taskDao;
+
+    private static final int DEFAULT_TOKEN_EXPIRATION_MINUTES = 1;
+    private static final int PO_TOKEN_EXPIRATION_MINUTES = 60;
     @Transactional
     public TokenEntity createToken(String token, int userId) {
 
         TokenEntity tokenEntity = new TokenEntity();
+        UserEntity userEntity = userDao.findUserById(userId);
 
+        tokenEntity.setUser(userEntity);
         tokenEntity.setToken(token);
 
-        tokenEntity.setUser(userDao.findUserById(userId));
-        tokenEntity.setExpiration(LocalDateTime.now().plusMinutes(1));
+        setDefaultTokenExpiration(tokenEntity);
 
         tokenDao.persist(tokenEntity);
+
         return tokenEntity;
     }
-
 
     public String login(String username, String password) {
 
@@ -94,7 +98,7 @@ public class TokenBean  {
     public void logout(String token) {
         TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
         if (tokenEntity != null) {
-            em.remove(tokenEntity);
+            tokenDao.remove(tokenEntity);
         }
     }
 
@@ -104,9 +108,9 @@ public class TokenBean  {
         if(tokenEntity != null && tokenEntity.getUser().getActive()){
             if (tokenEntity.getExpiration().isAfter(LocalDateTime.now())) {
                 // Atualiza a expiração do token
-                System.out.println("Token still valid, updated expiration" + tokenEntity.getExpiration());
-                tokenEntity.setExpiration(LocalDateTime.now().plusMinutes(1));
-                System.out.println("New expiration: " + tokenEntity.getExpiration());
+
+                setDefaultTokenExpiration(tokenEntity);
+
                 // merge para atualizar a expiração
                 tokenDao.merge(tokenEntity);
                 return TokenStatus.VALID;
@@ -117,5 +121,15 @@ public class TokenBean  {
             }
         }
         return TokenStatus.NOT_FOUND;
+    }
+
+    public void setDefaultTokenExpiration (TokenEntity tokenEntity){
+        UserEntity userEntity = tokenEntity.getUser();
+
+        if(userEntity.getRole().equals("po")){
+            tokenEntity.setExpiration(LocalDateTime.now().plusMinutes(PO_TOKEN_EXPIRATION_MINUTES));
+        }else{
+            tokenEntity.setExpiration(LocalDateTime.now().plusMinutes(DEFAULT_TOKEN_EXPIRATION_MINUTES));
+        }
     }
 }

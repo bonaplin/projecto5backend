@@ -71,6 +71,7 @@ public class UserBean {
                 userEntity.setRole("dev");
             }
             userEntity.setActive(true);
+
             userDao.persist(userEntity);
 
             return true;
@@ -356,5 +357,9 @@ public class UserBean {
             changeStatus("deleted",false);
         }
 
+    }
+    public boolean isSameUserEmail(String email, int userId) {
+        UserEntity userEntity = userDao.findUserByEmail(email);
+        return userEntity != null && userEntity.getId() == userId;
     }
 }

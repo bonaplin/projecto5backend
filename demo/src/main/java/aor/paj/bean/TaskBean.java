@@ -104,14 +104,14 @@ public class TaskBean {
 //    }
 
     //Function that returns all tasks from the database mysql
-    public List<TaskDto> getAllTasks() {
-        List<TaskEntity> taskEntities = taskDao.getAllTasks();
-        ArrayList<TaskDto> taskDtos = new ArrayList<>();
-        for (TaskEntity taskEntity : taskEntities) {
-            taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
-        }
-        return taskDtos;
-    }
+//    public List<TaskDto> getAllTasks() {
+//        List<TaskEntity> taskEntities = taskDao.getAllTasks();
+//        ArrayList<TaskDto> taskDtos = new ArrayList<>();
+//        for (TaskEntity taskEntity : taskEntities) {
+//            taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
+//        }
+//        return taskDtos;
+//    }
     public List<TaskDto> getActiveTasks() {
         List<TaskEntity> taskEntities = taskDao.getActiveTasks();
         ArrayList<TaskDto> taskDtos = new ArrayList<>();
@@ -176,12 +176,12 @@ public class TaskBean {
     }
 
     //Function that receives a task name and sets the task active to true in the database mysql
-    public boolean restoreTask(String title) {
-        TaskEntity taskEntity = taskDao.findTaskByTitle(title);
-        taskEntity.setActive(true);
-        taskDao.merge(taskEntity);
-        return true;
-    }
+//    public boolean restoreTask(String title) {
+//        TaskEntity taskEntity = taskDao.findTaskByTitle(title);
+//        taskEntity.setActive(true);
+//        taskDao.merge(taskEntity);
+//        return true;
+//    }
     public boolean restoreTask(int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskEntity.setActive(true);
@@ -190,11 +190,11 @@ public class TaskBean {
     }
 
     //Function that receives a task name and deletes the task from the database mysql
-    public boolean deleteTask(String title) {
-        TaskEntity taskEntity = taskDao.findTaskByTitle(title);
-        taskDao.remove(taskEntity);
-        return true;
-    }
+//    public boolean deleteTask(String title) {
+//        TaskEntity taskEntity = taskDao.findTaskByTitle(title);
+//        taskDao.remove(taskEntity);
+//        return true;
+//    }
     public boolean deleteTask(int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskDao.remove(taskEntity);
