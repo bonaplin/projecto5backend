@@ -321,6 +321,18 @@ public class UserService {
             return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
         }
     }
+
+
+
+
+    @Path("/populator/")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response test(UserDto u) {
+        userBean.addUser(u);
+        return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
+    }
 }
 
 
