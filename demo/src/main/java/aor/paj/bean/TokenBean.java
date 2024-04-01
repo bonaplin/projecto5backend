@@ -104,8 +104,16 @@ public class TokenBean  {
 
     public TokenStatus isValidUserByToken(String token) {
         TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
-        // falta verificar se o já validou o registo e se a expiração do token ainda não passou.
-        if(tokenEntity != null && tokenEntity.getUser().getActive()){
+
+        if(tokenEntity == null){
+            return TokenStatus.NOT_FOUND;
+        }
+
+        if(!tokenEntity.getUser().getConfirmed()){
+            return TokenStatus.NOT_CONFIRMED;
+        }
+
+        if(tokenEntity.getUser().getActive()){
             if (tokenEntity.getExpiration().isAfter(LocalDateTime.now())) {
                 // Atualiza a expiração do token
 

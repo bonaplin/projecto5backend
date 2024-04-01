@@ -31,7 +31,7 @@ public class CategoryService {
     public Response getCategories(@HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         return Response.status(200).entity(categoryBean.getAllCategories()).build();
@@ -74,7 +74,7 @@ public class CategoryService {
     public Response deleteCategory(@HeaderParam("token") String token, @PathParam("id") int id) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID || !tokenBean.getUserRole(token).equals("po")) {
-        return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+        return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
     }
 
     if (categoryBean.deleteCategory(id)) {
@@ -90,7 +90,7 @@ public class CategoryService {
     public Response addCategory(@HeaderParam("token") String token, CategoryDto category) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID || !tokenBean.getUserRole(token).equals("po")) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
 
         if (categoryBean.isValidCategory(category) && categoryBean.addCategory(category)) {
@@ -106,7 +106,7 @@ public class CategoryService {
     public Response updateCategory(@HeaderParam("token") String token, CategoryDto category, @QueryParam("title") String title) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         if (!tokenBean.getUserRole(token).equals("po")) {
@@ -130,7 +130,7 @@ public class CategoryService {
     public Response updateCategory(@HeaderParam("token") String token, CategoryDto category, @PathParam("id") int id) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID || !tokenBean.getUserRole(token).equals("po")) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
 
         if (categoryBean.isValidCategory(category) && categoryBean.updateCategory(category, id)) {

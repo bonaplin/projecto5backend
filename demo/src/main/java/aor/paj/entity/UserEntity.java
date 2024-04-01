@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name="user")
@@ -52,7 +53,12 @@ public class UserEntity implements Serializable {
     private Boolean active;
 
     @Column(name="created", nullable = false, unique = false, updatable = false)
-    private LocalDate created;
+    private LocalDateTime created;
+
+    @Column(name="confirmed", nullable = false, unique = false, updatable = true)
+    private Boolean confirmed = false;
+
+
 
     public UserEntity() {
     }
@@ -149,14 +155,21 @@ public class UserEntity implements Serializable {
         return active;
     }
 
-    public LocalDate getCreated() {
+    public LocalDateTime getCreated() {
         return created;
     }
     @PrePersist // This method is called just before the entity is persisted to the database
     public void setCreated() {
-        this.created = LocalDate.now();
+        this.created = LocalDateTime.now();
     }
 
+    public Boolean getConfirmed() {
+        return confirmed;
+    }
+
+    public void setConfirmed(Boolean confirmed) {
+        this.confirmed = confirmed;
+    }
 
     @Override
     public String toString() {

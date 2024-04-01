@@ -40,7 +40,7 @@ public class TaskService {
     public Response addTask(@HeaderParam("token") String token, TaskDto taskDto) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         if (!TaskValidator.isValidTask(taskDto) || taskBean.taskTitleExists(taskDto)) {
@@ -61,7 +61,7 @@ public class TaskService {
     public Response getTasks(@HeaderParam("token") String token, @QueryParam("category") String category, @QueryParam("username") String username, @QueryParam("active") Boolean active, @QueryParam("id") Integer id) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         if (id != null) {
@@ -77,7 +77,7 @@ public class TaskService {
     public Response updateTaskStatus(@HeaderParam("token") String token, @PathParam("id") int id, StatusUpdate statusUpdate) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         int status = statusUpdate.getStatus();
@@ -95,7 +95,7 @@ public class TaskService {
     public Response desactivateTask(@HeaderParam("token") String token, @PathParam("id") int id) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         String role = tokenBean.getUserRole(token);
@@ -137,7 +137,7 @@ public class TaskService {
     public Response updateTask(TaskDto t, @HeaderParam("token") String token, @PathParam("id") int id) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         if (!tokenBean.hasPermissionToEdit(token, id)) {
@@ -205,7 +205,7 @@ public class TaskService {
     public Response deleteTask(@HeaderParam("token") String token, @PathParam ("id") int id){
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         String role = tokenBean.getUserRole(token);
@@ -227,7 +227,7 @@ public class TaskService {
     public Response restoreAllTasks(@HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         String role = tokenBean.getUserRole(token);
@@ -249,7 +249,7 @@ public class TaskService {
     public Response restoreTask(@HeaderParam("token") String token, @PathParam("id") int id) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         String role = tokenBean.getUserRole(token);
@@ -271,7 +271,7 @@ public class TaskService {
     public Response deleteAllTasks(@HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         String role = tokenBean.getUserRole(token);

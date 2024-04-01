@@ -1,6 +1,7 @@
 package aor.paj.dao;
 
 import aor.paj.entity.UserEntity;
+import jakarta.ejb.Schedule;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -62,6 +63,23 @@ public class UserDao extends AbstractDao<UserEntity> {
             return em.createNamedQuery("User.findAllUsers").getResultList();
         } catch (NoResultException e) {
             return null;
+        }
+    }
+    // Find all unconfirmed users and remove them
+    public List<UserEntity> findUnconfirmedUsers() {
+        System.out.println("Finding unconfirmed users");
+        List<UserEntity> unconfirmedUsers = em.createQuery("SELECT u FROM UserEntity u WHERE u.confirmed = false", UserEntity.class)
+                .getResultList();
+        return unconfirmedUsers;
+    }
+    @Schedule(hour = "*", persistent = false)
+    public void removeUnconfirmedUsers() {
+
+        List<UserEntity> unconfirmedUsers = findUnconfirmedUsers();
+
+        for (UserEntity user : unconfirmedUsers) {
+            System.out.println("Removing user" + user.getId());
+            em.remove(user);
         }
     }
 }

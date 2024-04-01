@@ -1,9 +1,12 @@
 package aor.paj.bean;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import aor.paj.controller.EmailSender;
 import aor.paj.dao.CategoryDao;
 import aor.paj.dao.TaskDao;
 import aor.paj.dao.TokenDao;
@@ -27,7 +30,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 @ApplicationScoped
 public class UserBean {
-    private ArrayList<UserDto> userDtos;
+//    private ArrayList<UserDto> userDtos;
 
     @EJB
     UserDao userDao;
@@ -64,13 +67,15 @@ public class UserBean {
             UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
             //Encrypt the password
             userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
-//            userEntity.setId(generateIdDataBase());
+
             if(userEntity.getUsername().equals("admin")){
                 userEntity.setRole("po");
             }else {
                 userEntity.setRole("dev");
             }
             userEntity.setActive(true);
+            userEntity.setConfirmed(true);
+            userEntity.setCreated();
 
             userDao.persist(userEntity);
 
@@ -80,12 +85,22 @@ public class UserBean {
         UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
         //Encrypt the password
         userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
-//        userEntity.setId(generateIdDataBase());
-        userEntity.setRole("dev");
+
+        if(userEntity.getUsername().equals("admin")){
+            userEntity.setRole("po");
+        }
+
+        if (role.equals("po") || role.equals("sm") || role.equals("dev")) {
+            userEntity.setRole(role);
+        } else {
+            userEntity.setRole("dev");
+        }
         userEntity.setActive(true);
-        userEntity.setRole(role);
+
         userDao.persist(userEntity);
 
+        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(),
+                "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getUsername());
         return true;
     }
 
@@ -340,6 +355,7 @@ public class UserBean {
             userDto.setLastname("Admin");
             userDto.setEmail("admin@admin");
             userDto.setPhone("000000000");
+
             userDto.setPhotoURL("https://t4.ftcdn.net/jpg/04/75/00/99/360_F_475009987_zwsk4c77x3cTpcI3W1C1LU4pOSyPKaqi.jpg");
             addUser(userDto);
         }
@@ -362,4 +378,25 @@ public class UserBean {
         UserEntity userEntity = userDao.findUserByEmail(email);
         return userEntity != null && userEntity.getId() == userId;
     }
+
+    public boolean confirmUser(String username) {
+        UserEntity userEntity = userDao.findUserByUsername(username);
+        if (userEntity != null) {
+            userEntity.setConfirmed(true);
+            userDao.merge(userEntity);
+            return true;
+        }else{
+        return false;}
+    }
+
+    public boolean userConfirmed(String username){
+        UserEntity userEntity = userDao.findUserByUsername(username);
+        if(userEntity != null){
+            userEntity.setConfirmed(true);
+            System.out.println("user confirmado");
+            return true;
+        }
+        return false;
+    }
+
 }

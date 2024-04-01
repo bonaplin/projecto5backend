@@ -10,10 +10,10 @@ import java.util.Properties;
 
 public class EmailSender {
 
-    private final String username = "botsemgps@gmail.com";
-    private final String password = "xlvi nhlq blnp olzf"; // replace with your actual password
+    private static final String username = "botsemgps@gmail.com";
+    private static final String password = "xlvi nhlq blnp olzf"; // replace with your actual password
 
-    public void sendEmail(String to, String subject, String content) {
+    public static void sendEmail(String to, String subject, String content) {
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com");
         props.put("mail.smtp.socketFactory.port", "465");
@@ -60,18 +60,22 @@ public class EmailSender {
             throw new RuntimeException(e);
         }
     }
-    public void sendVerificationEmail(String to, String userName, String verificationLink) {
+    public static void sendVerificationEmail(String to, String userName, String verificationLink) {
         String subject = "Verificação de conta";
         String content = "<h1>Olá, " + userName + "!</h1>" +
+
                 "<p>Para verificar a sua conta, clique no link abaixo:</p>" +
-                "<p><a href=\"" + verificationLink + "\">Verificar conta</a></p>";
+                "<p><a href=\"" + verificationLink + "\">Verificar conta</a></p>"+
+                "<p>Se você não se registou, por favor ignore este email.</p>";
+
         sendEmail(to, subject, content);
     }
 
-    public void sendPasswordResetEmail(String to, String userName, String resetLink) {
+    public static void sendPasswordResetEmail(String to, String userName, String resetLink) {
         String subject = "Redefinição de senha";
         String content = "<h1>Olá, " + userName + "!</h1>" +
                 "<p>Para redefinir sua senha, clique no link abaixo:</p>" +
+
                 "<p><a href=\"" + resetLink + "\">Redefinir senha</a></p>";
         sendEmail(to, subject, content);
     }

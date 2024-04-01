@@ -7,11 +7,13 @@ import aor.paj.bean.UserBean;
 import aor.paj.controller.EmailRequest;
 import aor.paj.controller.EmailSender;
 import aor.paj.dto.*;
+import aor.paj.entity.UserEntity;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.utils.TokenStatus;
 import aor.paj.validator.UserValidator;
 import com.sun.tools.jconsole.JConsoleContext;
+import com.sun.tools.jconsole.JConsolePlugin;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -27,6 +29,7 @@ public class UserService {
     public UserService() {
         this.emailSender = new EmailSender();
     }
+
     @Inject
     UserBean userBean;
     @Inject
@@ -41,7 +44,7 @@ public class UserService {
     public Response addUser(UserDto u, @HeaderParam("token") String token, @HeaderParam("role") String roleNewUser) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         if (UserValidator.isNullorBlank(u) ||
@@ -54,10 +57,10 @@ public class UserService {
 
         String role = tokenBean.getUserRole(token);
         if (role.equals("po")) {
-            userBean.addUserPO(u, roleNewUser);
-        } else {
-            userBean.addUser(u);
-        }
+            userBean.addUserPO(u, roleNewUser);}
+//        } else {
+//            userBean.addUser(u);
+//        }
 
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
     }
@@ -83,7 +86,7 @@ public class UserService {
     public Response logout(@HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         tokenBean.logout(token);
@@ -97,7 +100,7 @@ public class UserService {
     public Response getAllUsers(@HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         List<UserDto> userDtos = userBean.getAllUsersDB();
@@ -107,6 +110,7 @@ public class UserService {
 
         return Response.status(200).entity(userDtos).build();
     }
+
     //Service that receives the token to validate and sends the userPartialDto object
     @GET
     @Path("{username}/partial")
@@ -114,7 +118,7 @@ public class UserService {
     public Response getUserPartial(@HeaderParam("token") String token, @PathParam("username") String username) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         UserDto userDto = tokenBean.getUserByToken(token);
@@ -129,7 +133,7 @@ public class UserService {
     public Response getPhoto(@HeaderParam("token") String token, @PathParam("username") String username) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         UserDto userDto = userBean.getUserByUsername(username);
@@ -143,7 +147,7 @@ public class UserService {
     public Response getUsersOwners(@HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         List<UserDto> userDtos = userBean.getUsersOwners();
@@ -161,7 +165,7 @@ public class UserService {
     public Response hasPermissionToEdit(@HeaderParam("token") String token, @PathParam("username") String username, @PathParam("taskId") int taskId) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         if (tokenBean.hasPermissionToEdit(token, taskId)) {
@@ -178,7 +182,7 @@ public class UserService {
     public Response getUserDetails(@HeaderParam("token") String token, @PathParam("selectedUser") String selectedUser) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         if (tokenBean.getUserByToken(token).getRole().equals("po") || tokenBean.getUserByToken(token).getUsername().equals(selectedUser)) {
@@ -197,6 +201,7 @@ public class UserService {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
     }
+
     @PUT
     @Path("/{selectedUser}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -204,13 +209,13 @@ public class UserService {
     public Response updateUser(UserUpdateDto u, @HeaderParam("token") String token, @PathParam("selectedUser") String selectedUser) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         if (tokenBean.getUserByToken(token).getRole().equals("po") || tokenBean.getUserByToken(token).getUsername().equals(selectedUser)) {
             if (!UserValidator.isValidEmail(u.getEmail())) {
                 return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid email format"))).build();
-            } else if (!u.getEmail().equals(userBean.getUserByUsername(selectedUser).getEmail()) && UserValidator.emailExists(userBean.getAllUsersDB(),u.getEmail())
+            } else if (!u.getEmail().equals(userBean.getUserByUsername(selectedUser).getEmail()) && UserValidator.emailExists(userBean.getAllUsersDB(), u.getEmail())
                     && (!tokenBean.getUserByToken(token).getEmail().equals(u.getEmail()) || !userBean.getUserByUsername(selectedUser).getEmail().equals(u.getEmail()))) {
                 return Response.status(409).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Email already exists"))).build();
             } else if (!UserValidator.isValidPhoneNumber(u.getPhone())) {
@@ -234,11 +239,11 @@ public class UserService {
     public Response updatePassword(UserPasswordUpdateDto u, @PathParam("username") @HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
         boolean updateTry = userBean.updatePassword(u, token);
-        if(!updateTry){
+        if (!updateTry) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Old password is incorrect"))).build();
         } else {
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Password is updated")).toString()).build();
@@ -251,10 +256,10 @@ public class UserService {
     public Response changeStatus(@HeaderParam("token") String token, @PathParam("username") String username, UserStatusUpdateDto userStatusUpdateDto) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID || !tokenBean.getUserByToken(token).getRole().equals("po")) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
 
-        if(userBean.changeStatus(username, userStatusUpdateDto.isActive())){
+        if (userBean.changeStatus(username, userStatusUpdateDto.isActive())) {
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Status changed")).toString()).build();
         } else {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Status not changed")).toString()).build();
@@ -268,10 +273,10 @@ public class UserService {
     public Response deleteUser(@HeaderParam("token") String token, @PathParam("selectedUser") String selectedUser) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID || !tokenBean.getUserByToken(token).getRole().equals("po")) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
 
-        if(userBean.deleteUser(selectedUser)){
+        if (userBean.deleteUser(selectedUser)) {
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User deleted")).toString()).build();
         } else {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User not deleted")).toString()).build();
@@ -285,10 +290,10 @@ public class UserService {
     public Response deleteTasks(@HeaderParam("token") String token, @PathParam("selectedUser") String selectedUser) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID || !tokenBean.getUserByToken(token).getRole().equals("po")) {
-            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
 
-        if(userBean.deleteTasks(selectedUser)){
+        if (userBean.deleteTasks(selectedUser)) {
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tasks deleted")).toString()).build();
         } else {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tasks not deleted")).toString()).build();
@@ -303,6 +308,19 @@ public class UserService {
 //        emailSender.sendEmail(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getContent());
 //        return Response.ok("Email sent successfully").build();
 //    }
+
+    @GET
+    @Path("/confirm/{username}")
+    public Response confirmEmail(@PathParam("username") String username) {
+        System.out.println("Confirming user: " + username);
+        boolean isConfirmed = userBean.confirmUser(username);
+        if (isConfirmed) {
+            userBean.userConfirmed(username);
+            return Response.ok("User confirmed successfully").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+        }
+    }
 }
 
 
