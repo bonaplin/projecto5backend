@@ -19,6 +19,7 @@ public class UserMapper {
         userEntity.setPhotoURL(userDto.getPhotoURL());
         userEntity.setRole(userDto.getRole());
         userEntity.setActive(userDto.isActive());
+        userEntity.setConfirmed(userDto.isConfirmed());
 
         return userEntity;
     }
@@ -35,6 +36,7 @@ public class UserMapper {
         userDto.setPhotoURL(userEntity.getPhotoURL());
         userDto.setRole(userEntity.getRole());
         userDto.setActive(userEntity.isActive());
+        userDto.setConfirmed(userEntity.getConfirmed());
 
         return userDto;
     }

@@ -62,6 +62,7 @@ public class UserBean {
 //    }
 
     //Add a user to the database mysql, encrypting the password, role to "dev" and generating a id
+    // FOR POPULATE USING
     public boolean addUser(UserDto user) {
 
             UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
@@ -355,9 +356,9 @@ public class UserBean {
             userDto.setLastname("Admin");
             userDto.setEmail("admin@admin");
             userDto.setPhone("000000000");
-
             userDto.setPhotoURL("https://t4.ftcdn.net/jpg/04/75/00/99/360_F_475009987_zwsk4c77x3cTpcI3W1C1LU4pOSyPKaqi.jpg");
-            addUser(userDto);
+            userDto.setConfirmed(true);
+            addUserPO(userDto,"po");
         }
 
         if (userDao.findUserByUsername("deleted") == null) {
@@ -369,7 +370,8 @@ public class UserBean {
             userDto.setEmail("userdeleted@deleted");
             userDto.setPhone("000000000");
             userDto.setPhotoURL("https://www.shutterstock.com/image-vector/trash-can-icon-symbol-delete-600nw-1454137346.jpg");
-            addUser(userDto);
+            userDto.setConfirmed(true);
+            addUserPO(userDto,"dev");
             changeStatus("deleted",false);
         }
 
