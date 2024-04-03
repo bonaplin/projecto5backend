@@ -299,27 +299,6 @@ public class UserService {
         }
     }
 
-//    @Path("/email/send")
-//    @POST
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.TEXT_PLAIN)
-//    public Response sendEmail(EmailRequest emailRequest) {
-//        emailSender.sendEmail(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getContent());
-//        return Response.ok("Email sent successfully").build();
-//    }
-
-//    @GET
-//    @Path("/confirm/{username}")
-//    public Response confirmEmail(@PathParam("username") String username) {
-//        System.out.println("Confirming user: " + username);
-//        boolean isConfirmed = userBean.confirmUser(username);
-//        if (isConfirmed) {
-//            userBean.userConfirmed(username);
-//            return Response.ok("User confirmed successfully").build();
-//        } else {
-//            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
-//        }
-//    }
 
     @GET
     @Path("/confirm/{token}")
@@ -334,6 +313,31 @@ public class UserService {
         }
     }
 
+    @GET
+    @Path("/reset/{email}")
+    public Response resetPassword(@PathParam("email") String email) {
+        System.out.println("Resetting password for email: " + email);
+        if(userBean.sendPasswordResetEmail(email)){
+            return Response.ok("Password reset email sent").build();
+        }
+        return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+    }
+
+    //ENDPOINT PARA VALIDAR A MUDANÇA DE PASSWORD
+    @GET
+    @Path("/password/{token}")
+    public Response resetPasswordByToken(@PathParam("token") String token) {
+        System.out.println("Resetting password for token: " + token);
+        boolean isConfirmed = userBean.confirmUser(token);
+        if (isConfirmed) {
+            userBean.confirmPasswordRequest(token);
+            System.out.println("Password can be reset");
+            return Response.ok("Password can be reset").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+        }
+    }
+
 
     @Path("/populator/")
     @POST
@@ -341,7 +345,6 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response test(UserDto u) {
         userBean.addUser(u);
-        notify();
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
     }
 }

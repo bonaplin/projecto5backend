@@ -76,8 +76,9 @@ public class EmailSender {
         String subject = "Redefinição de senha";
         String content = "<h1>Olá, " + userName + "!</h1>" +
                 "<p>Para redefinir sua senha, clique no link abaixo:</p>" +
-
-                "<p><a href=\"" + resetLink + "\">Redefinir senha</a></p>";
+                "<p><a href=\"" + resetLink + "\">Redefinir senha</a></p>"+
+                "<p>Este link apenas é válido por 1 hora.</p>"+
+                "<p>Se você não quer restaurar a sua palavra-passe, por favor ignore este email.</p>";
         sendEmail(to, subject, content);
     }
 }
