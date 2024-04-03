@@ -69,6 +69,7 @@ public class NotificationEntity implements Serializable {
         this.message = message;
     }
 
+
     @Override
     public String toString() {
         return "NotificationEntity{" +

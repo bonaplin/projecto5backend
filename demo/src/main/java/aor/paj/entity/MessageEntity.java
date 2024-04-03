@@ -27,8 +27,8 @@ public class MessageEntity implements Serializable {
     @Column(name = "timestamp", nullable = false, unique = false, updatable = true)
     private String timestamp;
 
-    @Column(name = "isRead", nullable = false, unique = false, updatable = true)
-    private boolean isRead;
+    @Column(name = "`read`", nullable = false, unique = false, updatable = true)
+    private boolean read;
 
     public MessageEntity() {
     }
@@ -59,10 +59,10 @@ public class MessageEntity implements Serializable {
     }
 
     public boolean isRead() {
-        return isRead;
+        return read;
     }
 
     public void setIsRead(boolean isRead) {
-        this.isRead = isRead;
+        this.read = isRead;
     }
 }

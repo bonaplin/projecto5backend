@@ -66,6 +66,7 @@ public class EmailSender {
 
                 "<p>Para verificar a sua conta, clique no link abaixo:</p>" +
                 "<p><a href=\"" + verificationLink + "\">Verificar conta</a></p>"+
+                "<p>Este link apenas é válido por 1 hora.</p>"+
                 "<p>Se você não se registou, por favor ignore este email.</p>";
 
         sendEmail(to, subject, content);

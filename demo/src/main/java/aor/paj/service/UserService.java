@@ -308,20 +308,31 @@ public class UserService {
 //        return Response.ok("Email sent successfully").build();
 //    }
 
+//    @GET
+//    @Path("/confirm/{username}")
+//    public Response confirmEmail(@PathParam("username") String username) {
+//        System.out.println("Confirming user: " + username);
+//        boolean isConfirmed = userBean.confirmUser(username);
+//        if (isConfirmed) {
+//            userBean.userConfirmed(username);
+//            return Response.ok("User confirmed successfully").build();
+//        } else {
+//            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+//        }
+//    }
+
     @GET
-    @Path("/confirm/{username}")
-    public Response confirmEmail(@PathParam("username") String username) {
-        System.out.println("Confirming user: " + username);
-        boolean isConfirmed = userBean.confirmUser(username);
+    @Path("/confirm/{token}")
+    public Response confirmEmailByToken(@PathParam("token") String token) {
+        System.out.println("Confirming token: " + token);
+        boolean isConfirmed = userBean.confirmUser(token);
         if (isConfirmed) {
-            userBean.userConfirmed(username);
+            userBean.userConfirmed(token);
             return Response.ok("User confirmed successfully").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
         }
     }
-
-
 
 
     @Path("/populator/")

@@ -45,23 +45,6 @@ public class UserBean {
     @EJB
     TokenDao tokenDao;
 
-    //Function that generates a unique id for new user checking in database mysql if the id already exists
-//    public int generateIdDataBase() {
-//        int id = 1;
-//        boolean idAlreadyExists;
-//
-//        do {
-//            idAlreadyExists = false;
-//            UserEntity userEntity = userDao.findUserById(id);
-//            if (userEntity != null) {
-//                id++;
-//                idAlreadyExists = true;
-//            }
-//        } while (idAlreadyExists);
-//        return id;
-//    }
-
-    //Add a user to the database mysql, encrypting the password, role to "dev" and generating a id
     // FOR POPULATE USING
     public boolean addUser(UserDto user) {
 
@@ -97,24 +80,16 @@ public class UserBean {
             userEntity.setRole("dev");
         }
         userEntity.setActive(true);
-
+        generateNewToken(userEntity, 60);
         userDao.persist(userEntity);
 
+        System.out.println(userEntity);
 
-//        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(),
-//                "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getUsername());
+        String verificationLink = "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getToken_verification();
+        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
+
         return true;
     }
-
-    //Function that validates a user in database by token
-    //TOKEN
-//    public boolean isValidUserByToken(String token) {
-//        UserEntity userEntity = userDao.findUserByToken(token);
-//        if(userEntity != null && userEntity.getActive()){
-//            return true;
-//        }
-//        return false;
-//    }
 
     //Function that receives a UserDto and checks in database mysql if the username and email already exists
     public boolean userExists(UserDto user) {
@@ -379,18 +354,17 @@ public class UserBean {
         return userEntity != null && userEntity.getId() == userId;
     }
 
-    public boolean confirmUser(String username) {
-        UserEntity userEntity = userDao.findUserByUsername(username);
+    public boolean confirmUser(String token) {
+        UserEntity userEntity = userDao.findUserByToken(token);
         if (userEntity != null) {
-            userEntity.setConfirmed(true);
-            userDao.merge(userEntity);
             return true;
         }else{
-        return false;}
+            return false;
+        }
     }
 
-    public boolean userConfirmed(String username){
-        UserEntity userEntity = userDao.findUserByUsername(username);
+    public boolean userConfirmed(String token){
+        UserEntity userEntity = userDao.findUserByToken(token);
         if(userEntity != null){
             userEntity.setConfirmed(true);
             System.out.println("user confirmado");
@@ -398,16 +372,12 @@ public class UserBean {
         }
         return false;
     }
+
     //Function that generates a new token and expire time
-    private boolean generateNewToken(UserDto userDto, int minutes) {
+    private boolean generateNewToken(UserEntity userEntity, int minutes) {
         String token = UUID.randomUUID().toString();
-        UserEntity userEntity = userDao.findUserByUsername(userDto.getUsername());
-        if (userEntity != null) {
-            userEntity.setToken_verification(token);
-            userEntity.setToken_expiration(LocalDateTime.now().plusMinutes(minutes));
-            userDao.merge(userEntity);
-            return true;
-        }
-        return false;
+        userEntity.setToken_verification(token);
+        userEntity.setToken_expiration(LocalDateTime.now().plusMinutes(minutes));
+        return true;
     }
 }
