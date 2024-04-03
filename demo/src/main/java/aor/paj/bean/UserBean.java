@@ -321,8 +321,7 @@ public class UserBean {
         if (userEntity != null) {
             generateNewToken(userEntity, 60);
             userDao.merge(userEntity); //update the user with the new token in DB
-            String token = userEntity.getToken_verification(); //obtain the token
-            String resetLink = "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/password/" + token;
+            String resetLink = "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/password/" + userEntity.getToken_verification();
             EmailSender.sendPasswordResetEmail(email, userEntity.getUsername(), resetLink);
             return true;
         }

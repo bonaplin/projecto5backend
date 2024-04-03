@@ -314,7 +314,7 @@ public class UserService {
     }
 
     @GET
-    @Path("/reset/{email}")
+    @Path("/password-reset/{email}")
     public Response resetPassword(@PathParam("email") String email) {
         System.out.println("Resetting password for email: " + email);
         if(userBean.sendPasswordResetEmail(email)){
