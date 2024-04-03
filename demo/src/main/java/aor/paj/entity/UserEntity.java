@@ -46,8 +46,11 @@ public class UserEntity implements Serializable {
     @Column(name="role", nullable = false, unique = false, updatable = true)
     private String role;
 
-//    @Column(name="token", nullable = true, unique = true, updatable = true)
-//    private String token;
+    @Column(name="token_verification", nullable = true, unique = true, updatable = true)
+    private String token_verification;
+
+    @Column(name="token_expiration", nullable = true, unique = false, updatable = true)
+    private LocalDateTime token_expiration;
 
     @Column(name="active", nullable = false, unique = false, updatable = true)
     private Boolean active;
@@ -135,13 +138,21 @@ public class UserEntity implements Serializable {
         this.role = role;
     }
 
-//    public String getToken() {
-//        return token;
-//    }
-//
-//    public void setToken(String token) {
-//        this.token = token;
-//    }
+    public String getToken_verification() {
+        return token_verification;
+    }
+
+    public void setToken_verification(String token_verification) {
+        this.token_verification = token_verification;
+    }
+
+    public LocalDateTime getToken_expiration() {
+        return token_expiration;
+    }
+
+    public void setToken_expiration(LocalDateTime token_expiration) {
+        this.token_expiration = token_expiration;
+    }
 
     public Boolean isActive() {
         return active;

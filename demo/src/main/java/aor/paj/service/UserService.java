@@ -12,6 +12,7 @@ import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.utils.TokenStatus;
 import aor.paj.validator.UserValidator;
+import aor.paj.websocket.Notifier;
 import com.sun.tools.jconsole.JConsoleContext;
 import com.sun.tools.jconsole.JConsolePlugin;
 import jakarta.inject.Inject;
@@ -24,10 +25,8 @@ import jakarta.ws.rs.core.Response;
 
 public class UserService {
 
-    private final EmailSender emailSender;
-
     public UserService() {
-        this.emailSender = new EmailSender();
+
     }
 
     @Inject
@@ -331,6 +330,7 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response test(UserDto u) {
         userBean.addUser(u);
+        notify();
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
     }
 }

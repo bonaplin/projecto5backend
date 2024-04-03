@@ -21,6 +21,7 @@ import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.JsonUtils;
+import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -43,7 +44,6 @@ public class UserBean {
 
     @EJB
     TokenDao tokenDao;
-
 
     //Function that generates a unique id for new user checking in database mysql if the id already exists
 //    public int generateIdDataBase() {
@@ -100,8 +100,9 @@ public class UserBean {
 
         userDao.persist(userEntity);
 
-        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(),
-                "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getUsername());
+
+//        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(),
+//                "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getUsername());
         return true;
     }
 
@@ -172,10 +173,7 @@ public class UserBean {
 //        }
 //    }
 
-    //Function that generates a new token
-    private String generateNewToken() {
-        return UUID.randomUUID().toString();
-    }
+
 
     //Function that receives a token and a task id and checks if the user has permission to access the task, to edit he must be role sm or po, or the be owner of the task
     //TOKEN
@@ -400,5 +398,16 @@ public class UserBean {
         }
         return false;
     }
-
+    //Function that generates a new token and expire time
+    private boolean generateNewToken(UserDto userDto, int minutes) {
+        String token = UUID.randomUUID().toString();
+        UserEntity userEntity = userDao.findUserByUsername(userDto.getUsername());
+        if (userEntity != null) {
+            userEntity.setToken_verification(token);
+            userEntity.setToken_expiration(LocalDateTime.now().plusMinutes(minutes));
+            userDao.merge(userEntity);
+            return true;
+        }
+        return false;
+    }
 }

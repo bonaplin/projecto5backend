@@ -19,9 +19,11 @@ public class NotificationEntity implements Serializable {
     @JoinColumn(name="user_id", nullable = false)
     private UserEntity user;
 
-    @OneToOne
-    @JoinColumn(name="message")
-    private MessageEntity message;
+//    @OneToOne
+//    @JoinColumn(name="message")
+//    private MessageEntity message;
+    @Column(name="message")
+    private String message;
 
     @Column(name="timestamp", nullable = false, unique = false, updatable = true)
     private LocalDateTime timestamp;
@@ -43,14 +45,6 @@ public class NotificationEntity implements Serializable {
         this.user = user;
     }
 
-    public MessageEntity getMessage() {
-        return message;
-    }
-
-    public void setMessage(MessageEntity message) {
-        this.message = message;
-    }
-
     public LocalDateTime getTimestamp() {
         return timestamp;
     }
@@ -65,5 +59,24 @@ public class NotificationEntity implements Serializable {
 
     public void setRead(boolean read) {
         this.read = read;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    @Override
+    public String toString() {
+        return "NotificationEntity{" +
+                "id=" + id +
+                ", user=" + user +
+                ", message='" + message + '\'' +
+                ", timestamp=" + timestamp +
+                ", read=" + read +
+                '}';
     }
 }
