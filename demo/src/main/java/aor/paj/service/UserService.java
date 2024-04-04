@@ -201,6 +201,20 @@ public class UserService {
         }
     }
 
+    @GET
+    @Path("/profile/{selectedUser}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getUserProfile(@HeaderParam("token") String token, @PathParam("selectedUser") String selectedUser) {
+        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+        if (tokenStatus != TokenStatus.VALID) {
+            return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
+        }
+            UserProfileDto userProfileDto = userBean.getUserProfileByUsername(selectedUser);
+
+            return Response.status(200).entity(userProfileDto).build();
+
+    }
+
     @PUT
     @Path("/{selectedUser}")
     @Consumes(MediaType.APPLICATION_JSON)

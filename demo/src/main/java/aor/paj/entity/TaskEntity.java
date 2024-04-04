@@ -23,6 +23,7 @@ import java.time.LocalDate;
         query = "SELECT t FROM TaskEntity t WHERE t.title = :title AND t.status = :status AND t.active = true ORDER BY t.priority DESC, t.initialDate, COALESCE(t.finalDate, '9999-12-31')")
 @NamedQuery(name = "Task.findTaskByCategoryAndStatus",
         query = "SELECT t FROM TaskEntity t WHERE t.category = :category AND t.status = :status AND t.active = true ORDER BY t.priority DESC, t.initialDate, COALESCE(t.finalDate, '9999-12-31')")
+@NamedQuery(name = "Task.findTaskByOwnerIdAndStatus", query = "SELECT t FROM TaskEntity t WHERE t.owner.id = :ownerId AND t.status = :status")
 public class TaskEntity implements Serializable {
 
     private static final long serialVersionUID = 1L;
