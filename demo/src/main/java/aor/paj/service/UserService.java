@@ -300,14 +300,29 @@ public class UserService {
     }
 
 
-    @GET
+//    @GET
+//    @Path("/confirm/{token}")
+//    public Response confirmEmailByToken(@PathParam("token") String token) {
+//        System.out.println("Confirming token: " + token);
+//        boolean isConfirmed = userBean.confirmUser(token);
+//        if (isConfirmed) {
+//            userBean.userConfirmed(token);
+//            return Response.ok("User confirmed successfully").build();
+//        } else {
+//            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+//        }
+//    }
+
+    @POST
     @Path("/confirm/{token}")
-    public Response confirmEmailByToken(@PathParam("token") String token) {
-        System.out.println("Confirming token: " + token);
+    public Response confirmAccountByToken(@PathParam("token") String token, @HeaderParam("password") String password) {
         boolean isConfirmed = userBean.confirmUser(token);
         if (isConfirmed) {
+
             userBean.userConfirmed(token);
-            return Response.ok("User confirmed successfully").build();
+            userBean.resetPassword(token,password);
+
+            return Response.ok("User confirmed successfully and change password too!").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
         }
@@ -327,18 +342,16 @@ public class UserService {
     //ENDPOINT PARA VALIDAR A MUDANÇA DE PASSWORD
     @POST
     @Path("/password/{token}")
-    public Response resetPasswordByToken(@PathParam("token") String token) {
-        System.out.println("Resetting password for token: " + token);
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response resetPasswordByToken(@PathParam("token") String token, @HeaderParam("password") String password) {
         boolean isConfirmed = userBean.confirmUser(token);
         if (isConfirmed) {
-            userBean.confirmPasswordRequest(token);
-            System.out.println("Password can be reset");
-            return Response.ok("Password can be reset").build();
+            userBean.resetPassword(token, password);
+            return Response.ok("Password changed successfully").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
         }
     }
-
 
     @Path("/populator/")
     @POST

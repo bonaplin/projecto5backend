@@ -83,9 +83,9 @@ public class UserBean {
         // generate token and expiration time
         generateNewToken(userEntity, 60);
         userDao.persist(userEntity);
-//
-//        String verificationLink = "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getToken_verification();
-//        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
+
+        String verificationLink = "http://localhost:3000/confirm-account/" + userEntity.getToken_verification();
+        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
 
         return true;
     }
@@ -293,8 +293,10 @@ public class UserBean {
     public boolean confirmUser(String token) {
         UserEntity userEntity = userDao.findUserByToken(token);
         if (userEntity != null) {
+            System.out.println("user encontrado");
             return true;
         }else{
+            System.out.println("user nao encontrado");
             return false;
         }
     }
@@ -321,21 +323,21 @@ public class UserBean {
         if (userEntity != null) {
             generateNewToken(userEntity, 60);
             userDao.merge(userEntity); //update the user with the new token in DB
-            String resetLink = "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/password/" + userEntity.getToken_verification();
+            String resetLink = "http://localhost:3000/reset-password/" + userEntity.getToken_verification();
             EmailSender.sendPasswordResetEmail(email, userEntity.getUsername(), resetLink);
             return true;
         }
         return false;
     }
 
-    public boolean confirmPasswordRequest(String token){
+    public boolean resetPassword(String token, String password){
         UserEntity userEntity = userDao.findUserByToken(token);
-        if(userEntity != null){
-            generateNewToken(userEntity, 60);
-            String restLink = "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/password/" + userEntity.getToken_verification();
-            EmailSender.sendPasswordResetEmail(userEntity.getEmail(), userEntity.getUsername(), restLink);
-            return true;
+        System.out.println("reset password");
+        if(userEntity == null){
+            return false;
         }
-        return false;
+        userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+        userDao.merge(userEntity);
+        return true;
     }
 }
