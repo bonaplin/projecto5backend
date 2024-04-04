@@ -318,10 +318,8 @@ public class UserService {
     public Response confirmAccountByToken(@PathParam("token") String token, @HeaderParam("password") String password) {
         boolean isConfirmed = userBean.confirmUser(token);
         if (isConfirmed) {
-
-            userBean.userConfirmed(token);
             userBean.resetPassword(token,password);
-
+            System.out.println("User confirmed successfully and change password too!");
             return Response.ok("User confirmed successfully and change password too!").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();

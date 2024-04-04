@@ -304,6 +304,7 @@ public class UserBean {
     public boolean userConfirmed(String token){
         UserEntity userEntity = userDao.findUserByToken(token);
         if(userEntity != null){
+            System.out.println("user encontrado no userConfirmed");
             userEntity.setConfirmed(true);
             return true;
         }
@@ -336,6 +337,7 @@ public class UserBean {
         if(userEntity == null){
             return false;
         }
+        userEntity.setConfirmed(true);
         userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
         userDao.merge(userEntity);
         return true;
