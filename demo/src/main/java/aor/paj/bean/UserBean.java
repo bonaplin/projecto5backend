@@ -11,10 +11,7 @@ import aor.paj.dao.CategoryDao;
 import aor.paj.dao.TaskDao;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
-import aor.paj.dto.UserDto;
-import aor.paj.dto.UserPartialDto;
-import aor.paj.dto.UserPasswordUpdateDto;
-import aor.paj.dto.UserUpdateDto;
+import aor.paj.dto.*;
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
 import aor.paj.entity.TokenEntity;
@@ -60,7 +57,7 @@ public class UserBean {
             userEntity.setActive(true);
             userEntity.setConfirmed(true);
             userEntity.setCreated();
-
+            System.out.println("user a ser adicionado: " + userEntity);
             userDao.persist(userEntity);
 
             return true;
@@ -111,6 +108,24 @@ public class UserBean {
             return UserMapper.convertUserEntityToUserDto(userEntity);
         }
         return null;
+    }
+    public UserProfileDto getUserProfileByUsername(String username){
+        UserEntity userEntity = userDao.findUserByUsername(username);
+        if(userEntity != null){
+            UserProfileDto userProfileDto = new UserProfileDto();
+            userProfileDto.setUsername(userEntity.getUsername());
+            userProfileDto.setEmail(userEntity.getEmail());
+            userProfileDto.setFirstname(userEntity.getFirstname());
+            userProfileDto.setLastname(userEntity.getLastname());
+            userProfileDto.setPhotoURL(userEntity.getPhotoURL());
+            userProfileDto.setTaskcount(taskDao.findTaskByOwnerId(userEntity.getId()).size());
+            userProfileDto.setTodocount(taskDao.findTaskByOwnerIdAndStatus(userEntity.getId(),100).size());
+            userProfileDto.setDoingcount(taskDao.findTaskByOwnerIdAndStatus(userEntity.getId(),200).size());
+            userProfileDto.setDonecount(taskDao.findTaskByOwnerIdAndStatus(userEntity.getId(),300).size());
+            userProfileDto.setTaskcount(userProfileDto.getTaskcount());
+            return userProfileDto;
+        }
+        return new UserProfileDto();
     }
 
     //Return the list of users in the json file
@@ -304,6 +319,7 @@ public class UserBean {
     public boolean userConfirmed(String token){
         UserEntity userEntity = userDao.findUserByToken(token);
         if(userEntity != null){
+            System.out.println("user encontrado no userConfirmed");
             userEntity.setConfirmed(true);
             return true;
         }
@@ -336,7 +352,10 @@ public class UserBean {
         if(userEntity == null){
             return false;
         }
+        userEntity.setConfirmed(true);
         userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+        userEntity.setToken_expiration(null);
+        userEntity.setToken_verification(null);
         userDao.merge(userEntity);
         return true;
     }

@@ -96,6 +96,17 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         }
     }
 
+    public List<TaskEntity> findTaskByOwnerIdAndStatus(int ownerId, int status) {
+        try {
+            return em.createNamedQuery("Task.findTaskByOwnerIdAndStatus")
+                    .setParameter("ownerId", ownerId)
+                    .setParameter("status", status)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
     //Function that returns all the tasks of database mysql
     public List<TaskEntity> getAllTasks() {
         return em.createNamedQuery("Task.getAllTasks").getResultList();
