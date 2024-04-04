@@ -2,6 +2,9 @@ package aor.paj.entity;//package aor.paj.entity;
 
 import jakarta.persistence.*;
 import java.io.Serializable;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 @Entity
 
@@ -24,8 +27,8 @@ public class MessageEntity implements Serializable {
     @JoinColumn(name = "receiver_id", nullable = false, unique = false, updatable = true)
     private UserEntity receiver_id;
 
-    @Column(name = "timestamp", nullable = false, unique = false, updatable = true)
-    private String timestamp;
+    @Column(name = "created_at", nullable = false, unique = false, updatable = true)
+    private Timestamp createdAt;
 
     @Column(name = "`read`", nullable = false, unique = false, updatable = true)
     private boolean read;
@@ -49,13 +52,17 @@ public class MessageEntity implements Serializable {
         this.message = message;
     }
 
-
-    public String getTimestamp() {
-        return timestamp;
+    @PrePersist
+    protected void onCreate(){
+        createdAt = Timestamp.valueOf(LocalDateTime.now());
     }
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
+    public Timestamp getTimestamp() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Timestamp createdAt) {
+        this.createdAt = createdAt;
     }
 
     public boolean isRead() {
@@ -64,5 +71,29 @@ public class MessageEntity implements Serializable {
 
     public void setIsRead(boolean isRead) {
         this.read = isRead;
+    }
+
+    public UserEntity getSender_id() {
+        return sender_id;
+    }
+
+    public void setSender_id(UserEntity sender_id) {
+        this.sender_id = sender_id;
+    }
+
+    public UserEntity getReceiver_id() {
+        return receiver_id;
+    }
+
+    public void setReceiver_id(UserEntity receiver_id) {
+        this.receiver_id = receiver_id;
+    }
+
+    public Timestamp getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
     }
 }

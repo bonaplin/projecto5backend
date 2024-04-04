@@ -313,18 +313,19 @@ public class UserService {
         }
     }
 
-    @GET
+    //ENDPOINT PARA ENVIAR EMAIL DE RESET DE PASSWORD
+    @POST
     @Path("/password-reset/{email}")
     public Response resetPassword(@PathParam("email") String email) {
         System.out.println("Resetting password for email: " + email);
         if(userBean.sendPasswordResetEmail(email)){
-            return Response.ok("Password reset email sent").build();
+            return Response.ok("Email sent for password reset").build();
         }
         return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
     }
 
     //ENDPOINT PARA VALIDAR A MUDANÇA DE PASSWORD
-    @GET
+    @POST
     @Path("/password/{token}")
     public Response resetPasswordByToken(@PathParam("token") String token) {
         System.out.println("Resetting password for token: " + token);
@@ -334,7 +335,7 @@ public class UserService {
             System.out.println("Password can be reset");
             return Response.ok("Password can be reset").build();
         } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
         }
     }
 

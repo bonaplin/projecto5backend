@@ -83,9 +83,9 @@ public class UserBean {
         // generate token and expiration time
         generateNewToken(userEntity, 60);
         userDao.persist(userEntity);
-
-        String verificationLink = "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getToken_verification();
-        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
+//
+//        String verificationLink = "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getToken_verification();
+//        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
 
         return true;
     }
@@ -336,6 +336,6 @@ public class UserBean {
             EmailSender.sendPasswordResetEmail(userEntity.getEmail(), userEntity.getUsername(), restLink);
             return true;
         }
-        return true;
+        return false;
     }
 }
