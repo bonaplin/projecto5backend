@@ -5,8 +5,10 @@ import aor.paj.entity.UserEntity;
 import jakarta.ejb.Schedule;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceException;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Stateless
@@ -43,6 +45,29 @@ public class TokenDao extends AbstractDao<TokenEntity>{
             return tokenEntity.getUser();
         }
         return null;
+    }
+
+    public List<UserEntity> findLoggedUsers(){
+        List<TokenEntity> validTokens = findValidTokens(LocalDateTime.now());
+        List<UserEntity> loggedUsers = new ArrayList<>();
+
+        for(TokenEntity t : validTokens){
+            loggedUsers.add(t.getUser());
+        }
+
+        return loggedUsers;
+    }
+
+    public List<TokenEntity> findValidTokens(LocalDateTime now) {
+        try {
+            List<TokenEntity> validTokens = em.createQuery("SELECT t FROM TokenEntity t WHERE t.expiration > :now", TokenEntity.class)
+                    .setParameter("now", now)
+                    .getResultList();
+            return validTokens;
+        }catch (PersistenceException e){
+            return new ArrayList<>();
+        }
+
     }
 
     public List<TokenEntity> findExpiredTokens(LocalDateTime now) {

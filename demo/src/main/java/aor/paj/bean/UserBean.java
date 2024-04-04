@@ -21,6 +21,7 @@ import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.JsonUtils;
+import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -44,24 +45,7 @@ public class UserBean {
     @EJB
     TokenDao tokenDao;
 
-
-    //Function that generates a unique id for new user checking in database mysql if the id already exists
-//    public int generateIdDataBase() {
-//        int id = 1;
-//        boolean idAlreadyExists;
-//
-//        do {
-//            idAlreadyExists = false;
-//            UserEntity userEntity = userDao.findUserById(id);
-//            if (userEntity != null) {
-//                id++;
-//                idAlreadyExists = true;
-//            }
-//        } while (idAlreadyExists);
-//        return id;
-//    }
-
-    //Add a user to the database mysql, encrypting the password, role to "dev" and generating a id
+    // FOR POPULATE USING
     public boolean addUser(UserDto user) {
 
             UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
@@ -96,23 +80,15 @@ public class UserBean {
             userEntity.setRole("dev");
         }
         userEntity.setActive(true);
-
+        // generate token and expiration time
+        generateNewToken(userEntity, 60);
         userDao.persist(userEntity);
 
-        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(),
-                "http://localhost:8080/demo-1.0-SNAPSHOT/rest/users/confirm/" + userEntity.getUsername());
+        String verificationLink = "http://localhost:3000/confirm-account/" + userEntity.getToken_verification();
+        EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
+
         return true;
     }
-
-    //Function that validates a user in database by token
-    //TOKEN
-//    public boolean isValidUserByToken(String token) {
-//        UserEntity userEntity = userDao.findUserByToken(token);
-//        if(userEntity != null && userEntity.getActive()){
-//            return true;
-//        }
-//        return false;
-//    }
 
     //Function that receives a UserDto and checks in database mysql if the username and email already exists
     public boolean userExists(UserDto user) {
@@ -127,21 +103,6 @@ public class UserBean {
         return false;
     }
 
-    //Function that receives the username and password and checks in database mysql if the user exists and if the password is correct, then if so returns the token generated
-    //TOKEN
-//    public String login(String username, String password) {
-//        UserEntity userEntity = userDao.findUserByUsername(username);
-//        if (userEntity != null) {
-//            if (BCrypt.checkpw(password, userEntity.getPassword())) {
-//                String token = generateNewToken();
-//                userEntity.setToken(token);
-//                userDao.merge(userEntity);
-//                userDao.flush();
-//                return token;
-//            }
-//        }
-//        return null;
-//    }
 
     //Fubction that receives username, retrieves the user from the database and returns the userDto object
     public UserDto getUserByUsername(String username) {
@@ -151,47 +112,6 @@ public class UserBean {
         }
         return null;
     }
-    //Function that receives the token and retrieves the user from the database and returns the userDto object
-    //TOKEN
-//    public UserDto getUserByToken(String token) {
-//        UserEntity userEntity = userDao.findUserByToken(token);
-//        if (userEntity != null) {
-//            return UserMapper.convertUserEntityToUserDto(userEntity);
-//        }
-//        return null;
-//    }
-
-    //Function that receives the token and sets it to null, logging out the user
-    //TOKEN
-//    public void logout(String token) {
-//        UserEntity userEntity = userDao.findUserByToken(token);
-//        if (userEntity != null) {
-//            userEntity.setToken(null);
-//            userDao.merge(userEntity);
-//        }
-//    }
-
-    //Function that generates a new token
-    private String generateNewToken() {
-        return UUID.randomUUID().toString();
-    }
-
-    //Function that receives a token and a task id and checks if the user has permission to access the task, to edit he must be role sm or po, or the be owner of the task
-    //TOKEN
-//    public boolean hasPermissionToEdit(String token, int taskId) {
-//        UserEntity userEntity = userDao.findUserByToken(token);
-//        if (userEntity != null) {
-//            if (userEntity.getRole().equals("sm") || userEntity.getRole().equals("po")) {
-//                return true;
-//            }
-//            for(int i = 0; i < taskDao.findTaskByOwnerId(userEntity.getId()).size(); i++){
-//                if(taskDao.findTaskByOwnerId(userEntity.getId()).get(i).getId() == taskId){
-//                    return true;
-//                }
-//            }
-//        }
-//        return false;
-//    }
 
     //Return the list of users in the json file
     public List<UserDto> getAllUsersDB() {
@@ -235,16 +155,6 @@ public class UserBean {
         }
         return false;
     }
-
-    //Function that receives a token and returns the user role
-    //TOKEN
-//    public String getUserRole(String token) {
-//        UserEntity userEntity = userDao.findUserByToken(token);
-//        if (userEntity != null) {
-//            return userEntity.getRole();
-//        }
-//        return null;
-//    }
 
     //Function that returns a list of users that own tasks
     public List<UserDto> getUsersOwners() {
@@ -355,9 +265,9 @@ public class UserBean {
             userDto.setLastname("Admin");
             userDto.setEmail("admin@admin");
             userDto.setPhone("000000000");
-
             userDto.setPhotoURL("https://t4.ftcdn.net/jpg/04/75/00/99/360_F_475009987_zwsk4c77x3cTpcI3W1C1LU4pOSyPKaqi.jpg");
-            addUser(userDto);
+            userDto.setConfirmed(true);
+            addUserPO(userDto,"po");
         }
 
         if (userDao.findUserByUsername("deleted") == null) {
@@ -369,7 +279,8 @@ public class UserBean {
             userDto.setEmail("userdeleted@deleted");
             userDto.setPhone("000000000");
             userDto.setPhotoURL("https://www.shutterstock.com/image-vector/trash-can-icon-symbol-delete-600nw-1454137346.jpg");
-            addUser(userDto);
+            userDto.setConfirmed(true);
+            addUserPO(userDto,"dev");
             changeStatus("deleted",false);
         }
 
@@ -379,24 +290,54 @@ public class UserBean {
         return userEntity != null && userEntity.getId() == userId;
     }
 
-    public boolean confirmUser(String username) {
-        UserEntity userEntity = userDao.findUserByUsername(username);
+    public boolean confirmUser(String token) {
+        UserEntity userEntity = userDao.findUserByToken(token);
         if (userEntity != null) {
-            userEntity.setConfirmed(true);
-            userDao.merge(userEntity);
+            System.out.println("user encontrado");
             return true;
         }else{
-        return false;}
+            System.out.println("user nao encontrado");
+            return false;
+        }
     }
 
-    public boolean userConfirmed(String username){
-        UserEntity userEntity = userDao.findUserByUsername(username);
+    public boolean userConfirmed(String token){
+        UserEntity userEntity = userDao.findUserByToken(token);
         if(userEntity != null){
             userEntity.setConfirmed(true);
-            System.out.println("user confirmado");
             return true;
         }
         return false;
     }
 
+    //Function that generates a new token and expire time
+    private boolean generateNewToken(UserEntity userEntity, int minutes) {
+        String token = UUID.randomUUID().toString();
+        userEntity.setToken_verification(token);
+        userEntity.setToken_expiration(LocalDateTime.now().plusMinutes(minutes));
+        return true;
+    }
+
+    public boolean sendPasswordResetEmail(String email) {
+        UserEntity userEntity = userDao.findUserByEmail(email);
+        if (userEntity != null) {
+            generateNewToken(userEntity, 60);
+            userDao.merge(userEntity); //update the user with the new token in DB
+            String resetLink = "http://localhost:3000/reset-password/" + userEntity.getToken_verification();
+            EmailSender.sendPasswordResetEmail(email, userEntity.getUsername(), resetLink);
+            return true;
+        }
+        return false;
+    }
+
+    public boolean resetPassword(String token, String password){
+        UserEntity userEntity = userDao.findUserByToken(token);
+        System.out.println("reset password");
+        if(userEntity == null){
+            return false;
+        }
+        userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+        userDao.merge(userEntity);
+        return true;
+    }
 }

@@ -12,6 +12,7 @@ import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.utils.TokenStatus;
 import aor.paj.validator.UserValidator;
+import aor.paj.websocket.Notifier;
 import com.sun.tools.jconsole.JConsoleContext;
 import com.sun.tools.jconsole.JConsolePlugin;
 import jakarta.inject.Inject;
@@ -24,10 +25,8 @@ import jakarta.ws.rs.core.Response;
 
 public class UserService {
 
-    private final EmailSender emailSender;
-
     public UserService() {
-        this.emailSender = new EmailSender();
+
     }
 
     @Inject
@@ -300,26 +299,67 @@ public class UserService {
         }
     }
 
-//    @Path("/email/send")
-//    @POST
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.TEXT_PLAIN)
-//    public Response sendEmail(EmailRequest emailRequest) {
-//        emailSender.sendEmail(emailRequest.getTo(), emailRequest.getSubject(), emailRequest.getContent());
-//        return Response.ok("Email sent successfully").build();
+
+//    @GET
+//    @Path("/confirm/{token}")
+//    public Response confirmEmailByToken(@PathParam("token") String token) {
+//        System.out.println("Confirming token: " + token);
+//        boolean isConfirmed = userBean.confirmUser(token);
+//        if (isConfirmed) {
+//            userBean.userConfirmed(token);
+//            return Response.ok("User confirmed successfully").build();
+//        } else {
+//            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+//        }
 //    }
 
-    @GET
-    @Path("/confirm/{username}")
-    public Response confirmEmail(@PathParam("username") String username) {
-        System.out.println("Confirming user: " + username);
-        boolean isConfirmed = userBean.confirmUser(username);
+    @POST
+    @Path("/confirm/{token}")
+    public Response confirmAccountByToken(@PathParam("token") String token, @HeaderParam("password") String password) {
+        boolean isConfirmed = userBean.confirmUser(token);
         if (isConfirmed) {
-            userBean.userConfirmed(username);
-            return Response.ok("User confirmed successfully").build();
+
+            userBean.userConfirmed(token);
+            userBean.resetPassword(token,password);
+
+            return Response.ok("User confirmed successfully and change password too!").build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
         }
+    }
+
+    //ENDPOINT PARA ENVIAR EMAIL DE RESET DE PASSWORD
+    @POST
+    @Path("/password-reset/{email}")
+    public Response resetPassword(@PathParam("email") String email) {
+        System.out.println("Resetting password for email: " + email);
+        if(userBean.sendPasswordResetEmail(email)){
+            return Response.ok("Email sent for password reset").build();
+        }
+        return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+    }
+
+    //ENDPOINT PARA VALIDAR A MUDANÇA DE PASSWORD
+    @POST
+    @Path("/password/{token}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response resetPasswordByToken(@PathParam("token") String token, @HeaderParam("password") String password) {
+        boolean isConfirmed = userBean.confirmUser(token);
+        if (isConfirmed) {
+            userBean.resetPassword(token, password);
+            return Response.ok("Password changed successfully").build();
+        } else {
+            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
+        }
+    }
+
+    @Path("/populator/")
+    @POST
+    @Consumes(MediaType.APPLICATION_JSON)
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response test(UserDto u) {
+        userBean.addUser(u);
+        return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
     }
 }
 

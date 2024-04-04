@@ -4,6 +4,7 @@ public class EmailDto {
     private String to;
     private String username;
     private String link;
+    private String token;
 
     public String getTo() {
         return to;
@@ -27,5 +28,13 @@ public class EmailDto {
 
     public void setLink(String link) {
         this.link = link;
+    }
+
+    public String getToken() {
+        return token;
+    }
+
+    public void setToken(String token) {
+        this.token = token;
     }
 }

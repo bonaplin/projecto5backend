@@ -17,6 +17,7 @@ public class UserDto {
     private String photoURL;
     private String role;
     private boolean active;
+    private boolean confirmed;
 
 
     private ArrayList<TaskDto> taskDtos;
@@ -85,11 +86,14 @@ public class UserDto {
         return active;
     }
 
-    @XmlElementWrapper
-    @XmlElement(name = "task")
-    public ArrayList<TaskDto> getTasks() {
-        return this.taskDtos;
-    }
+    @XmlElement
+    public boolean isConfirmed(){return confirmed;}
+
+//    @XmlElementWrapper
+//    @XmlElement(name = "task")
+//    public ArrayList<TaskDto> getTasks() {
+//        return this.taskDtos;
+//    }
 
     // Setter methods
     public void setId(int id) {
@@ -131,35 +135,36 @@ public class UserDto {
     public void setActive(boolean active) {
         this.active = active;
     }
+    public void setConfirmed(boolean confirmed){this.confirmed = confirmed; }
 
-    public void setTasks(ArrayList<TaskDto> taskDtos) {
-        this.taskDtos = taskDtos;
-    }
-
-    // Task-related methods
-    public void addTask(TaskDto t) {
-        taskDtos.add(t);
-    }
-
-    public void removeTask(TaskDto t) {
-        taskDtos.remove(t);
-    }
-
-    public void removeTask(int id) {
-        for (TaskDto t : taskDtos) {
-            if (t.getId() == id) {
-                taskDtos.remove(t);
-                return;
-            }
-        }
-    }
-
-    public TaskDto getTask(int id) {
-        for (TaskDto t : taskDtos) {
-            if (t.getId() == id) {
-                return t;
-            }
-        }
-        return null;
-    }
+//    public void setTasks(ArrayList<TaskDto> taskDtos) {
+//        this.taskDtos = taskDtos;
+//    }
+//
+//    // Task-related methods
+//    public void addTask(TaskDto t) {
+//        taskDtos.add(t);
+//    }
+//
+//    public void removeTask(TaskDto t) {
+//        taskDtos.remove(t);
+//    }
+//
+//    public void removeTask(int id) {
+//        for (TaskDto t : taskDtos) {
+//            if (t.getId() == id) {
+//                taskDtos.remove(t);
+//                return;
+//            }
+//        }
+//    }
+//
+//    public TaskDto getTask(int id) {
+//        for (TaskDto t : taskDtos) {
+//            if (t.getId() == id) {
+//                return t;
+//            }
+//        }
+//        return null;
+//    }
 }

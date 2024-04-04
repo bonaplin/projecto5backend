@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Table(name="user")
 @NamedQuery(name = "User.findUserByUsername", query = "SELECT u FROM UserEntity u WHERE u.username = :username")
 @NamedQuery(name = "User.findUserByEmail", query = "SELECT u FROM UserEntity u WHERE u.email = :email")
-//@NamedQuery(name = "User.findUserByToken", query = "SELECT DISTINCT u FROM UserEntity u WHERE u.token = :token")
+@NamedQuery(name = "User.findUserByToken", query = "SELECT DISTINCT u FROM UserEntity u WHERE u.token_verification = :token")
 @NamedQuery(name = "User.findUserById", query = "SELECT u FROM UserEntity u WHERE u.id = :id")
 @NamedQuery(name = "User.findAllUsers", query = "SELECT u FROM UserEntity u WHERE u.id != 1 AND u.id != 2")
 public class UserEntity implements Serializable {
@@ -46,8 +46,11 @@ public class UserEntity implements Serializable {
     @Column(name="role", nullable = false, unique = false, updatable = true)
     private String role;
 
-//    @Column(name="token", nullable = true, unique = true, updatable = true)
-//    private String token;
+    @Column(name="token_verification", nullable = true, unique = true, updatable = true)
+    private String token_verification;
+
+    @Column(name="token_expiration", nullable = true, unique = false, updatable = true)
+    private LocalDateTime token_expiration;
 
     @Column(name="active", nullable = false, unique = false, updatable = true)
     private Boolean active;
@@ -135,13 +138,21 @@ public class UserEntity implements Serializable {
         this.role = role;
     }
 
-//    public String getToken() {
-//        return token;
-//    }
-//
-//    public void setToken(String token) {
-//        this.token = token;
-//    }
+    public String getToken_verification() {
+        return token_verification;
+    }
+
+    public void setToken_verification(String token_verification) {
+        this.token_verification = token_verification;
+    }
+
+    public LocalDateTime getToken_expiration() {
+        return token_expiration;
+    }
+
+    public void setToken_expiration(LocalDateTime token_expiration) {
+        this.token_expiration = token_expiration;
+    }
 
     public Boolean isActive() {
         return active;
@@ -183,9 +194,11 @@ public class UserEntity implements Serializable {
                 ", phone='" + phone + '\'' +
                 ", photoURL='" + photoURL + '\'' +
                 ", role='" + role + '\'' +
-//                ", token='" + token + '\'' +
+                ", token_verification='" + token_verification + '\'' +
+                ", token_expiration=" + token_expiration +
                 ", active=" + active +
                 ", created=" + created +
+                ", confirmed=" + confirmed +
                 '}';
     }
 }

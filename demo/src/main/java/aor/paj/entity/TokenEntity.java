@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @Table(name="token")
 @NamedQuery(name = "Token.findTokenByToken", query = "SELECT t FROM TokenEntity t WHERE t.token = :token")
 @NamedQuery(name = "Token.findTokenByUserId", query = "SELECT t FROM TokenEntity t WHERE t.user.id = :id")
+@NamedQuery(name = "Token.findAllTokens", query = "SELECT t FROM TokenEntity t")
 
 
 public class TokenEntity implements Serializable {
@@ -62,4 +63,14 @@ public class TokenEntity implements Serializable {
         public void setUser(UserEntity user) {
             this.user = user;
         }
+
+    @Override
+    public String toString() {
+        return "TokenEntity{" +
+                "id=" + id +
+                ", token='" + token + '\'' +
+                ", expiration=" + expiration +
+                ", user=" + user +
+                '}';
+    }
 }
