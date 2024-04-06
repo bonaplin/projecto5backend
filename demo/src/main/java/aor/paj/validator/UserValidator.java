@@ -101,7 +101,7 @@ public class UserValidator {
 
     //Function that verifys if user to add is null or blank
     public static boolean isNullorBlank(UserDto u) {
-        return isNullOrBlank(u.getUsername()) || isNullOrBlank(u.getPassword()) || isNullOrBlank(u.getEmail())
+        return isNullOrBlank(u.getUsername()) || isNullOrBlank(u.getEmail())
                 || isNullOrBlank(u.getFirstname()) || isNullOrBlank(u.getLastname())
                 || isNullOrBlank(u.getPhone()) || isNullOrBlank(u.getPhotoURL());
     }

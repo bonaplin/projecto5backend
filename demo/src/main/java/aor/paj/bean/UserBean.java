@@ -18,6 +18,7 @@ import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.JsonUtils;
+import aor.paj.utils.ResetPasswordStatus;
 import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -56,15 +57,22 @@ public class UserBean {
             }
             userEntity.setActive(true);
             userEntity.setConfirmed(true);
-            userEntity.setCreated();
+            userEntity.setCreated(LocalDateTime.now());
             System.out.println("user a ser adicionado: " + userEntity);
             userDao.persist(userEntity);
 
             return true;
     }
     public boolean addUserPO(UserDto user, String role) {
+
+        String password = user.getPassword();
+        if(password==null || password.equals("") || password.isBlank()){
+            user.setPassword(UUID.randomUUID().toString());
+        }
+
         UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
-        //Encrypt the password
+
+
         userEntity.setPassword(BCrypt.hashpw(userEntity.getPassword(), BCrypt.gensalt()));
 
         if(userEntity.getUsername().equals("admin")){
@@ -76,8 +84,10 @@ public class UserBean {
         } else {
             userEntity.setRole("dev");
         }
+
         userEntity.setActive(true);
         // generate token and expiration time
+        userEntity.setCreated(LocalDateTime.now());
         generateNewToken(userEntity, 60);
         userDao.persist(userEntity);
 
@@ -317,12 +327,10 @@ public class UserBean {
     }
 
     public boolean userConfirmed(String token){
-        UserEntity userEntity = userDao.findUserByToken(token);
-        if(userEntity != null){
-            System.out.println("user encontrado no userConfirmed");
-            userEntity.setConfirmed(true);
-            return true;
-        }
+        UserEntity userEntity = tokenDao.findUserByTokenString(token);
+           if(userEntity != null){
+                return userEntity.getConfirmed();
+            }
         return false;
     }
 
@@ -346,17 +354,31 @@ public class UserBean {
         return false;
     }
 
-    public boolean resetPassword(String token, String password){
+    public ResetPasswordStatus resetPassword(String token, String password){
         UserEntity userEntity = userDao.findUserByToken(token);
         System.out.println("reset password");
+
         if(userEntity == null){
-            return false;
+            return ResetPasswordStatus.USER_NOT_FOUND;
         }
-        userEntity.setConfirmed(true);
-        userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+
+        if(!userEntity.getConfirmed()){
+            userEntity.setConfirmed(true);
+            System.out.println("user confirmado" + userEntity.getConfirmed());
+            userEntity.setCreated(LocalDateTime.now());
+        }
+        if(userEntity.getToken_expiration().isBefore(LocalDateTime.now())){
+            userEntity.setToken_expiration(null);
+            userEntity.setToken_verification(null);
+            return ResetPasswordStatus.TOKEN_EXPIRED;
+        }
+
         userEntity.setToken_expiration(null);
         userEntity.setToken_verification(null);
+
+        userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
+        System.out.println(userEntity.getConfirmed());
         userDao.merge(userEntity);
-        return true;
+        return ResetPasswordStatus.SUCCESS;
     }
 }

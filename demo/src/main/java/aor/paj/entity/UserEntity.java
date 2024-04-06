@@ -55,7 +55,7 @@ public class UserEntity implements Serializable {
     @Column(name="active", nullable = false, unique = false, updatable = true)
     private Boolean active;
 
-    @Column(name="created", nullable = false, unique = false, updatable = false)
+    @Column(name="created", nullable = false, unique = false, updatable = true)
     private LocalDateTime created;
 
     @Column(name="confirmed", nullable = false, unique = false, updatable = true)
@@ -169,9 +169,9 @@ public class UserEntity implements Serializable {
     public LocalDateTime getCreated() {
         return created;
     }
-    @PrePersist // This method is called just before the entity is persisted to the database
-    public void setCreated() {
-        this.created = LocalDateTime.now();
+    //@PrePersist // This method is called just before the entity is persisted to the database
+    public void setCreated(LocalDateTime created) {
+        this.created = created;
     }
 
     public Boolean getConfirmed() {
