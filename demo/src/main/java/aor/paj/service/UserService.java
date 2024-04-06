@@ -70,8 +70,11 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(@HeaderParam("username") String username, @HeaderParam("password") String password) {
         String token = tokenBean.login(username, password);
-        if (token == null || !userBean.getUserByUsername(username).isActive()) {
+        if (token == null) {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Login Failed"))).build();
+        }
+        if (!userBean.getUserByUsername(username).isActive()){
+            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is not active"))).build();
         }
 
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new TokenAndRoleDto(token, userBean.getUserByUsername(username).getRole(), tokenBean.getUserByToken(token).getUsername(),userBean.userConfirmed(token)))).build();
