@@ -10,6 +10,7 @@ import aor.paj.dto.*;
 import aor.paj.entity.UserEntity;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
+import aor.paj.utils.ResetPasswordStatus;
 import aor.paj.utils.TokenStatus;
 import aor.paj.validator.UserValidator;
 import aor.paj.websocket.Notifier;
@@ -56,10 +57,8 @@ public class UserService {
 
         String role = tokenBean.getUserRole(token);
         if (role.equals("po")) {
-            userBean.addUserPO(u, roleNewUser);}
-//        } else {
-//            userBean.addUser(u);
-//        }
+            userBean.addUserPO(u, roleNewUser);
+        }
 
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
     }
@@ -75,7 +74,7 @@ public class UserService {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Login Failed"))).build();
         }
 
-        return Response.status(200).entity(JsonUtils.convertObjectToJson(new TokenAndRoleDto(token, userBean.getUserByUsername(username).getRole(), tokenBean.getUserByToken(token).getUsername()))).build();
+        return Response.status(200).entity(JsonUtils.convertObjectToJson(new TokenAndRoleDto(token, userBean.getUserByUsername(username).getRole(), tokenBean.getUserByToken(token).getUsername(),userBean.userConfirmed(token)))).build();
     }
 
 
@@ -331,12 +330,11 @@ public class UserService {
     @Path("/confirm/{token}")
     public Response confirmAccountByToken(@PathParam("token") String token, @HeaderParam("password") String password) {
         boolean isConfirmed = userBean.confirmUser(token);
+        ResetPasswordStatus status = userBean.resetPassword(token, password);
         if (isConfirmed) {
-            userBean.resetPassword(token,password);
-            System.out.println("User confirmed successfully and change password too!");
-            return Response.ok("User confirmed successfully and change password too!").build();
+            return Response.ok(status.getMessage()).build();
         } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(status.getMessage()).build();
         }
     }
 
@@ -357,11 +355,11 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response resetPasswordByToken(@PathParam("token") String token, @HeaderParam("password") String password) {
         boolean isConfirmed = userBean.confirmUser(token);
+        ResetPasswordStatus status = userBean.resetPassword(token, password);
         if (isConfirmed) {
-            userBean.resetPassword(token, password);
-            return Response.ok("Password changed successfully").build();
+            return Response.ok(status.getMessage()).build();
         } else {
-            return Response.status(Response.Status.BAD_REQUEST).entity("Invalid token").build();
+            return Response.status(Response.Status.BAD_REQUEST).entity(status.getMessage()).build();
         }
     }
 

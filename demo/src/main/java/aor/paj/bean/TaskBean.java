@@ -81,6 +81,9 @@ public class TaskBean {
     public boolean taskTitleExists(TaskDto taskDto) {
         TaskEntity taskEntity = taskDao.findTaskByTitle(taskDto.getTitle());
         if (taskEntity != null) {
+            if(taskDto.getId() == taskEntity.getId()){
+                return false;
+            }
             return true;
         }
         return false;

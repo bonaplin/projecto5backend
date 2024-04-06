@@ -4,14 +4,16 @@ public class TokenAndRoleDto {
     private String token;
     private String role;
     private String username;
+    private boolean confirmed;
 
     public TokenAndRoleDto() {
     }
 
-    public TokenAndRoleDto(String token, String role, String username) {
+    public TokenAndRoleDto(String token, String role, String username, boolean confirmed){
         this.token = token;
         this.role = role;
         this.username = username;
+        this.confirmed = confirmed;
     }
 
     public String getToken() {
@@ -36,5 +38,12 @@ public class TokenAndRoleDto {
 
     public void setUsername(String username) {
         this.username = username;
+    }
+
+    public boolean isConfirmed() {
+        return confirmed;
+    }
+    public void setConfirmed(boolean confirmed) {
+        this.confirmed = confirmed;
     }
 }

@@ -174,6 +174,13 @@ public class CategoryBean {
             categoryDto.setOwner("admin");
             addCategory(categoryDto);
         }
+        if (!categoryDao.findCategoryByName("Java")) {
+            CategoryDto categoryDto = new CategoryDto();
+            categoryDto.setTitle("Java");
+            categoryDto.setDescription("Java category");
+            categoryDto.setOwner("admin");
+            addCategory(categoryDto);
+        }
 
     }
 }
