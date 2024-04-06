@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -27,8 +28,8 @@ public class MessageEntity implements Serializable {
     @JoinColumn(name = "receiver_id", nullable = false, unique = false, updatable = true)
     private UserEntity receiver_id;
 
-    @Column(name = "created_at", nullable = false, unique = false, updatable = true)
-    private Timestamp createdAt;
+    @Column(name = "time", nullable = false, unique = false, updatable = true)
+    private Instant time;
 
     @Column(name = "`read`", nullable = false, unique = false, updatable = true)
     private boolean read;
@@ -54,23 +55,23 @@ public class MessageEntity implements Serializable {
 
     @PrePersist
     protected void onCreate(){
-        createdAt = Timestamp.valueOf(LocalDateTime.now());
+        time = Instant.now();
     }
 
-    public Timestamp getTimestamp() {
-        return createdAt;
+    public Instant getTime() {
+        return time;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setTime(Instant time) {
+        this.time = time;
     }
 
     public boolean isRead() {
         return read;
     }
 
-    public void setIsRead(boolean isRead) {
-        this.read = isRead;
+    public void setIsRead(boolean read) {
+        this.read = read;
     }
 
     public UserEntity getSender_id() {
@@ -87,13 +88,5 @@ public class MessageEntity implements Serializable {
 
     public void setReceiver_id(UserEntity receiver_id) {
         this.receiver_id = receiver_id;
-    }
-
-    public Timestamp getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setRead(boolean read) {
-        this.read = read;
     }
 }

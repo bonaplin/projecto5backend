@@ -10,6 +10,7 @@ import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -59,7 +60,7 @@ public class NotificationBean {
             System.out.println("read"+notificationEntity.isRead());
             notificationEntity.setRead(false);
             System.out.println("time"+notificationEntity.getTimestamp());
-            notificationEntity.setTimestamp(LocalDateTime.now());
+            notificationEntity.setTime(Instant.now());
 
             notificationDao.persist(notificationEntity);
         }

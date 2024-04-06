@@ -4,13 +4,14 @@ import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlRootElement;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 
 @XmlRootElement
 public class MessageDto {
     private String message;
     private String sender;
     private String receiver;
-    private Timestamp createdAt;
+    private Instant time;
     private boolean read;
 
     @XmlElement
@@ -41,12 +42,12 @@ public class MessageDto {
     }
 
     @XmlElement
-    public Timestamp getCreatedAt() {
-        return createdAt;
+    public Instant getTime() {
+        return time;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
-        this.createdAt = createdAt;
+    public void setTime(Instant time) {
+        this.time = time;
     }
 
     @XmlElement

@@ -1,27 +1,37 @@
-package aor.paj.mapper;
+package aor.paj.bean;
 
+import aor.paj.dao.MessageDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageDto;
 import aor.paj.entity.MessageEntity;
 import aor.paj.entity.UserEntity;
+import jakarta.ejb.EJB;
+import jakarta.enterprise.context.ApplicationScoped;
 
-import java.sql.Timestamp;
+@ApplicationScoped
+public class MessageBean {
 
-public class MessageMapper {
+    @EJB
+    UserDao userDao;
+    @EJB
+    MessageDao messageDao;
 
-    private UserDao userDao;
 
-    public MessageMapper (UserDao userDao){
-        this.userDao = userDao;
-    }
+ public void sendMessage(MessageDto messageDto){
+        MessageEntity messageEntity = convertMessageDtoToMessageEntity(messageDto);
+        messageDao.persist(messageEntity);
+     System.out.println("Message send/: " + messageDto.getMessage());
 
-    public static MessageDto convertMessageEntityToMessageDto(MessageEntity messageEntity){
+
+ }
+
+    public MessageDto convertMessageEntityToMessageDto(MessageEntity messageEntity){
         MessageDto messageDto = new MessageDto();
 
         messageDto.setMessage(messageEntity.getMessage());
         messageDto.setSender(messageEntity.getSender_id().getUsername());
         messageDto.setReceiver(messageEntity.getReceiver_id().getUsername());
-        messageDto.setCreatedAt(messageEntity.getCreatedAt());
+        messageDto.setTime(messageEntity.getTime());
         messageDto.setRead(messageEntity.isRead());
 
         return messageDto;
@@ -36,9 +46,10 @@ public class MessageMapper {
         messageEntity.setMessage(messageDto.getMessage());
         messageEntity.setSender_id(sender);
         messageEntity.setReceiver_id(receiver);
-        messageEntity.setCreatedAt(messageDto.getCreatedAt());
-        messageEntity.setRead(messageDto.isRead());
+//        messageEntity.setTime(messageDto.getTime());
+        messageEntity.setIsRead(messageDto.isRead());
 
         return messageEntity;
     }
+
 }

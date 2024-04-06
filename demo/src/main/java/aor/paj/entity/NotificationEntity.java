@@ -3,6 +3,7 @@ package aor.paj.entity;//package aor.paj.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
@@ -24,8 +25,8 @@ public class NotificationEntity implements Serializable {
     @Column(name="message")
     private String message;
 
-    @Column(name="timestamp", nullable = false, unique = false, updatable = true)
-    private LocalDateTime timestamp;
+    @Column(name="time", nullable = false, unique = false, updatable = true)
+    private Instant time;
 
     @Column(name="`read`", nullable = false, unique = false, updatable = true)
     private boolean read;
@@ -52,12 +53,12 @@ public class NotificationEntity implements Serializable {
         this.message = message;
     }
 
-    public LocalDateTime getTimestamp() {
-        return timestamp;
+    public Instant getTimestamp() {
+        return time;
     }
 
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
+    public void setTime(Instant time) {
+        this.time = time;
     }
 
     public boolean isRead() {
