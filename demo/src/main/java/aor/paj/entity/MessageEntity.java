@@ -56,15 +56,16 @@ public class MessageEntity implements Serializable {
     @PrePersist
     protected void onCreate(){
         time = Instant.now();
+        read = false;
     }
 
     public Instant getTime() {
         return time;
     }
 
-    public void setTime(Instant time) {
-        this.time = time;
-    }
+//    public void setTime(Instant time) {
+//        this.time = time;
+//    }
 
     public boolean isRead() {
         return read;

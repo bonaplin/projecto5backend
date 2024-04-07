@@ -13,8 +13,5 @@ public class NotificationDao extends AbstractDao<NotificationEntity>{
         super(NotificationEntity.class);
     }
 
-    public NotificationDao(Class<NotificationEntity> clazz) {
-        super(clazz);
-    }
 
 }

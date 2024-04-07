@@ -21,8 +21,6 @@ public class MessageBean {
         MessageEntity messageEntity = convertMessageDtoToMessageEntity(messageDto);
         messageDao.persist(messageEntity);
      System.out.println("Message send/: " + messageDto.getMessage());
-
-
  }
 
     public MessageDto convertMessageEntityToMessageDto(MessageEntity messageEntity){
@@ -46,7 +44,6 @@ public class MessageBean {
         messageEntity.setMessage(messageDto.getMessage());
         messageEntity.setSender_id(sender);
         messageEntity.setReceiver_id(receiver);
-//        messageEntity.setTime(messageDto.getTime());
         messageEntity.setIsRead(messageDto.isRead());
 
         return messageEntity;

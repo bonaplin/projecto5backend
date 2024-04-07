@@ -7,6 +7,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
+
 @Table (name = "notification")
 public class NotificationEntity implements Serializable {
     private static final long serialVersionUID = 1L;
@@ -17,8 +18,8 @@ public class NotificationEntity implements Serializable {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
-    private UserEntity user;
+    @JoinColumn(name="receiver_id", nullable = false)
+    private UserEntity receiver;
 
 //    @OneToOne
 //    @JoinColumn(name="message")
@@ -37,12 +38,12 @@ public class NotificationEntity implements Serializable {
         return id;
     }
 
-    public UserEntity getUser() {
-        return user;
+    public UserEntity getReceiver() {
+        return receiver;
     }
 
-    public void setUser(UserEntity user) {
-        this.user = user;
+    public void setReceiver(UserEntity receiver) {
+        this.receiver = receiver;
     }
 
     public String getMessage() {
@@ -53,19 +54,25 @@ public class NotificationEntity implements Serializable {
         this.message = message;
     }
 
-    public Instant getTimestamp() {
+    public Instant getTime() {
         return time;
     }
 
-    public void setTime(Instant time) {
-        this.time = time;
+    @PrePersist
+    protected void onCreate(){
+        time = Instant.now();
+        read = false;
     }
+//
+//    public void setTime(Instant time) {
+//        this.time = time;
+//    }
 
     public boolean isRead() {
         return read;
     }
 
-    public void setRead(boolean read) {
+    public void setIsRead(boolean read) {
         this.read = read;
     }
 
