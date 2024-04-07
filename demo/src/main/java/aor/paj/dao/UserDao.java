@@ -7,6 +7,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -89,7 +90,7 @@ public class UserDao extends AbstractDao<UserEntity> {
         List<UserEntity> unconfirmedUsers = findUnconfirmedUsers();
 
         for (UserEntity user : unconfirmedUsers) {
-            if(user.getToken_expiration().isBefore(LocalDateTime.now())) em.remove(user);
+            if(user.getToken_expiration().isBefore(Instant.now())) em.remove(user);
         }
     }
 }

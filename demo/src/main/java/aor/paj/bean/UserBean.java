@@ -1,6 +1,8 @@
 package aor.paj.bean;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -57,7 +59,7 @@ public class UserBean {
             }
             userEntity.setActive(true);
             userEntity.setConfirmed(true);
-            userEntity.setCreated(LocalDateTime.now());
+            userEntity.setCreated(Instant.now());
             System.out.println("user a ser adicionado: " + userEntity);
             userDao.persist(userEntity);
 
@@ -87,7 +89,7 @@ public class UserBean {
 
         userEntity.setActive(true);
         // generate token and expiration time
-        userEntity.setCreated(LocalDateTime.now());
+        userEntity.setCreated(Instant.now());
         generateNewToken(userEntity, 60);
         userDao.persist(userEntity);
 
@@ -338,7 +340,7 @@ public class UserBean {
     private boolean generateNewToken(UserEntity userEntity, int minutes) {
         String token = UUID.randomUUID().toString();
         userEntity.setToken_verification(token);
-        userEntity.setToken_expiration(LocalDateTime.now().plusMinutes(minutes));
+        userEntity.setToken_expiration(Instant.now().plus(Duration.ofMinutes(minutes)));
         return true;
     }
 
@@ -365,9 +367,9 @@ public class UserBean {
         if(!userEntity.getConfirmed()){
             userEntity.setConfirmed(true);
             System.out.println("user confirmado" + userEntity.getConfirmed());
-            userEntity.setCreated(LocalDateTime.now());
+            userEntity.setCreated(Instant.now());
         }
-        if(userEntity.getToken_expiration().isBefore(LocalDateTime.now())){
+        if(userEntity.getToken_expiration().isBefore(Instant.now())){
             userEntity.setToken_expiration(null);
             userEntity.setToken_verification(null);
             return ResetPasswordStatus.TOKEN_EXPIRED;

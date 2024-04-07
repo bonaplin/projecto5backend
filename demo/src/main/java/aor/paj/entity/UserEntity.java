@@ -3,8 +3,8 @@ package aor.paj.entity;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
+
 
 @Entity
 @Table(name="user")
@@ -50,13 +50,13 @@ public class UserEntity implements Serializable {
     private String token_verification;
 
     @Column(name="token_expiration", nullable = true, unique = false, updatable = true)
-    private LocalDateTime token_expiration;
+    private Instant token_expiration;
 
     @Column(name="active", nullable = false, unique = false, updatable = true)
     private Boolean active;
 
     @Column(name="created", nullable = false, unique = false, updatable = true)
-    private LocalDateTime created;
+    private Instant created;
 
     @Column(name="confirmed", nullable = false, unique = false, updatable = true)
     private Boolean confirmed = false;
@@ -146,11 +146,11 @@ public class UserEntity implements Serializable {
         this.token_verification = token_verification;
     }
 
-    public LocalDateTime getToken_expiration() {
+    public Instant getToken_expiration() {
         return token_expiration;
     }
 
-    public void setToken_expiration(LocalDateTime token_expiration) {
+    public void setToken_expiration(Instant token_expiration) {
         this.token_expiration = token_expiration;
     }
 
@@ -166,11 +166,11 @@ public class UserEntity implements Serializable {
         return active;
     }
 
-    public LocalDateTime getCreated() {
+    public Instant getCreated() {
         return created;
     }
     //@PrePersist // This method is called just before the entity is persisted to the database
-    public void setCreated(LocalDateTime created) {
+    public void setCreated(Instant created) {
         this.created = created;
     }
 

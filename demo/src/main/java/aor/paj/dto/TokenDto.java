@@ -1,16 +1,17 @@
 package aor.paj.dto;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 public class TokenDto {
     private String token;
-    private LocalDateTime expiration;
+    private Instant expiration;
     private UserDto user;
 
     public TokenDto() {
     }
 
-    public TokenDto(String token, LocalDateTime expiration, UserDto user) {
+    public TokenDto(String token, Instant expiration, UserDto user) {
         this.token = token;
         this.expiration = expiration;
         this.user = user;
@@ -24,11 +25,11 @@ public class TokenDto {
         this.token = token;
     }
 
-    public LocalDateTime getExpiration() {
+    public Instant getExpiration() {
         return expiration;
     }
 
-    public void setExpiration(LocalDateTime expiration) {
+    public void setExpiration(Instant expiration) {
         this.expiration = expiration;
     }
 

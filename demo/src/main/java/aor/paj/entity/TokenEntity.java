@@ -4,6 +4,7 @@ import jakarta.inject.Named;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -27,7 +28,7 @@ public class TokenEntity implements Serializable {
         private String token;
 
         @Column(name="expiration", nullable = false, unique = false, updatable = true)
-        private LocalDateTime expiration;
+        private Instant expiration;
 
         @ManyToOne
         @JoinColumn(name="user_id", nullable = false)
@@ -48,11 +49,11 @@ public class TokenEntity implements Serializable {
             this.token = token;
         }
 
-        public LocalDateTime getExpiration() {
+        public Instant getExpiration() {
             return expiration;
         }
 
-        public void setExpiration(LocalDateTime expiration) {
+        public void setExpiration(Instant expiration) {
             this.expiration = expiration;
         }
 

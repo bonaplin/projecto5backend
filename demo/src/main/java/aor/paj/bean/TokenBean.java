@@ -20,6 +20,8 @@ import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
 
 import javax.management.Notification;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 
@@ -121,7 +123,7 @@ public class TokenBean  {
         }
 
         if(tokenEntity.getUser().getActive()){
-            if (tokenEntity.getExpiration().isAfter(LocalDateTime.now())) {
+            if (tokenEntity.getExpiration().isAfter(Instant.now())) {
                 // Atualiza a expiração do token
 
                 setDefaultTokenExpiration(tokenEntity);
@@ -142,9 +144,9 @@ public class TokenBean  {
         UserEntity userEntity = tokenEntity.getUser();
 
         if(userEntity.getRole().equals("po")){
-            tokenEntity.setExpiration(LocalDateTime.now().plusMinutes(PO_TOKEN_EXPIRATION_MINUTES));
+            tokenEntity.setExpiration(Instant.now().plus(Duration.ofMinutes(PO_TOKEN_EXPIRATION_MINUTES)));
         }else{
-            tokenEntity.setExpiration(LocalDateTime.now().plusMinutes(DEFAULT_TOKEN_EXPIRATION_MINUTES));
+            tokenEntity.setExpiration(Instant.now().plus(Duration.ofMinutes(DEFAULT_TOKEN_EXPIRATION_MINUTES)));
         }
     }
 }

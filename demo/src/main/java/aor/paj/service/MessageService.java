@@ -12,7 +12,6 @@ public class MessageService {
     @Inject
     MessageBean messageBean;
 
-
     @POST
     @Path("/")
     public void sendMessage(MessageDto messageDto){
