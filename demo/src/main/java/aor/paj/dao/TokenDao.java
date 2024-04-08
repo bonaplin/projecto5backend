@@ -86,4 +86,15 @@ public class TokenDao extends AbstractDao<TokenEntity>{
             em.remove(token);
         }
     }
+
+    public List<String> findTokensByUserId(int id) {
+        List<TokenEntity> tokens = em.createQuery("SELECT t FROM TokenEntity t WHERE t.user.id = :id", TokenEntity.class)
+                .setParameter("id", id)
+                .getResultList();
+        List<String> tokenStrings = new ArrayList<>();
+        for(TokenEntity t : tokens){
+            tokenStrings.add(t.getToken());
+        }
+        return tokenStrings;
+    }
 }

@@ -5,8 +5,12 @@ import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageDto;
 import aor.paj.entity.MessageEntity;
 import aor.paj.entity.UserEntity;
+import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class MessageBean {
@@ -15,12 +19,16 @@ public class MessageBean {
     UserDao userDao;
     @EJB
     MessageDao messageDao;
+    @EJB
+    Notifier notifier;
 
 
+    //POSSO CRIAR UMA SWITCH COM O .getType() PARA VERIRICAR SE É UM CHAT, NOTIFICATION OU UPDATE!
  public void sendMessage(MessageDto messageDto){
         MessageEntity messageEntity = convertMessageDtoToMessageEntity(messageDto);
         messageDao.persist(messageEntity);
-     System.out.println("Message send/: " + messageDto.getMessage());
+        notifier.sendToUser(messageDto.getReceiver(), messageDto.getMessage());
+        System.out.println("Message send/: " + messageDto.getMessage());
  }
 
     public MessageDto convertMessageEntityToMessageDto(MessageEntity messageEntity){
@@ -47,6 +55,15 @@ public class MessageBean {
         messageEntity.setIsRead(messageDto.isRead());
 
         return messageEntity;
+    }
+
+    public List<MessageDto> getMessagesByReceiver(String receiver){
+        List<MessageEntity> messages = messageDao.findMessagesByReceiver(receiver);
+        if(messages == null)
+            return null;
+        return messages.stream()
+                .map(this::convertMessageEntityToMessageDto)
+                .collect(Collectors.toList());
     }
 
 }

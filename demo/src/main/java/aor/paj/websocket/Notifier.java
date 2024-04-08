@@ -1,5 +1,8 @@
 package aor.paj.websocket;
 
+import aor.paj.dao.TokenDao;
+import aor.paj.dao.UserDao;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -8,6 +11,8 @@ import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Singleton
 @ServerEndpoint("/websocket/notifier/{token}")
@@ -15,6 +20,11 @@ import java.util.HashMap;
 public class Notifier {
     @PersistenceContext
     private EntityManager em;
+    @EJB
+    private UserDao userDao;
+    @EJB
+    private TokenDao tokenDao;
+
     private HashMap<String, Session> sessions = new HashMap<>();
     public void send(String token, String msg){
         Session session = sessions.get(token);
@@ -25,6 +35,30 @@ public class Notifier {
             }
             catch (IOException e) {
                 System.out.println("Something went wrong!"); }
+        }
+    }
+
+    public void sendToUser(String receiver, String message){
+
+        // Obter o ID do usuário com o nome de usuário fornecido
+        int userId = userDao.findUserByUsername(receiver).getId();
+
+        // Obter a lista de tokens que pertencem a esse ID de usuário
+        List<String> userTokens = tokenDao.findTokensByUserId(userId);
+
+        // Para cada token, obter a sessão correspondente e enviar a mensagem
+        for (String token : userTokens) {
+            Session session = sessions.get(token);
+
+            if (session != null) {
+                try {
+                    System.out.println("sendToUser vvvvv");
+                    session.getBasicRemote().sendText(message);
+                    System.out.println("sendToUser ^^^^");
+                } catch (IOException e) {
+                    System.out.println("Something went wrong!");
+                }
+            }
         }
     }
     @OnOpen

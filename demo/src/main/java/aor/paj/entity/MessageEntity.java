@@ -8,7 +8,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
-
+@NamedQuery(name = "Message.findMessagesByReceiver", query = "SELECT m FROM MessageEntity m WHERE m.receiver_id = :receiver")
 @Table (name = "message")
 public class MessageEntity implements Serializable {
     private static final long serialVersionUID = 1L;
