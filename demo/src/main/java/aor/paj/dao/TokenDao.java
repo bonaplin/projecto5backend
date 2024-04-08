@@ -7,6 +7,7 @@ import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceException;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,7 @@ public class TokenDao extends AbstractDao<TokenEntity>{
     }
 
     public List<UserEntity> findLoggedUsers(){
-        List<TokenEntity> validTokens = findValidTokens(LocalDateTime.now());
+        List<TokenEntity> validTokens = findValidTokens(Instant.now());
         List<UserEntity> loggedUsers = new ArrayList<>();
 
         for(TokenEntity t : validTokens){
@@ -58,7 +59,7 @@ public class TokenDao extends AbstractDao<TokenEntity>{
         return loggedUsers;
     }
 
-    public List<TokenEntity> findValidTokens(LocalDateTime now) {
+    public List<TokenEntity> findValidTokens(Instant now) {
         try {
             List<TokenEntity> validTokens = em.createQuery("SELECT t FROM TokenEntity t WHERE t.expiration > :now", TokenEntity.class)
                     .setParameter("now", now)
@@ -70,7 +71,7 @@ public class TokenDao extends AbstractDao<TokenEntity>{
 
     }
 
-    public List<TokenEntity> findExpiredTokens(LocalDateTime now) {
+    public List<TokenEntity> findExpiredTokens(Instant now) {
         List<TokenEntity> expiredTokens = em.createQuery("SELECT t FROM TokenEntity t WHERE t.expiration < :now", TokenEntity.class)
                 .setParameter("now", now)
                 .getResultList();
@@ -80,7 +81,7 @@ public class TokenDao extends AbstractDao<TokenEntity>{
     // Remove expired tokens every 5 minutes */5 <- every 5 minutes, * <- every time, hour, minute or second.
     @Schedule(hour = "*", minute = "*/5", persistent = false)
     public void removeExpiredTokens() {
-        List<TokenEntity> expiredTokens = findExpiredTokens(LocalDateTime.now());
+        List<TokenEntity> expiredTokens = findExpiredTokens(Instant.now());
         for (TokenEntity token : expiredTokens) {
             em.remove(token);
         }

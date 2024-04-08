@@ -27,11 +27,14 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import org.apache.logging.log4j.LogManager;
 import org.mindrot.jbcrypt.BCrypt;
 
 @ApplicationScoped
 public class UserBean {
 //    private ArrayList<UserDto> userDtos;
+
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(UserBean.class);
 
     @EJB
     UserDao userDao;
@@ -60,9 +63,9 @@ public class UserBean {
             userEntity.setActive(true);
             userEntity.setConfirmed(true);
             userEntity.setCreated(Instant.now());
-            System.out.println("user a ser adicionado: " + userEntity);
+            //System.out.println("user a ser adicionado: " + userEntity);
             userDao.persist(userEntity);
-
+            logger.info("user a ser adicionado: " + userEntity.getUsername());
             return true;
     }
     public boolean addUserPO(UserDto user, String role) {
@@ -92,9 +95,10 @@ public class UserBean {
         userEntity.setCreated(Instant.now());
         generateNewToken(userEntity, 60);
         userDao.persist(userEntity);
-
+        logger.info("user a ser adicionado: " + userEntity.getUsername());
         String verificationLink = "http://localhost:3000/confirm-account/" + userEntity.getToken_verification();
         EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
+        logger.info("Email de verificação enviado para: " + userEntity.getEmail());
 
         return true;
     }

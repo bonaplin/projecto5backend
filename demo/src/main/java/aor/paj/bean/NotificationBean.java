@@ -65,7 +65,7 @@ public class NotificationBean {
 //        UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(userDto);
         Set<UserEntity> uniqueUsers = new HashSet<>();
 
-        List<TokenEntity> loggedUsers = tokenDao.findValidTokens(LocalDateTime.now());
+        List<TokenEntity> loggedUsers = tokenDao.findValidTokens(Instant.now());
         System.out.println("loggedUsers size: " + loggedUsers.size());
         for(TokenEntity t : loggedUsers){
             uniqueUsers.add(t.getUser());
