@@ -24,8 +24,8 @@ public class MessageBean {
 
 
     //POSSO CRIAR UMA SWITCH COM O .getType() PARA VERIRICAR SE É UM CHAT, NOTIFICATION OU UPDATE!
- public void sendMessage(MessageDto messageDto){
-        MessageEntity messageEntity = convertMessageDtoToMessageEntity(messageDto);
+ public void sendMessage(MessageDto messageDto, String sender) {
+        MessageEntity messageEntity = convertMessageDtoToMessageEntity(messageDto,sender);
         messageDao.persist(messageEntity);
         notifier.sendToUser(messageDto.getReceiver(), messageDto.getMessage());
         System.out.println("Message send/: " + messageDto.getMessage());
@@ -43,15 +43,15 @@ public class MessageBean {
         return messageDto;
     }
 
-    public MessageEntity convertMessageDtoToMessageEntity(MessageDto messageDto){
-        UserEntity sender = userDao.findUserByUsername(messageDto.getSender());
-        UserEntity receiver = userDao.findUserByUsername(messageDto.getReceiver());
+    public MessageEntity convertMessageDtoToMessageEntity(MessageDto messageDto, String sender){
+        UserEntity senderEntity = userDao.findUserByUsername(sender);
+        UserEntity receiverEntity = userDao.findUserByUsername(messageDto.getReceiver());
 
         MessageEntity messageEntity = new MessageEntity();
 
         messageEntity.setMessage(messageDto.getMessage());
-        messageEntity.setSender_id(sender);
-        messageEntity.setReceiver_id(receiver);
+        messageEntity.setSender_id(senderEntity);
+        messageEntity.setReceiver_id(receiverEntity);
         messageEntity.setIsRead(messageDto.isRead());
 
         return messageEntity;

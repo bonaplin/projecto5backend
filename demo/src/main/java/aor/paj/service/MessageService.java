@@ -27,10 +27,11 @@ public class MessageService {
     @Path("/")
     public Response sendMessage(MessageDto messageDto, @HeaderParam("token") String token){
         if(token == null) return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tem de fazer login 1º."))).build();
+
         UserDto userDto = tokenBean.getUserByToken(token);
         if(userDto == null) return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User não encontrado."))).build();
 
-        messageBean.sendMessage(messageDto);
+        messageBean.sendMessage(messageDto, userDto.getUsername());
         return Response.ok().entity(JsonUtils.convertObjectToJson(new ResponseMessage("Mensagem enviada."))).build();
     }
 

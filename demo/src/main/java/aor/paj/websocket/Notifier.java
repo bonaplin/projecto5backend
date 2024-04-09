@@ -52,9 +52,7 @@ public class Notifier {
 
             if (session != null) {
                 try {
-                    System.out.println("sendToUser vvvvv");
                     session.getBasicRemote().sendText(message);
-                    System.out.println("sendToUser ^^^^");
                 } catch (IOException e) {
                     System.out.println("Something went wrong!");
                 }
