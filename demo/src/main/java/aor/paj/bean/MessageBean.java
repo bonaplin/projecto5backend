@@ -5,7 +5,7 @@ import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageDto;
 import aor.paj.entity.MessageEntity;
 import aor.paj.entity.UserEntity;
-import aor.paj.websocket.Notifier;
+import aor.paj.websocket.Message;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -20,7 +20,7 @@ public class MessageBean {
     @EJB
     MessageDao messageDao;
     @EJB
-    Notifier notifier;
+    Message notifier;
 
 
     //POSSO CRIAR UMA SWITCH COM O .getType() PARA VERIRICAR SE É UM CHAT, NOTIFICATION OU UPDATE!

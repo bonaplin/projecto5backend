@@ -2,7 +2,7 @@ package aor.paj.service;
 
 import aor.paj.controller.EmailRequest;
 import aor.paj.controller.EmailSender;
-import aor.paj.dto.EmailDto;
+import aor.paj.controller.EmailDto;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;

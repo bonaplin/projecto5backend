@@ -4,18 +4,12 @@ import java.util.List;
 
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
-import aor.paj.controller.EmailRequest;
-import aor.paj.controller.EmailSender;
 import aor.paj.dto.*;
-import aor.paj.entity.UserEntity;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
 import aor.paj.utils.ResetPasswordStatus;
 import aor.paj.utils.TokenStatus;
 import aor.paj.validator.UserValidator;
-import aor.paj.websocket.Notifier;
-import com.sun.tools.jconsole.JConsoleContext;
-import com.sun.tools.jconsole.JConsolePlugin;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
@@ -77,7 +71,12 @@ public class UserService {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is not active"))).build();
         }
 
-        return Response.status(200).entity(JsonUtils.convertObjectToJson(new TokenAndRoleDto(token, userBean.getUserByUsername(username).getRole(), tokenBean.getUserByToken(token).getUsername(),userBean.userConfirmed(token)))).build();
+        return Response.status(200).entity(JsonUtils.convertObjectToJson(
+                new TokenAndRoleDto(
+                token,
+                userBean.getUserByUsername(username).getRole(),
+                tokenBean.getUserByToken(token).getUsername(),userBean.userConfirmed(token))
+        )).build();
     }
 
 
@@ -370,8 +369,8 @@ public class UserService {
     @POST
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response test(UserDto u) {
-        userBean.addUser(u);
+    public Response addUserFromPopulator(UserDto u) {
+        userBean.addUserFromPopulator(u);
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
     }
 }

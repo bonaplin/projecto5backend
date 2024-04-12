@@ -1,4 +1,4 @@
-package aor.paj.dto;
+package aor.paj.controller;
 
 public class EmailDto {
     private String to;

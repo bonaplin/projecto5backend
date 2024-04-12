@@ -1,24 +1,14 @@
 package aor.paj.bean;
 
 import aor.paj.dao.NotificationDao;
-import aor.paj.dao.TaskDao;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
-import aor.paj.dto.MessageDto;
 import aor.paj.dto.NotificationDto;
-import aor.paj.entity.MessageEntity;
 import aor.paj.entity.NotificationEntity;
-import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
-import aor.paj.websocket.Notifier;
+import aor.paj.websocket.Message;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
-
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 @ApplicationScoped
 public class NotificationBean {
@@ -33,7 +23,7 @@ public class NotificationBean {
     UserDao userDao;
 
     @EJB
-    Notifier notifier;
+    Message notifier;
 
 
     public NotificationEntity convertNotificationDtoToNotificationEntity(NotificationDto notificationDto){

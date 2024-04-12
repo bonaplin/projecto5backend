@@ -2,30 +2,30 @@ package aor.paj.websocket;
 
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
+import aor.paj.dto.MessageSocketDto;
+import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Singleton
-@ServerEndpoint("/websocket/notifier/{token}")
+@ServerEndpoint("/websocket/message/{token}")
 
-public class Notifier {
-    @PersistenceContext
-    private EntityManager em;
+public class Message {
     @EJB
     private UserDao userDao;
     @EJB
     private TokenDao tokenDao;
 
     private HashMap<String, Session> sessions = new HashMap<>();
+    private Gson gson = new Gson();
+
+
     public void send(String token, String msg){
         Session session = sessions.get(token);
         if (session != null){
@@ -74,9 +74,15 @@ public class Notifier {
     }
     @OnMessage
     public void toDoOnMessage(Session session, String msg){
-        System.out.println("A new message is received: "+ msg);
         try {
-            session.getBasicRemote().sendText("ack");
+            MessageSocketDto message = jsonToMessageSocketDto(msg);
+
+            String userToken = "token user:" + message.getSenderToken();
+            String receiverToken = "token user:" + message.getReceiverUsername();
+            String messageToSend = gson.toJson(message);
+
+            System.out.println(message);
+            session.getBasicRemote().sendText(userToken+" "+messageToSend+" "+receiverToken+" "+messageToSend);
         }
         catch (IOException e) {
             System.out.println("Something went wrong!");
@@ -87,5 +93,16 @@ public class Notifier {
         return sessions;
     }
 
-
+    public MessageSocketDto jsonToMessageSocketDto(String json){
+        MessageSocketDto msg = null;
+        try{
+           msg = gson.fromJson(json, MessageSocketDto.class);
+        }
+        catch (Exception e){
+            e.printStackTrace();
+            System.out.println("Error in converting json to MessageSocketDto");
+            //tratar o erro...
+        }
+        return msg;
+    }
 }

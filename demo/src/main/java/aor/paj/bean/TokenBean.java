@@ -1,34 +1,22 @@
 package aor.paj.bean;
 
-import aor.paj.dao.NotificationDao;
 import aor.paj.dao.TaskDao;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.UserDto;
-import aor.paj.entity.NotificationEntity;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.TokenStatus;
-import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
-import jakarta.ejb.Schedule;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
 
-import javax.management.Notification;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 
-import java.time.LocalDateTime;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @ApplicationScoped

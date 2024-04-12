@@ -1,9 +1,7 @@
 package aor.paj.bean;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -19,14 +17,9 @@ import aor.paj.entity.TaskEntity;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
-import aor.paj.utils.JsonUtils;
 import aor.paj.utils.ResetPasswordStatus;
-import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.inject.Inject;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.apache.logging.log4j.LogManager;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -49,7 +42,7 @@ public class UserBean {
     TokenDao tokenDao;
 
     // FOR POPULATE USING
-    public boolean addUser(UserDto user) {
+    public boolean addUserFromPopulator(UserDto user) {
 
             UserEntity userEntity = UserMapper.convertUserDtoToUserEntity(user);
             //Encrypt the password
@@ -91,14 +84,17 @@ public class UserBean {
         }
 
         userEntity.setActive(true);
-        // generate token and expiration time
+
         userEntity.setCreated(Instant.now());
+
         generateNewToken(userEntity, 60);
         userDao.persist(userEntity);
-        logger.info("user a ser adicionado: " + userEntity.getUsername());
+
+
         String verificationLink = "http://localhost:3000/confirm-account/" + userEntity.getToken_verification();
         EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
-        logger.info("Email de verificação enviado para: " + userEntity.getEmail());
+
+        logger.info("User adicionado: " + userEntity.getUsername()+" & email de verificação enviado para: " + userEntity.getEmail());
 
         return true;
     }
@@ -373,6 +369,7 @@ public class UserBean {
             System.out.println("user confirmado" + userEntity.getConfirmed());
             userEntity.setCreated(Instant.now());
         }
+
         if(userEntity.getToken_expiration().isBefore(Instant.now())){
             userEntity.setToken_expiration(null);
             userEntity.setToken_verification(null);
