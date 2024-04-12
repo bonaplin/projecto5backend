@@ -3,6 +3,7 @@ package aor.paj.websocket;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageSocketDto;
+import aor.paj.entity.UserEntity;
 import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
@@ -39,6 +40,10 @@ public class Message {
     }
 
     public void sendToUser(String receiver, String message){
+
+        UserEntity user = userDao.findUserByUsername(receiver);
+
+        if(user == null) return;
 
         // Obter o ID do usuário com o nome de usuário fornecido
         int userId = userDao.findUserByUsername(receiver).getId();
@@ -77,14 +82,17 @@ public class Message {
         try {
             MessageSocketDto message = jsonToMessageSocketDto(msg);
 
-            String userToken = "token user:" + message.getSenderToken();
-            String receiverToken = "token user:" + message.getReceiverUsername();
+//            String userToken = "token user:" + message.getSenderToken();
+            String receiver = message.getReceiverUsername();
             String messageToSend = gson.toJson(message);
 
             System.out.println(message);
-            session.getBasicRemote().sendText(userToken+" "+messageToSend+" "+receiverToken+" "+messageToSend);
+//            session.getBasicRemote().sendText(userToken+" "+messageToSend+" "+receiverToken+" "+messageToSend);
+            sendToUser(receiver, messageToSend);
+            //send(message.getSenderToken(), messageToSend);
         }
-        catch (IOException e) {
+        catch (Exception e) {
+            e.printStackTrace();
             System.out.println("Something went wrong!");
         }
     }
@@ -99,8 +107,8 @@ public class Message {
            msg = gson.fromJson(json, MessageSocketDto.class);
         }
         catch (Exception e){
-            e.printStackTrace();
-            System.out.println("Error in converting json to MessageSocketDto");
+            e.getMessage();
+            System.out.println("--- "+e.getMessage());
             //tratar o erro...
         }
         return msg;
