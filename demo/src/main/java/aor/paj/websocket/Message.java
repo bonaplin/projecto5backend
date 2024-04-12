@@ -27,43 +27,43 @@ public class Message {
     private Gson gson = new Gson();
 
 
-    public void send(String token, String msg){
-        Session session = sessions.get(token);
-        if (session != null){
-            System.out.println("sending.......... "+msg);
-            try {
-                session.getBasicRemote().sendText(msg);
-            }
-            catch (IOException e) {
-                System.out.println("Something went wrong!"); }
-        }
-    }
+//    public void send(String token, String msg){
+//        Session session = sessions.get(token);
+//        if (session != null){
+//            System.out.println("sending.......... "+msg);
+//            try {
+//                session.getBasicRemote().sendText(msg);
+//            }
+//            catch (IOException e) {
+//                System.out.println("Something went wrong!"); }
+//        }
+//    }
 
-    public void sendToUser(String receiver, String message){
-
-        UserEntity user = userDao.findUserByUsername(receiver);
-
-        if(user == null) return;
-
-        // Obter o ID do usuário com o nome de usuário fornecido
-        int userId = userDao.findUserByUsername(receiver).getId();
-
-        // Obter a lista de tokens que pertencem a esse ID de usuário
-        List<String> userTokens = tokenDao.findTokensByUserId(userId);
-
-        // Para cada token, obter a sessão correspondente e enviar a mensagem
-        for (String token : userTokens) {
-            Session session = sessions.get(token);
-
-            if (session != null) {
-                try {
-                    session.getBasicRemote().sendText(message);
-                } catch (IOException e) {
-                    System.out.println("Something went wrong!");
-                }
-            }
-        }
-    }
+//    public void sendToUser(String receiver, String message){
+//
+//        UserEntity user = userDao.findUserByUsername(receiver);
+//
+//        if(user == null) return;
+//
+//        // Obter o ID do usuário com o nome de usuário fornecido
+//        int userId = userDao.findUserByUsername(receiver).getId();
+//
+//        // Obter a lista de tokens que pertencem a esse ID de usuário
+//        List<String> userTokens = tokenDao.findTokensByUserId(userId);
+//
+//        // Para cada token, obter a sessão correspondente e enviar a mensagem
+//        for (String token : userTokens) {
+//            Session session = sessions.get(token);
+//
+//            if (session != null) {
+//                try {
+//                    session.getBasicRemote().sendText(message);
+//                } catch (IOException e) {
+//                    System.out.println("Something went wrong!");
+//                }
+//            }
+//        }
+//    }
     @OnOpen
     public void toDoOnOpen(Session session, @PathParam("token") String token){
         System.out.println("A new WebSocket session is opened for client with token: "+ token);
@@ -81,17 +81,13 @@ public class Message {
     public void toDoOnMessage(Session session, String msg){
         try {
             MessageSocketDto message = jsonToMessageSocketDto(msg);
-
-//            String userToken = "token user:" + message.getSenderToken();
+            String userToken = message.getSenderToken();
             String receiver = message.getReceiverUsername();
             String messageToSend = gson.toJson(message);
-
             System.out.println(message);
-//            session.getBasicRemote().sendText(userToken+" "+messageToSend+" "+receiverToken+" "+messageToSend);
+            session.getBasicRemote().sendObject(messageToSend);
             sendToUser(receiver, messageToSend);
-            //send(message.getSenderToken(), messageToSend);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Something went wrong!");
         }
@@ -112,5 +108,30 @@ public class Message {
             //tratar o erro...
         }
         return msg;
+    }
+
+    public void sendToUser(String receiver, String message){
+        UserEntity user = userDao.findUserByUsername(receiver);
+        if(user == null) return;
+        List<String> userTokens = getUserTokens(user);
+        sendMessageToUserTokens(userTokens, message);
+    }
+
+    private List<String> getUserTokens(UserEntity user) {
+        int userId = user.getId();
+        return tokenDao.findTokensByUserId(userId);
+    }
+
+    private void sendMessageToUserTokens(List<String> userTokens, String message) {
+        for (String token : userTokens) {
+            Session session = sessions.get(token);
+            if (session != null) {
+                try {
+                    session.getBasicRemote().sendText(message);
+                } catch (IOException e) {
+                    System.out.println("Something went wrong!");
+                }
+            }
+        }
     }
 }

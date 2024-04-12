@@ -28,7 +28,7 @@ public class MessageService {
         UserDto userDto = tokenBean.getUserByToken(token);
         if(userDto == null) return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User não encontrado."))).build();
 
-        messageBean.sendMessage(messageDto, userDto.getUsername());
+//        messageBean.sendMessage(messageDto, userDto.getUsername());
         return Response.ok().entity(JsonUtils.convertObjectToJson(new ResponseMessage("Mensagem enviada."))).build();
     }
 

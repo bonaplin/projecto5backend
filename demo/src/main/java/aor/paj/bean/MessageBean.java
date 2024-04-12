@@ -19,17 +19,15 @@ public class MessageBean {
     UserDao userDao;
     @EJB
     MessageDao messageDao;
-    @EJB
-    Message notifier;
 
 
     //POSSO CRIAR UMA SWITCH COM O .getType() PARA VERIRICAR SE É UM CHAT, NOTIFICATION OU UPDATE!
- public void sendMessage(MessageDto messageDto, String sender) {
-        MessageEntity messageEntity = convertMessageDtoToMessageEntity(messageDto,sender);
-        messageDao.persist(messageEntity);
-        notifier.sendToUser(messageDto.getReceiver(), messageDto.getMessage());
-        System.out.println("Message send/: " + messageDto.getMessage());
- }
+// public void sendMessage(MessageDto messageDto, String sender) {
+//        MessageEntity messageEntity = convertMessageDtoToMessageEntity(messageDto,sender);
+//        messageDao.persist(messageEntity);
+//        notifier.sendToUser(messageDto.getReceiver(), messageDto.getMessage());
+//        System.out.println("Message send/: " + messageDto.getMessage());
+// }
 
     public MessageDto convertMessageEntityToMessageDto(MessageEntity messageEntity){
         MessageDto messageDto = new MessageDto();
