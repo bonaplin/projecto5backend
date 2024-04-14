@@ -63,9 +63,9 @@ public class MessageEntity implements Serializable {
         return time;
     }
 
-//    public void setTime(Instant time) {
-//        this.time = time;
-//    }
+    public void setTime(Instant time) {
+        this.time = time;
+    }
 
     public boolean isRead() {
         return read;

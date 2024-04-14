@@ -1,4 +1,4 @@
-package aor.paj.dto;
+package aor.paj.websocket.dto;
 
 public class MessageSocketDto {
     private String message;

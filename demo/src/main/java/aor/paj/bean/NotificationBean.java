@@ -6,7 +6,7 @@ import aor.paj.dao.UserDao;
 import aor.paj.dto.NotificationDto;
 import aor.paj.entity.NotificationEntity;
 import aor.paj.entity.UserEntity;
-import aor.paj.websocket.Message;
+import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
 
@@ -23,7 +23,7 @@ public class NotificationBean {
     UserDao userDao;
 
     @EJB
-    Message notifier;
+    Notifier notifier;
 
 
     public NotificationEntity convertNotificationDtoToNotificationEntity(NotificationDto notificationDto){

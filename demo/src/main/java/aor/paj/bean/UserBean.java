@@ -19,11 +19,12 @@ import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.ResetPasswordStatus;
 import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ApplicationScoped;
 import org.apache.logging.log4j.LogManager;
 import org.mindrot.jbcrypt.BCrypt;
 
-@ApplicationScoped
+@Stateless
 public class UserBean {
 //    private ArrayList<UserDto> userDtos;
 

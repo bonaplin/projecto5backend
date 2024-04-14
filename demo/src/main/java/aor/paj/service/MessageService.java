@@ -32,9 +32,9 @@ public class MessageService {
         return Response.ok().entity(JsonUtils.convertObjectToJson(new ResponseMessage("Mensagem enviada."))).build();
     }
 
-    @GET
-    @Path("/{receiver}")
-    public List<MessageDto> getMessages(@PathParam("receiver") String receiver){
-        return messageBean.getMessagesByReceiver(receiver);
-    }
+//    @GET
+//    @Path("/{receiver}")
+//    public List<MessageDto> getMessages(@PathParam("receiver") String receiver){
+//        return messageBean.getMessagesByReceiver(receiver);
+//    }
 }
