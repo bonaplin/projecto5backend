@@ -37,4 +37,13 @@ public class MessageService {
 //    public List<MessageDto> getMessages(@PathParam("receiver") String receiver){
 //        return messageBean.getMessagesByReceiver(receiver);
 //    }
+    @GET
+    @Path("/{sender}/{receiver}")
+    public Response getMessages(@PathParam("sender") String sender, @PathParam("receiver") String receiver){
+        List<MessageDto> messages = messageBean.getMessagesBetweenUsers(sender, receiver);
+        if(messages == null) return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Mensagens não encontradas."))).build();
+        return Response.ok().entity(JsonUtils.convertObjectToJson(messages)).build();
+    }
+
+
 }

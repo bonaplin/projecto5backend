@@ -15,6 +15,8 @@ import com.google.gson.Gson;
 import jakarta.ejb.EJB;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Stateless
@@ -100,6 +102,29 @@ public class MessageBean {
                 }
             }
         }
+    }
+
+    public List<MessageDto> getMessagesBetweenUsers(String usernameX, String usernameY) {
+        // Obter mensagens de X para Y
+        List<MessageEntity> messagesFromXtoY = messageDao.findMessagesBySenderAndReceiver(usernameX, usernameY);
+        // Obter mensagens de Y para X
+        List<MessageEntity> messagesFromYtoX = messageDao.findMessagesBySenderAndReceiver(usernameY, usernameX);
+
+        // Combina as duas listas em uma única lista
+        List<MessageEntity> allMessages = new ArrayList<>();
+        allMessages.addAll(messagesFromXtoY);
+        allMessages.addAll(messagesFromYtoX);
+
+        // Ordena todas as mensagens por tempo
+        allMessages.sort(Comparator.comparing(MessageEntity::getTime));
+
+        // Converte as entidades de mensagem em DTOs
+        List<MessageDto> allMessageDtos = new ArrayList<>();
+        for (MessageEntity message : allMessages) {
+            allMessageDtos.add(convertMessageEntityToMessageDto(message));
+        }
+
+        return allMessageDtos;
     }
 
 

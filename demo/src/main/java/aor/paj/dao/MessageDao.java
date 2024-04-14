@@ -1,7 +1,9 @@
 package aor.paj.dao;
 
 import aor.paj.entity.MessageEntity;
+import aor.paj.entity.UserEntity;
 import jakarta.ejb.Stateless;
+import jakarta.persistence.TypedQuery;
 
 import java.util.List;
 
@@ -23,4 +25,10 @@ public class MessageDao extends AbstractDao<MessageEntity> {
 
     }
 
+    public List<MessageEntity> findMessagesBySenderAndReceiver(String senderUsername, String receiverUsername) {
+        TypedQuery<MessageEntity> query = em.createNamedQuery("Message.findMessagesBySenderAndReceiver", MessageEntity.class);
+        query.setParameter("sender", senderUsername);
+        query.setParameter("receiver", receiverUsername);
+        return query.getResultList();
+    }
 }
