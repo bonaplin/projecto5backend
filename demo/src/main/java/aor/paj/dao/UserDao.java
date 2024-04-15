@@ -90,7 +90,9 @@ public class UserDao extends AbstractDao<UserEntity> {
         List<UserEntity> unconfirmedUsers = findUnconfirmedUsers();
 
         for (UserEntity user : unconfirmedUsers) {
-            if(user.getToken_expiration().isBefore(Instant.now())) em.remove(user);
+            if(user.getToken_expiration().isBefore(Instant.now())) {
+                em.remove(user);
+            }
         }
     }
 }

@@ -29,8 +29,9 @@ public class TokenBean  {
     @EJB
     private TaskDao taskDao;
 
-    private static final int DEFAULT_TOKEN_EXPIRATION_MINUTES = 1;
+    private static final int DEFAULT_TOKEN_EXPIRATION_MINUTES = 30;
     private static final int PO_TOKEN_EXPIRATION_MINUTES = 60;
+    private static final int SHORT_TOKEN_EXPIRATION_SECONDS = 10;
     @Transactional
     public TokenEntity createToken(String token, int userId) {
 
@@ -135,6 +136,7 @@ public class TokenBean  {
             tokenEntity.setExpiration(Instant.now().plus(Duration.ofMinutes(PO_TOKEN_EXPIRATION_MINUTES)));
         }else{
             tokenEntity.setExpiration(Instant.now().plus(Duration.ofMinutes(DEFAULT_TOKEN_EXPIRATION_MINUTES)));
+//            tokenEntity.setExpiration(Instant.now().plus(Duration.ofSeconds(SHORT_TOKEN_EXPIRATION_SECONDS)));
         }
     }
 }

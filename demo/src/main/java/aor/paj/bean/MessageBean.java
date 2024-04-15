@@ -4,10 +4,12 @@ import aor.paj.dao.MessageDao;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageDto;
-import aor.paj.websocket.dto.MessageSocketDto;
+//import aor.paj.websocket.dto.MessageSocketDto;
 import aor.paj.entity.MessageEntity;
 import aor.paj.entity.UserEntity;
+import aor.paj.utils.InfoSocketType;
 import aor.paj.websocket.Notifier;
+import aor.paj.websocket.dto.InfoSocket;
 import jakarta.ejb.Stateless;
 import jakarta.websocket.EncodeException;
 import jakarta.websocket.Session;
@@ -60,22 +62,22 @@ public class MessageBean {
         return messageEntity;
     }
 
-    public MessageSocketDto jsonToMessageSocketDto(String json){
-        MessageSocketDto msg = null;
-        try{
-            msg = gson.fromJson(json, MessageSocketDto.class);
-        }
-        catch (Exception e){
-            e.getMessage();
-            System.out.println("--- "+e.getMessage());
-            //tratar o erro...
-        }
-        return msg;
-    }
-
-    public String getMessageToSend(MessageSocketDto msg) {
-        return gson.toJson(msg);
-    }
+//    public MessageSocketDto jsonToMessageSocketDto(String json){
+//        MessageSocketDto msg = null;
+//        try{
+//            msg = gson.fromJson(json, MessageSocketDto.class);
+//        }
+//        catch (Exception e){
+//            e.getMessage();
+//            System.out.println("--- "+e.getMessage());
+//            //tratar o erro...
+//        }
+//        return msg;
+//    }
+//
+//    public String getMessageToSend(MessageSocketDto msg) {
+//        return gson.toJson(msg);
+//    }
 
     public void sendToUser(String receiver, String messageJson){
         UserEntity user = userDao.findUserByUsername(receiver);
@@ -127,5 +129,20 @@ public class MessageBean {
         return allMessageDtos;
     }
 
+
+    /**
+     * Envia uma mensagem de informação para um usuário
+     * @param receiver
+     * @param message informação a enviar
+     */
+    public void sendInfo(String receiver, String message, InfoSocketType type){
+        InfoSocket infoSocket = new InfoSocket();
+        infoSocket.setType(type.getValue());
+        infoSocket.setMessage(message);
+        infoSocket.setReceiver(receiver);
+
+        String messageJson = gson.toJson(infoSocket);
+        sendToUser(receiver, messageJson);
+    }
 
 }

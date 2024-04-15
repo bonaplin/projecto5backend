@@ -1,7 +1,10 @@
 package aor.paj.dao;
 
+import aor.paj.bean.MessageBean;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
+import aor.paj.utils.InfoSocketType;
+import jakarta.ejb.EJB;
 import jakarta.ejb.Schedule;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
@@ -15,7 +18,8 @@ import java.util.List;
 @Stateless
 public class TokenDao extends AbstractDao<TokenEntity>{
     private static final long serialVersionUID = 1L;
-
+    @EJB
+    private MessageBean messageBean;
     public TokenDao() {
         super(TokenEntity.class);
     }
@@ -79,11 +83,21 @@ public class TokenDao extends AbstractDao<TokenEntity>{
     }
 
     // Remove expired tokens every 5 minutes */5 <- every 5 minutes, * <- every time, hour, minute or second.
-    @Schedule(hour = "*", minute = "*/5", persistent = false)
+//    @Schedule(hour = "*", minute = "*/5", persistent = false)
+    @Schedule(hour = "*", minute = "*", second = "*/5", persistent = false)
     public void removeExpiredTokens() {
+        System.out.println("Removing expired tokens");
         List<TokenEntity> expiredTokens = findExpiredTokens(Instant.now());
         for (TokenEntity token : expiredTokens) {
-            em.remove(token);
+            System.out.println("Removing token: " + token.getToken());
+            UserEntity user = token.getUser();
+            if(user != null){
+                String username = user.getUsername();
+                messageBean.sendInfo(username, "Your account has been disconnected due to inactivity",
+                        InfoSocketType.LOGOUT
+                );
+                em.remove(token);
+            }
         }
     }
 

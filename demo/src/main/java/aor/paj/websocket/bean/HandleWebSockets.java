@@ -8,7 +8,7 @@ import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageDto;
 import aor.paj.entity.MessageEntity;
 import aor.paj.gson.InstantAdapter;
-import aor.paj.websocket.dto.MessageSocketDto;
+//import aor.paj.websocket.dto.MessageSocketDto;
 import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
