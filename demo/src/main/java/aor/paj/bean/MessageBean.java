@@ -7,7 +7,7 @@ import aor.paj.dto.MessageDto;
 //import aor.paj.websocket.dto.MessageSocketDto;
 import aor.paj.entity.MessageEntity;
 import aor.paj.entity.UserEntity;
-import aor.paj.utils.InfoSocketType;
+import aor.paj.utils.MessageType;
 import aor.paj.websocket.Notifier;
 import aor.paj.websocket.dto.InfoSocket;
 import jakarta.ejb.Stateless;
@@ -135,7 +135,7 @@ public class MessageBean {
      * @param receiver
      * @param message informação a enviar
      */
-    public void sendInfo(String receiver, String message, InfoSocketType type){
+    public void sendInfo(String receiver, String message, MessageType type){
         InfoSocket infoSocket = new InfoSocket();
         infoSocket.setType(type.getValue());
         infoSocket.setMessage(message);

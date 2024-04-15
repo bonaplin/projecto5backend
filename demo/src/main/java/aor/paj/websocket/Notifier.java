@@ -19,8 +19,6 @@ public class Notifier {
     @EJB
     private HandleWebSockets handleWebSockets;
 
-    @EJB
-    private MessageBean messageBean;
 
     private HashMap<String, Session> sessions = new HashMap<>();
 
@@ -41,13 +39,6 @@ public class Notifier {
     public void toDoOnMessage(Session session, String json){
         try {
             handleWebSockets.handleWebSocketJSON(session, json);
-//            MessageSocketDto message = messageBean.jsonToMessageSocketDto(json);
-//            String userToken = message.getSenderToken();
-//            String receiver = message.getReceiverUsername();
-//            String messageToSend = messageBean.getMessageToSend(message);
-//            System.out.println(message);
-//            session.getBasicRemote().sendObject(messageToSend);
-//            messageBean.sendToUser(receiver, messageToSend);
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("Something went wrong!");

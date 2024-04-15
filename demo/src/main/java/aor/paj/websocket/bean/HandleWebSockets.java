@@ -4,18 +4,16 @@ import aor.paj.bean.MessageBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dao.MessageDao;
 import aor.paj.dao.TokenDao;
-import aor.paj.dao.UserDao;
 import aor.paj.dto.MessageDto;
 import aor.paj.entity.MessageEntity;
 import aor.paj.gson.InstantAdapter;
 //import aor.paj.websocket.dto.MessageSocketDto;
-import com.fasterxml.jackson.datatype.jsr310.ser.InstantSerializer;
+import aor.paj.utils.MessageType;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
-import jakarta.json.Json;
 import jakarta.websocket.Session;
 
 import java.time.Instant;
@@ -39,27 +37,33 @@ public class HandleWebSockets {
     public void handleWebSocketJSON(Session session, String json) {
         System.out.println("Handling WebSocket JSON: " + json);
         JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
-        int type = jsonObject.get("type").getAsInt();
+        int typeValue = jsonObject.get("type").getAsInt();
 
-        switch (type) {
-            case 10:
+        MessageType messageType = MessageType.fromValue(typeValue);
+
+        switch (messageType) {
+            case TYPE_10:
                 System.out.println("Type 10");
-                handletype10(session, jsonObject);
+                handleNewMessage(session, jsonObject);
                 break;
-            case 20:
+            case TYPE_20:
                 System.out.println("Type 20");
                 //converte para Dto de notificiação e faz algo
                 break;
-            case 30:
-                System.out.println("Type 30");
+            case LOGOUT:
+                System.out.println("Type 30 - Logout");
                 //converte para Dto de task e faz algo
+                break;
+            case TYPE_40:
+                System.out.println("Type 30");
+                //converte para Dto de logout e faz algo
                 break;
             default:
                 System.out.println("Unknown type");
         }
     }
 
-    private void handletype10(Session session, JsonObject jsonObject) {
+    private void handleNewMessage(Session session, JsonObject jsonObject) {
         try{
             String messageContent = jsonObject.get("message").getAsString();
             String receiver = jsonObject.get("receiver").getAsString();
