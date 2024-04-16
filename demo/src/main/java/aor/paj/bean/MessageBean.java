@@ -62,22 +62,6 @@ public class MessageBean {
         return messageEntity;
     }
 
-//    public MessageSocketDto jsonToMessageSocketDto(String json){
-//        MessageSocketDto msg = null;
-//        try{
-//            msg = gson.fromJson(json, MessageSocketDto.class);
-//        }
-//        catch (Exception e){
-//            e.getMessage();
-//            System.out.println("--- "+e.getMessage());
-//            //tratar o erro...
-//        }
-//        return msg;
-//    }
-//
-//    public String getMessageToSend(MessageSocketDto msg) {
-//        return gson.toJson(msg);
-//    }
 
     public void sendToUser(String receiver, String messageJson){
         UserEntity user = userDao.findUserByUsername(receiver);

@@ -37,42 +37,31 @@ public class TaskBean {
     TokenDao tokenDao;
 
 
-   //Function that receives a token and a taskdto and creates a task with the user token as owner and adds the task to the database mysql
-//    public boolean addTask(String token, TaskDto taskDto) {
-//        UserEntity userEntity = userDao.findUserByToken(token);
-//        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskDto.getCategory());
-//        TaskEntity taskEntity = TaskMapper.convertTaskDtoToTaskEntity(taskDto);
-//
-//        taskEntity.setOwner(userEntity);
-//        taskEntity.setActive(true);
-////        taskEntity.setId(generateTaskId());
-//        taskEntity.setStatus(State.TODO.getValue());
-//        taskEntity.setCategory(categoryEntity);
-//        if(taskEntity.getInitialDate() == null) {
-//            taskEntity.setInitialDate(LocalDate.now());
-//        }
-//        taskDao.persist(taskEntity);
-//        return true;
-//    }
-
+    /**
+     * Function that receives a token and a taskDto and adds a new task to the database mysql
+     * @param token
+     * @param taskDto
+     * @return
+     */
     public boolean addTask(String token, TaskDto taskDto){
         TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
-        if(tokenEntity != null){
-            UserEntity userEntity = tokenEntity.getUser();
-            CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskDto.getCategory());
-            TaskEntity taskEntity = TaskMapper.convertTaskDtoToTaskEntity(taskDto);
+        if(tokenEntity != null) return false;
 
-            taskEntity.setOwner(userEntity);
-            taskEntity.setActive(true);
-            taskEntity.setStatus(State.TODO.getValue());
-            taskEntity.setCategory(categoryEntity);
-            if(taskEntity.getInitialDate() == null) {
-                taskEntity.setInitialDate(LocalDate.now());
-            }
-            taskDao.persist(taskEntity);
-            return true;
+        UserEntity userEntity = tokenEntity.getUser();
+        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskDto.getCategory());
+        TaskEntity taskEntity = TaskMapper.convertTaskDtoToTaskEntity(taskDto);
+
+        taskEntity.setOwner(userEntity);
+        taskEntity.setActive(true);
+        taskEntity.setStatus(State.TODO.getValue());
+        taskEntity.setCategory(categoryEntity);
+
+        if(taskEntity.getInitialDate() == null) {
+            taskEntity.setInitialDate(LocalDate.now());
         }
-        return false;
+
+        taskDao.persist(taskEntity);
+        return true;
     }
 
 

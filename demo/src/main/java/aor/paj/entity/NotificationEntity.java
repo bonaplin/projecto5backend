@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Entity
+@NamedQuery(name ="Notification.findNotificationsByReceiver", query = "SELECT n FROM NotificationEntity n WHERE n.receiver = :receiver")
+@NamedQuery(name ="Notification.findNotificationsByReceiverUnread", query = "SELECT n FROM NotificationEntity n WHERE n.sender = :sender AND n.receiver = :receiver AND n.read = false")
 
 @Table (name = "notification")
 public class NotificationEntity implements Serializable {
@@ -21,6 +23,10 @@ public class NotificationEntity implements Serializable {
     @JoinColumn(name="receiver_id", nullable = false)
     private UserEntity receiver;
 
+    @ManyToOne
+    @JoinColumn(name="sender_id", nullable = false)
+    private UserEntity sender;
+
 //    @OneToOne
 //    @JoinColumn(name="message")
     @Column(name="message")
@@ -31,6 +37,7 @@ public class NotificationEntity implements Serializable {
 
     @Column(name="`read`", nullable = false, unique = false, updatable = true)
     private boolean read;
+
     public NotificationEntity() {
     }
 
@@ -56,6 +63,18 @@ public class NotificationEntity implements Serializable {
 
     public Instant getTime() {
         return time;
+    }
+
+    public UserEntity getSender() {
+        return sender;
+    }
+
+    public void setSender(UserEntity sender) {
+        this.sender = sender;
+    }
+
+    public void setRead(boolean read) {
+        this.read = read;
     }
 
     @PrePersist

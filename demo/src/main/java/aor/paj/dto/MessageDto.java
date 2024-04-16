@@ -14,6 +14,17 @@ public class MessageDto {
     private Instant time;
     private boolean read;
 
+    public MessageDto() {
+    }
+
+    public MessageDto(String message, String sender, String receiver, Instant time, boolean read) {
+        this.message = message;
+        this.sender = sender;
+        this.receiver = receiver;
+        this.time = time;
+        this.read = read;
+    }
+
     @XmlElement
     public String getMessage() {
         return message;
@@ -59,5 +70,14 @@ public class MessageDto {
         this.read = read;
     }
 
-
+    @Override
+    public String toString() {
+        return "MessageDto{" +
+                "message='" + message + '\'' +
+                ", sender='" + sender + '\'' +
+                ", receiver='" + receiver + '\'' +
+                ", time=" + time +
+                ", read=" + read +
+                '}';
+    }
 }

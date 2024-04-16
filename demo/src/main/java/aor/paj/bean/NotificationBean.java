@@ -8,9 +8,13 @@ import aor.paj.entity.NotificationEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ApplicationScoped;
 
-@ApplicationScoped
+import java.util.ArrayList;
+import java.util.List;
+
+@Stateless
 public class NotificationBean {
 
     @EJB
@@ -28,9 +32,10 @@ public class NotificationBean {
 
     public NotificationEntity convertNotificationDtoToNotificationEntity(NotificationDto notificationDto){
         UserEntity receiver = userDao.findUserByUsername(notificationDto.getReceiver());
+        UserEntity sender = userDao.findUserByUsername(notificationDto.getSender());
 
         NotificationEntity notificationEntity = new NotificationEntity();
-
+        notificationEntity.setSender(sender);
         notificationEntity.setMessage(notificationDto.getMessage());
         notificationEntity.setReceiver(receiver);
         notificationEntity.setIsRead(notificationDto.isRead());
@@ -43,6 +48,7 @@ public class NotificationBean {
 
         notificationDto.setMessage(notificationEntity.getMessage());
         notificationDto.setReceiver(notificationEntity.getReceiver().getUsername());
+        notificationDto.setSender(notificationEntity.getSender().getUsername());
         notificationDto.setTime(notificationEntity.getTime());
         notificationDto.setRead(notificationEntity.isRead());
 
@@ -90,6 +96,45 @@ public class NotificationBean {
         }
         NotificationEntity notificationEntity = convertNotificationDtoToNotificationEntity(notification);
         notificationDao.persist(notificationEntity);
+    }
+
+    public List<NotificationDto> getAllNotifications(){
+
+        List<NotificationEntity> notificationEntities = notificationDao.findNotificationsByReceiver("admin");
+        System.out.println("notificationEntities: " + notificationEntities);
+        if(notificationEntities == null || notificationEntities.isEmpty()){
+            System.out.println("notifications not found, is null or empty");
+            return new ArrayList<>();
+        }
+        List<NotificationDto> notificationDtos = new ArrayList<>();
+        for(NotificationEntity n : notificationEntities){
+            notificationDtos.add(convertNotificationEntityToNotificationDto(n));
+            System.out.println("notificationDtos: " + notificationDtos);
+        }
+        return notificationDtos;
+    }
+
+    public List<NotificationDto> getUnreadNotifications(String receiver){
+        List<NotificationEntity> notificationEntities = notificationDao.findNotificationsByReceiverUnread(receiver);
+        if(notificationEntities == null || notificationEntities.isEmpty()){
+            return new ArrayList<>();
+        }
+        List<NotificationDto> notificationDtos = new ArrayList<>();
+        for(NotificationEntity n : notificationEntities){
+            notificationDtos.add(convertNotificationEntityToNotificationDto(n));
+        }
+        return notificationDtos;
+    }
+
+    public boolean markAsRead(List<Integer> notificationIds){
+        for(Integer id : notificationIds){
+            NotificationEntity notificationEntity = notificationDao.find(id);
+            if(notificationEntity != null){
+                notificationEntity.setIsRead(true);
+                notificationDao.merge(notificationEntity);
+            }
+        }
+        return true;
     }
 
 

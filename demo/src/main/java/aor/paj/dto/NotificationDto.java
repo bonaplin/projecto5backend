@@ -6,52 +6,19 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 
 @XmlRootElement
-public class NotificationDto {
-    private String receiver;
-    private String message;
-    private Instant time;
-    private boolean read;
+public class NotificationDto extends MessageDto{
 
     public NotificationDto() {
     }
 
-    public NotificationDto(String receiver, String message, Instant time, boolean read) {
-        this.receiver = receiver;
-        this.message = message;
-        this.time = time;
-        this.read = read;
+    public NotificationDto(String message, String sender, String receiver, Instant time, boolean read) {
+        super(message, sender, receiver, time, read);
     }
 
-    @XmlElement
-    public String getReceiver() {
-        return receiver;
-    }
-    public void setReceiver(String receiver) {
-        this.receiver = receiver;
-    }
-    @XmlElement
-    public String getMessage() {
-        return message;
-    }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
-    @XmlElement
-    public Instant getTime() {
-        return time;
-    }
-
-    public void setTime(Instant time) {
-        this.time = time;
-    }
-    @XmlElement
-    public boolean isRead() {
-        return read;
-    }
-
-    public void setRead(boolean read) {
-        this.read = read;
+    @Override
+    public String toString() {
+        return super.toString();
     }
 }
+
