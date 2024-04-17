@@ -11,8 +11,8 @@ public class NotificationDto extends MessageDto{
     public NotificationDto() {
     }
 
-    public NotificationDto(String message, String sender, String receiver, Instant time, boolean read) {
-        super(message, sender, receiver, time, read);
+    public NotificationDto(int id, String message, String sender, String receiver, Instant time, boolean read) {
+        super(id, message, sender, receiver, time, read);
     }
 
 

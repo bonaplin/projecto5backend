@@ -33,7 +33,6 @@ public class NotificationDao extends AbstractDao<NotificationEntity>{
     public List<NotificationEntity> findNotificationsByReceiverUnread(String receiver) {
         try{
             UserEntity receiverEntity = userDao.findUserByUsername(receiver);
-            System.out.println("receiverEntity por ler: " + receiverEntity);
             return em.createNamedQuery("Notification.findNotificationsByReceiverUnread").setParameter("receiver", receiverEntity).getResultList();
         } catch (Exception e){
             return Collections.emptyList();

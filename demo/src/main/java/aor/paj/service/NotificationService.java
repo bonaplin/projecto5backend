@@ -34,9 +34,21 @@ public class NotificationService {
             if(tokenStatus != TokenStatus.VALID){
                 return Response.status(Response.Status.UNAUTHORIZED).entity(tokenStatus.getMessage()).build();
             }
-            List<NotificationDto> notifications = notificationBean.getAllNotifications();
+            List<NotificationDto> notifications = notificationBean.getAllNotificationsBytoken(token);
             System.out.println("Notifications get/: " + notifications);
             return Response.status(200).entity(notifications).build();
+        }
+
+        @PUT
+        @Path("/")
+        @Produces("application/json")
+        public Response markAsRead(@HeaderParam("token") String token, @QueryParam("id") Integer id){
+            TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+            if(tokenStatus != TokenStatus.VALID){
+                return Response.status(Response.Status.UNAUTHORIZED).entity(tokenStatus.getMessage()).build();
+            }
+            notificationBean.markAsRead(token, id);
+            return Response.status(200).entity(new ResponseMessage("Notification(s) marked as read")).build();
         }
 
 }

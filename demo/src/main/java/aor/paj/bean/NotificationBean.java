@@ -5,6 +5,7 @@ import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.NotificationDto;
 import aor.paj.entity.NotificationEntity;
+import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.websocket.Notifier;
 import jakarta.ejb.EJB;
@@ -35,6 +36,7 @@ public class NotificationBean {
         UserEntity sender = userDao.findUserByUsername(notificationDto.getSender());
 
         NotificationEntity notificationEntity = new NotificationEntity();
+        notificationEntity.setId(notificationDto.getId());
         notificationEntity.setSender(sender);
         notificationEntity.setMessage(notificationDto.getMessage());
         notificationEntity.setReceiver(receiver);
@@ -45,7 +47,7 @@ public class NotificationBean {
 
     public NotificationDto convertNotificationEntityToNotificationDto(NotificationEntity notificationEntity){
         NotificationDto notificationDto = new NotificationDto();
-
+        notificationDto.setId(notificationEntity.getId());
         notificationDto.setMessage(notificationEntity.getMessage());
         notificationDto.setReceiver(notificationEntity.getReceiver().getUsername());
         notificationDto.setSender(notificationEntity.getSender().getUsername());
@@ -126,16 +128,42 @@ public class NotificationBean {
         return notificationDtos;
     }
 
-    public boolean markAsRead(List<Integer> notificationIds){
-        for(Integer id : notificationIds){
+    public void markAsRead(String token, Integer id) {
+        UserEntity receiver = tokenDao.findUserByTokenString(token);
+
+        if (id != null) {
             NotificationEntity notificationEntity = notificationDao.find(id);
-            if(notificationEntity != null){
+            if (notificationEntity != null) {
                 notificationEntity.setIsRead(true);
                 notificationDao.merge(notificationEntity);
             }
         }
-        return true;
+
+        if(id == null && receiver != null) {
+            System.out.println(">>>>>>receiver: " + receiver.getUsername());
+            List<NotificationEntity> notificationEntities = notificationDao.findNotificationsByReceiverUnread(receiver.getUsername());
+            List<NotificationEntity> notificationEntitie = notificationDao.findNotificationsByReceiver(receiver.getUsername());
+
+            System.out.println(">>>>>>receiver: " + notificationEntities.size());
+            for(NotificationEntity n : notificationEntities){
+                System.out.println(">>>>>>receiver: antes de marcar como lida: " + n.isRead());
+                n.setIsRead(true);
+                System.out.println(">>>>>>receiver: depois de marcar como lida: " + n.isRead());
+                notificationDao.merge(n);
+            }
+        }
     }
 
 
+    public List<NotificationDto> getAllNotificationsBytoken(String token) {
+        List<NotificationDto> notificationDtos = new ArrayList<>();
+        TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
+        UserEntity userEntity = tokenEntity.getUser();
+        List<NotificationEntity> notificationEntities = notificationDao.findNotificationsByReceiver(userEntity.getUsername());
+        for(NotificationEntity n : notificationEntities){
+            NotificationDto ndto = convertNotificationEntityToNotificationDto(n);
+            notificationDtos.add(ndto);
+        }
+        return notificationDtos;
+    }
 }

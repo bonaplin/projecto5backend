@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @NamedQuery(name ="Notification.findNotificationsByReceiver", query = "SELECT n FROM NotificationEntity n WHERE n.receiver = :receiver")
-@NamedQuery(name ="Notification.findNotificationsByReceiverUnread", query = "SELECT n FROM NotificationEntity n WHERE n.sender = :sender AND n.receiver = :receiver AND n.read = false")
+@NamedQuery(name ="Notification.findNotificationsByReceiverUnread", query = "SELECT n FROM NotificationEntity n WHERE n.receiver = :receiver AND n.read = false")
 
 @Table (name = "notification")
 public class NotificationEntity implements Serializable {
@@ -73,10 +73,6 @@ public class NotificationEntity implements Serializable {
         this.sender = sender;
     }
 
-    public void setRead(boolean read) {
-        this.read = read;
-    }
-
     @PrePersist
     protected void onCreate(){
         time = Instant.now();
@@ -95,4 +91,7 @@ public class NotificationEntity implements Serializable {
         this.read = read;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
 }

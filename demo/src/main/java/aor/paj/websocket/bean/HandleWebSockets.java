@@ -131,6 +131,7 @@ public class HandleWebSockets {
             jsonObject.add("time", gson.toJsonTree(notificationEntity.getTime()));
             jsonObject.add("read", gson.toJsonTree(notificationEntity.isRead()));
             jsonObject.add("type", gson.toJsonTree(MessageType.TYPE_40.getValue()));
+            jsonObject.add("id", gson.toJsonTree(notificationEntity.getId()));
 
             messageBean.sendToUser(receiver, jsonObject.toString());
             System.out.println(jsonObject.toString());

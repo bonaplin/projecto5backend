@@ -8,6 +8,7 @@ import java.time.Instant;
 
 @XmlRootElement
 public class MessageDto {
+    private int id;
     private String message;
     private String sender;
     private String receiver;
@@ -17,7 +18,8 @@ public class MessageDto {
     public MessageDto() {
     }
 
-    public MessageDto(String message, String sender, String receiver, Instant time, boolean read) {
+    public MessageDto(int id, String message, String sender, String receiver, Instant time, boolean read) {
+        this.id = id;
         this.message = message;
         this.sender = sender;
         this.receiver = receiver;
@@ -70,10 +72,19 @@ public class MessageDto {
         this.read = read;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
     @Override
     public String toString() {
         return "MessageDto{" +
-                "message='" + message + '\'' +
+                "id=" + id +
+                ", message='" + message + '\'' +
                 ", sender='" + sender + '\'' +
                 ", receiver='" + receiver + '\'' +
                 ", time=" + time +
