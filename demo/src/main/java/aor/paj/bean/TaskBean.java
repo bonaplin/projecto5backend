@@ -153,8 +153,33 @@ public class TaskBean {
     //Function that receives a task id and sets the task active to false in the database mysql
     public boolean desactivateTask(int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
+        if(taskEntity == null) return false;
         taskEntity.setActive(false);
+
+        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+
+        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+        taskDtoJson.addProperty("type", MessageType.TASK_DESACTIVATE.getValue());
+
         taskDao.merge(taskEntity);
+
+        String taskDtoJsonString = taskDtoJson.toString();
+        notifier.sendToAllSessions(taskDtoJsonString);
+        return true;
+    }
+    public boolean deleteTasks(int id) {
+        TaskEntity taskEntity = taskDao.findTaskById(id);
+        if(taskEntity == null) return false;
+
+        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+
+        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+        taskDtoJson.addProperty("type", MessageType.TASK_DELETE.getValue());
+
+        taskDao.remove(taskEntity);
+
+        String taskDtoJsonString = taskDtoJson.toString();
+        notifier.sendToAllSessions(taskDtoJsonString);
         return true;
     }
     
@@ -179,6 +204,7 @@ public class TaskBean {
 
     public void updateTask(TaskDto taskDto, int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
+        int lastStatus = taskEntity.getStatus();
         taskEntity.setTitle(taskDto.getTitle());
         taskEntity.setDescription(taskDto.getDescription());
         taskEntity.setInitialDate(taskDto.getInitialDate());
@@ -187,6 +213,47 @@ public class TaskBean {
         taskEntity.setPriority(taskDto.getPriority());
         taskEntity.setCategory(categoryDao.findCategoryByTitle(taskDto.getCategory()));
         taskDao.merge(taskEntity);
+
+        //verificar se o status foi alterado
+        if(!statusAsChanged(taskDto, lastStatus)) handleTaskEdit(taskEntity);
+        else handleTaskEditMove(taskEntity, lastStatus);
+    }
+
+    private void handleTaskEdit(TaskEntity taskEntity) {
+        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+
+        // Convert taskDto to JsonObject
+        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+
+        // Add "type" & "lastStatus property to taskDtoJson
+        taskDtoJson.addProperty("type", MessageType.TASK_EDIT.getValue());
+
+        // Convert taskDtoJson back to string
+        String taskDtoJsonString = taskDtoJson.toString();
+
+        // Send taskDtoJsonString to all logged in users
+        notifier.sendToAllSessions(taskDtoJsonString);
+    }
+
+    private void handleTaskEditMove(TaskEntity taskEntity, int lastStatus){
+        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+
+        // Convert taskDto to JsonObject
+        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+
+        // Add "type" & "lastStatus property to taskDtoJson
+        taskDtoJson.addProperty("type", MessageType.TASK_EDIT_AND_MOVE.getValue());
+        taskDtoJson.addProperty("lastStatus", lastStatus);
+
+        // Convert taskDtoJson back to string
+        String taskDtoJsonString = taskDtoJson.toString();
+
+        // Send taskDtoJsonString to all logged in users
+        notifier.sendToAllSessions(taskDtoJsonString);
+    }
+
+    private boolean statusAsChanged(TaskDto taskDto, int lastStatus) {
+        return taskDto.getStatus() != lastStatus;
     }
 
     public boolean restoreTask(int id) {
@@ -198,7 +265,17 @@ public class TaskBean {
 
     public boolean deleteTask(int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
+        if(taskEntity == null) return false;
+
+        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+
+        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+        taskDtoJson.addProperty("type", MessageType.TASK_DELETE.getValue());
+
         taskDao.remove(taskEntity);
+
+        String taskDtoJsonString = taskDtoJson.toString();
+        notifier.sendToAllSessions(taskDtoJsonString);
         return true;
     }
 
@@ -282,6 +359,7 @@ public class TaskBean {
         }
     }
 
+
     public boolean handleTaskMove(Session session, JsonObject jsonObject) {
         int taskID = jsonObject.get("id").getAsInt();
         int status = jsonObject.get("status").getAsInt();
@@ -313,4 +391,31 @@ public class TaskBean {
         notifier.sendToAllSessions(taskDtoJsonString);
         return true;
     }
+
+//    public boolean handleEditTask(Session session, JsonObject jsonObject){
+//        int taskID = jsonObject.get("id").getAsInt();
+//        TaskDto taskDto = gson.fromJson(jsonObject, TaskDto.class);
+//        String token = session.getPathParameters().get("token");
+//
+//        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+//        if(tokenStatus != TokenStatus.VALID) return false;
+//
+//        updateTask(taskDto, taskID);
+//
+//        TaskEntity taskEntityUpdated = taskDao.findTaskById(taskID);
+//        TaskDto taskDtoUpdated = TaskMapper.convertTaskEntityToTaskDto(taskEntityUpdated);
+//
+//        // Convert taskDto to JsonObject
+//        JsonObject taskDtoJson = gson.toJsonTree(taskDtoUpdated).getAsJsonObject();
+//
+//        // Add "type" property to taskDtoJson
+//        taskDtoJson.addProperty("type", MessageType.TASK_MOVE.getValue());
+//
+//        // Convert taskDtoJson back to string
+//        String taskDtoJsonString = taskDtoJson.toString();
+//
+//        // Send taskDtoJsonString to all logged in users
+//        notifier.sendToAllSessions(taskDtoJsonString);
+//        return true;
+//    }
 }

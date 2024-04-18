@@ -11,6 +11,7 @@ import aor.paj.utils.JsonUtils;
 import aor.paj.utils.TokenStatus;
 import aor.paj.validator.TaskValidator;
 import aor.paj.validator.UserValidator;
+import aor.paj.websocket.Notifier;
 import jakarta.inject.Inject;
 import jakarta.json.bind.JsonbException;
 import jakarta.ws.rs.*;
@@ -31,6 +32,8 @@ public class TaskService {
 
     @Inject
     TokenBean tokenBean;
+    @Inject
+    Notifier notifier;
 
     //Service that receives a taskdto and a token and creates a new task with the user in token and adds the task to the task table in the database mysql
     @POST
@@ -154,8 +157,8 @@ public class TaskService {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Title already exists"))).build();
         }
 
-
         taskBean.updateTask(t, id);
+
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is updated"))).build();
     }
     //Service that receives a token and a task name, validates the token and sets the active of that task to true
