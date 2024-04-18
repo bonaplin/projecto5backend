@@ -44,10 +44,12 @@ public class TaskService {
         }
 
         if (!TaskValidator.isValidTask(taskDto) || taskBean.taskTitleExists(taskDto)) {
+            System.out.println("Task is not valid");
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Verify the fields. Cannot have the same title."))).build();
         }
 
         if (!taskBean.addTask(token, taskDto)) {
+            System.out.println("Cannot add task");
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot add task"))).build();
         }
 

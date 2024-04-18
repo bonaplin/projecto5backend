@@ -23,20 +23,22 @@ public class Notifier {
     private HashMap<String, Session> sessions = new HashMap<>();
 
     @OnOpen
-    public void toDoOnOpen(Session session, @PathParam("token") String token){
-        System.out.println("A new WebSocket session is opened for client with token: "+ token);
-        sessions.put(token,session);
+    public void toDoOnOpen(Session session, @PathParam("token") String token) {
+        System.out.println("A new WebSocket session is opened for client with token: " + token);
+        sessions.put(token, session);
     }
+
     @OnClose
-    public void toDoOnClose(Session session, CloseReason reason){
-        System.out.println("Websocket session is closed with CloseCode: "+
-                reason.getCloseCode() + ": "+reason.getReasonPhrase());
-        for(String key:sessions.keySet()){
-            if(sessions.get(key) == session) sessions.remove(key);
+    public void toDoOnClose(Session session, CloseReason reason) {
+        System.out.println("Websocket session is closed with CloseCode: " +
+                reason.getCloseCode() + ": " + reason.getReasonPhrase());
+        for (String key : sessions.keySet()) {
+            if (sessions.get(key) == session) sessions.remove(key);
         }
     }
+
     @OnMessage
-    public void toDoOnMessage(Session session, String json){
+    public void toDoOnMessage(Session session, String json) {
         try {
             handleWebSockets.handleWebSocketJSON(session, json);
         } catch (Exception e) {
@@ -44,8 +46,18 @@ public class Notifier {
             System.out.println("Something went wrong!");
         }
     }
+
     public Map<String, Session> getSessions() {
         return this.sessions;
     }
 
+    public void sendToAllSessions(String messageJson) {
+        for (Session session : sessions.values()) {
+            try {
+                session.getBasicRemote().sendObject(messageJson);
+            } catch (Exception e) {
+                System.out.println("Something went wrong!");
+            }
+        }
     }
+}

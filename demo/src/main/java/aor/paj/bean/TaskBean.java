@@ -10,18 +10,33 @@ import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
+import aor.paj.gson.InstantAdapter;
 import aor.paj.mapper.TaskMapper;
+import aor.paj.service.LocalDateAdapter;
 import aor.paj.utils.JsonUtils;
+import aor.paj.utils.MessageType;
 import aor.paj.utils.State;
+import aor.paj.utils.TokenStatus;
+import aor.paj.websocket.Notifier;
+import aor.paj.websocket.bean.HandleWebSockets;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import jakarta.ejb.EJB;
+import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import jakarta.websocket.Session;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-@ApplicationScoped
+import static aor.paj.utils.MessageType.TASK_CREATE;
+
+//@ApplicationScoped
+@Stateless
 public class TaskBean {
 
     @EJB
@@ -36,6 +51,18 @@ public class TaskBean {
     @EJB
     TokenDao tokenDao;
 
+    @EJB
+    Notifier notifier;
+    @EJB
+    HandleWebSockets handleWebSockets;
+
+    @Inject
+    TokenBean tokenBean;
+
+    Gson gson = new GsonBuilder()
+            .registerTypeAdapter(Instant.class, new InstantAdapter())
+            .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+            .create();
 
     /**
      * Function that receives a token and a taskDto and adds a new task to the database mysql
@@ -45,10 +72,15 @@ public class TaskBean {
      */
     public boolean addTask(String token, TaskDto taskDto){
         TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
-        if(tokenEntity != null) return false;
+        if(tokenEntity == null) return false;
+        System.out.println("TokenEntity: " + tokenEntity);
+
 
         UserEntity userEntity = tokenEntity.getUser();
+        System.out.println("UserEntity: " + userEntity);
         CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskDto.getCategory());
+
+        System.out.println(categoryEntity);
         TaskEntity taskEntity = TaskMapper.convertTaskDtoToTaskEntity(taskDto);
 
         taskEntity.setOwner(userEntity);
@@ -61,9 +93,25 @@ public class TaskBean {
         }
 
         taskDao.persist(taskEntity);
+
+        sendNewTask(taskEntity);
+
         return true;
     }
 
+    private void sendNewTask(TaskEntity taskEntity) {
+        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+
+        JsonObject jsonObject = handleWebSockets.convertStringToJsonObject(gson.toJson(taskDto));
+        System.out.println("Sending new task: " + taskDto);
+        jsonObject.addProperty("owner", taskEntity.getOwner().getUsername());
+        jsonObject.addProperty("type", TASK_CREATE.getValue());
+        jsonObject.addProperty("id", taskEntity.getId());
+        System.out.println("Sending new task to frontend: " + jsonObject);
+
+        String json = gson.toJson(jsonObject);
+        notifier.sendToAllSessions(json);
+    }
 
 
     //Function that receives a taskdto and checks in database mysql if a task with the same title already exists
@@ -78,32 +126,6 @@ public class TaskBean {
         return false;
     }
 
-    //Function that generates a unique id for new task checking in database mysql if the id already exists
-//    public int generateTaskId() {
-//        int id = 1;
-//        boolean idAlreadyExists;
-//
-//        do {
-//            idAlreadyExists = false;
-//            TaskEntity taskEntity = taskDao.findTaskById(id);
-//            if (taskEntity != null) {
-//                id++;
-//                idAlreadyExists = true;
-//            }
-//        } while (idAlreadyExists);
-//
-//        return id;
-//    }
-
-    //Function that returns all tasks from the database mysql
-//    public List<TaskDto> getAllTasks() {
-//        List<TaskEntity> taskEntities = taskDao.getAllTasks();
-//        ArrayList<TaskDto> taskDtos = new ArrayList<>();
-//        for (TaskEntity taskEntity : taskEntities) {
-//            taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
-//        }
-//        return taskDtos;
-//    }
     public List<TaskDto> getActiveTasks() {
         List<TaskEntity> taskEntities = taskDao.getActiveTasks();
         ArrayList<TaskDto> taskDtos = new ArrayList<>();
@@ -167,13 +189,6 @@ public class TaskBean {
         taskDao.merge(taskEntity);
     }
 
-    //Function that receives a task name and sets the task active to true in the database mysql
-//    public boolean restoreTask(String title) {
-//        TaskEntity taskEntity = taskDao.findTaskByTitle(title);
-//        taskEntity.setActive(true);
-//        taskDao.merge(taskEntity);
-//        return true;
-//    }
     public boolean restoreTask(int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskEntity.setActive(true);
@@ -181,12 +196,6 @@ public class TaskBean {
         return true;
     }
 
-    //Function that receives a task name and deletes the task from the database mysql
-//    public boolean deleteTask(String title) {
-//        TaskEntity taskEntity = taskDao.findTaskByTitle(title);
-//        taskDao.remove(taskEntity);
-//        return true;
-//    }
     public boolean deleteTask(int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskDao.remove(taskEntity);
@@ -227,17 +236,6 @@ public class TaskBean {
         }
         return taskDtos;
     }
-//public List<TaskDto> getActiveTasksByCategoryAndOwnerAndStatus(String category, String owner, Integer status){
-//    UserEntity userEntity = userDao.findUserByUsername(owner);
-//    CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(category);
-//    List<TaskEntity> taskEntities = taskDao.getTasksByStatusAndOwnerAndCategory(status, userEntity, categoryEntity);
-//    ArrayList<TaskDto> taskDtos = new ArrayList<>();
-//    for (TaskEntity taskEntity : taskEntities) {
-//        taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
-//    }
-//    return taskDtos;
-//}
-
 
     //Function that returns list of tasks filtered by category from the database mysql
     public List<TaskDto> getTasksByCategory(String category){
@@ -282,5 +280,37 @@ public class TaskBean {
         } else {
             return getActiveTasks();
         }
+    }
+
+    public boolean handleTaskMove(Session session, JsonObject jsonObject) {
+        int taskID = jsonObject.get("id").getAsInt();
+        int status = jsonObject.get("status").getAsInt();
+
+        String token = session.getPathParameters().get("token");
+
+        TaskEntity taskEntity = taskDao.findTaskById(taskID);
+        if(taskEntity == null) return false;
+        int lastStatus = taskEntity.getStatus();
+        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+        if(tokenStatus != TokenStatus.VALID) return false;
+
+        updateTaskStatus(taskID, status);
+
+        TaskEntity taskEntityUpdated = taskDao.findTaskById(taskID);
+        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntityUpdated);
+
+        // Convert taskDto to JsonObject
+        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+
+        // Add "type" & "lastStatus property to taskDtoJson
+        taskDtoJson.addProperty("type", MessageType.TASK_MOVE.getValue());
+        taskDtoJson.addProperty("lastStatus", lastStatus);
+
+        // Convert taskDtoJson back to string
+        String taskDtoJsonString = taskDtoJson.toString();
+
+        // Send taskDtoJsonString to all logged in users
+        notifier.sendToAllSessions(taskDtoJsonString);
+        return true;
     }
 }

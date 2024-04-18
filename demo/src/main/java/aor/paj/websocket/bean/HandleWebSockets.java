@@ -2,6 +2,7 @@ package aor.paj.websocket.bean;
 
 import aor.paj.bean.MessageBean;
 import aor.paj.bean.NotificationBean;
+import aor.paj.bean.TaskBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dao.MessageDao;
 import aor.paj.dao.NotificationDao;
@@ -14,14 +15,17 @@ import aor.paj.entity.UserEntity;
 import aor.paj.gson.InstantAdapter;
 //import aor.paj.websocket.dto.MessageSocketDto;
 import aor.paj.utils.MessageType;
+import aor.paj.websocket.Notifier;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
+import jakarta.websocket.EncodeException;
 import jakarta.websocket.Session;
 
 import javax.management.Notification;
+import java.io.IOException;
 import java.time.Instant;
 
 @Stateless
@@ -32,6 +36,8 @@ public class HandleWebSockets {
     @EJB
     UserBean userBean;
     @EJB
+    TaskBean taskBean;
+    @EJB
     MessageDao messageDao;
     @EJB
     TokenDao tokenDao;
@@ -39,6 +45,8 @@ public class HandleWebSockets {
     NotificationBean notificationBean;
     @EJB
     NotificationDao notificationDao;
+//    @EJB
+//    Notifier notifier;
 
     Gson gson = new GsonBuilder()
             .registerTypeAdapter(Instant.class, new InstantAdapter())
@@ -56,9 +64,14 @@ public class HandleWebSockets {
                 System.out.println("Type 10");
                 handleNewMessage(session, jsonObject);
                 break;
-            case TYPE_20:
-                System.out.println("Type 20");
-                //converte para Dto de notificiação e faz algo
+            case TASK_CREATE:
+//                handleCreateTask(session, jsonObject);
+                System.out.println("Type 20 -> taskcreate");
+
+                break;
+            case TASK_MOVE:
+                System.out.println("Type 20 -> taskmove");
+                taskBean.handleTaskMove(session, jsonObject);
                 break;
             case LOGOUT:
                 System.out.println("Type 30 - Logout");
@@ -71,6 +84,10 @@ public class HandleWebSockets {
             default:
                 System.out.println("Unknown type");
         }
+    }
+
+    public JsonObject convertStringToJsonObject(String jsonString) {
+        return gson.fromJson(jsonString, JsonObject.class);
     }
     //MESSAGE -     - MESSAGE -     - MESSAGE -     - MESSAGE -     - MESSAGE
     private void handleNewMessage(Session session, JsonObject jsonObject) {
