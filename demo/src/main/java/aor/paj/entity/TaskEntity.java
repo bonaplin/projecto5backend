@@ -45,6 +45,9 @@ public class TaskEntity implements Serializable {
     @Column(name = "finalDate", nullable = true, unique = false, updatable = true)
     private LocalDate finalDate;
 
+    @Column(name ="doneDate", nullable = true, unique = false, updatable = true)
+    private LocalDate doneDate;
+
     @Column(name = "status", nullable = false, unique = false, updatable = true)
     private Integer status;
 
@@ -156,6 +159,15 @@ public class TaskEntity implements Serializable {
 //        this.doneDate = doneDate;
 //    }
 
+
+    public LocalDate getDoneDate() {
+        return doneDate;
+    }
+
+    public void setDoneDate(LocalDate doneDate) {
+        this.doneDate = doneDate;
+    }
+
     @Override
     public String toString() {
         return "TaskEntity{" +
@@ -169,6 +181,7 @@ public class TaskEntity implements Serializable {
                 ", active=" + active +
                 ", owner=" + owner +
                 ", category=" + category +
+                ", doneDate=" + doneDate +
                 '}';
     }
 }

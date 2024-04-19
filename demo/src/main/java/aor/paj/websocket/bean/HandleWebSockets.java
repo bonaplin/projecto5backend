@@ -66,8 +66,7 @@ public class HandleWebSockets {
                 break;
             case TASK_CREATE:
 //                handleCreateTask(session, jsonObject);
-                System.out.println("Type 20 -> taskcreate");
-
+                System.out.println("Não é usado");
                 break;
             case TASK_MOVE:
                 System.out.println("Type 20 -> taskmove");
@@ -75,11 +74,9 @@ public class HandleWebSockets {
                 break;
             case LOGOUT:
                 System.out.println("Type 30 - Logout");
-                //converte para Dto de task e faz algo
                 break;
             case TYPE_40:
                 System.out.println("Type 30");
-                //converte para Dto de logout e faz algo
                 break;
             default:
                 System.out.println("Unknown type");
@@ -113,11 +110,14 @@ public class HandleWebSockets {
             jsonObject.addProperty("time", messageEntity.getTime().toString());
             jsonObject.addProperty("sender", messageEntity.getSender_id().getUsername());
 
-            // Envia a mensagem de volta para o remetente
-            session.getBasicRemote().sendText(jsonObject.toString());
+
             // Envia a mensagem para o destinatário
             messageBean.sendToUser(receiver, jsonObject.toString());
-            sendNotify(sender, receiver, "Nova mensagem de " + sender + "!");
+            sendNotify(sender, receiver, "New Message from " + sender + " at "+ messageEntity.getTime().toString());
+
+            // Envia a mensagem de volta para o remetente
+            jsonObject.addProperty("type", MessageType.MESSAGE_SENDER.getValue());
+            session.getBasicRemote().sendText(jsonObject.toString());
 
         } catch (Exception e) {
             e.printStackTrace();

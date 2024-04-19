@@ -6,8 +6,12 @@ import aor.paj.entity.UserEntity;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
+import java.time.Duration;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Stateless
 public class TaskDao extends AbstractDao<TaskEntity>{
@@ -122,5 +126,71 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         } catch (NoResultException e) {
             return new ArrayList<>();
         }
+    }
+    //STATISTICS - STATISTICS - STATISTICS - STATISTICS - STATISTICS - STATISTICS
+    public double getAverageTaskCountPerUser() {
+        long totalTasks = em.createQuery("SELECT COUNT(t) FROM TaskEntity t", Long.class).getSingleResult();
+        long totalUsers = em.createQuery("SELECT COUNT(u) FROM UserEntity u", Long.class).getSingleResult();
+        return totalUsers > 0 ? (double) totalTasks / totalUsers : 0;
+    }
+    public Map<String, Long> getTaskCountByState() {
+        List<Object[]> results = em.createQuery("SELECT t.status, COUNT(t) FROM TaskEntity t GROUP BY t.status").getResultList();
+        Map<String, Long> taskCountByState = new HashMap<>();
+        for (Object[] result : results) {
+            taskCountByState.put((String) result[0], (Long) result[1]);
+        }
+        return taskCountByState;
+    }
+
+
+
+    public Map<String, Long> getTaskCountByUser() {
+        List<Object[]> results = em.createQuery("SELECT t.owner.username, COUNT(t) FROM TaskEntity t GROUP BY t.owner.username").getResultList();
+        Map<String, Long> taskCountByUser = new HashMap<>();
+        for (Object[] result : results) {
+            taskCountByUser.put((String) result[0], (Long) result[1]);
+        }
+        return taskCountByUser;
+    }
+
+    public Map<String, Map<String, Long>> getTaskCountByUserAndState() {
+        List<Object[]> results = em.createQuery("SELECT t.owner.username, t.status, COUNT(t) FROM TaskEntity t GROUP BY t.owner.username, t.status").getResultList();
+        Map<String, Map<String, Long>> taskCountByUserAndState = new HashMap<>();
+        for (Object[] result : results) {
+            String username = (String) result[0];
+            String state = (String) result[1];
+            Long count = (Long) result[2];
+            Map<String, Long> userMap = taskCountByUserAndState.getOrDefault(username, new HashMap<>());
+            userMap.put(state, count);
+            taskCountByUserAndState.put(username, userMap);
+        }
+        return taskCountByUserAndState;
+    }
+    public double getAverageCompletionTime() {
+        List<TaskEntity> doneTasks = em.createQuery("SELECT t FROM TaskEntity t WHERE t.status = 300", TaskEntity.class).getResultList();
+        if (doneTasks.isEmpty()) {
+            return 0;
+        }
+
+        long totalDuration = 0;
+        for (TaskEntity task : doneTasks) {
+            long duration = Duration.between(task.getInitialDate(), task.getDoneDate()).toMillis();
+            totalDuration += duration;
+        }
+
+        return totalDuration / (double) doneTasks.size();
+    }
+
+    public List<LocalDate> getDoneTaskCompletionDates() {
+        return em.createQuery("SELECT t.doneDate FROM TaskEntity t WHERE t.active = true AND t.status = 300 ORDER BY t.doneDate", LocalDate.class).getResultList();
+    }
+
+    public List<Object[]> getCategoryTaskCount() {
+        List<Object[]> results = em.createQuery("SELECT t.category, COUNT(t) FROM TaskEntity t GROUP BY t.category ORDER BY COUNT(t) DESC").getResultList();
+        List<Object[]> categoryTaskCount = new ArrayList<>();
+        for (Object[] result : results) {
+            categoryTaskCount.add(new Object[]{((CategoryEntity) result[0]).getTitle(), result[1]});
+        }
+        return categoryTaskCount;
     }
 }

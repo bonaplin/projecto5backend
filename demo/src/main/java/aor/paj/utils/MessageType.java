@@ -2,6 +2,7 @@ package aor.paj.utils;
 
 public enum MessageType {
     TYPE_10(10),
+    MESSAGE_SENDER(11),
     TASK_CREATE(21),
     TASK_MOVE(22),
     TASK_EDIT(23),

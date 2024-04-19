@@ -8,6 +8,7 @@ import jakarta.persistence.NoResultException;
 import jakarta.persistence.PersistenceContext;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -94,6 +95,31 @@ public class UserDao extends AbstractDao<UserEntity> {
                 em.remove(user);
             }
         }
+    }
+
+    //STATISTICS - STATISTICS - STATISTICS - STATISTICS - STATISTICS - STATISTICS
+    public int getUserCount() {
+        return ((Number) em.createQuery("SELECT COUNT(u) FROM UserEntity u").getSingleResult()).intValue();
+    }
+    public int getActiveUserCount() {
+        return ((Number) em.createQuery("SELECT COUNT(u) FROM UserEntity u WHERE u.active = true").getSingleResult()).intValue();
+    }
+    public int getUnconfirmedUserCount() {
+        return ((Number) em.createQuery("SELECT COUNT(u) FROM UserEntity u WHERE u.confirmed = false").getSingleResult()).intValue();
+    }
+    public List<LocalDate> getActiveUserCreationDates() {
+        return em.createQuery("SELECT u.created FROM UserEntity u WHERE u.active = true ORDER BY u.created", LocalDate.class).getResultList();
+    }
+
+
+
+
+    public int getInactiveUserCount() {
+        return ((Number) em.createQuery("SELECT COUNT(u) FROM UserEntity u WHERE u.active = false").getSingleResult()).intValue();
+    }
+
+    public int getConfirmedUserCount() {
+        return ((Number) em.createQuery("SELECT COUNT(u) FROM UserEntity u WHERE u.confirmed = true").getSingleResult()).intValue();
     }
 }
 
