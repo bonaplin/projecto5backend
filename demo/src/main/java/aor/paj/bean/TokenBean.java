@@ -85,6 +85,16 @@ public class TokenBean  {
         }
         return false;
     }
+    public boolean isProductOwner(String token){
+        TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
+        if (tokenEntity != null) {
+            UserEntity userEntity = tokenEntity.getUser();
+            if (userEntity.getRole().equals("po")) {
+                return true;
+            }
+        }
+        return false;
+    }
     public UserDto getUserByToken(String token) {
         TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
         if (tokenEntity != null) {

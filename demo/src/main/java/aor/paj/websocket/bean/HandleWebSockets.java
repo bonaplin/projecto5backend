@@ -60,7 +60,7 @@ public class HandleWebSockets {
         MessageType messageType = MessageType.fromValue(typeValue);
 
         switch (messageType) {
-            case TYPE_10:
+            case MESSAGE_RECEIVER:
                 System.out.println("Type 10");
                 handleNewMessage(session, jsonObject);
                 break;
@@ -166,4 +166,20 @@ public class HandleWebSockets {
         if(token == null) return null;
         return tokenDao.findUserByTokenString(token);
     }
+
+    public boolean isProductOwner(String token){
+        return tokenDao.findUserByTokenString(token).getRole().equals("po");
+    }
+
+    public String convertToJsonString(Object object, MessageType messageType) {
+        // Convert the original object to a JsonObject
+        JsonObject jsonObject = gson.toJsonTree(object).getAsJsonObject();
+
+        // Add the "type" property to the JsonObject
+        jsonObject.addProperty("type", messageType.getValue());
+
+        // Return the JSON representation of the modified JsonObject
+        return gson.toJson(jsonObject);
+    }
+
 }

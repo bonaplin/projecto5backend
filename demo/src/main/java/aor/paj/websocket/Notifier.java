@@ -60,4 +60,20 @@ public class Notifier {
             }
         }
     }
+
+    public void sendToAllProductOwnerSessions(String messageJson) {
+        for (Session session : sessions.values()) {
+            try {
+                String token = session.getPathParameters().get("token");
+                System.out.println("Token do user revistado: "+token);
+                if(handleWebSockets.isProductOwner(token)){
+                    System.out.println("Token do ADMIN: " + token);
+                    session.getBasicRemote().sendObject(messageJson);
+                }
+
+            } catch (Exception e) {
+                System.out.println("Something went wrong!");
+            }
+        }
+    }
 }

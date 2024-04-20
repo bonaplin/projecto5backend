@@ -5,6 +5,7 @@ import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.StatusUpdate;
 import aor.paj.dto.TaskDto;
+import aor.paj.dto.TaskListsDto;
 import aor.paj.entity.TaskEntity;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
@@ -73,8 +74,8 @@ public class TaskService {
             return Response.status(200).entity(taskBean.getTaskById(id)).build();
         }
 
-        List<TaskDto> tasks = taskBean.getTasksBasedOnQueryParams(category, username, active);
-        return Response.status(200).entity(tasks).build();
+        Object taskListsDto = taskBean.getTasksBasedOnQueryParams(category, username, active);
+        return Response.status(200).entity(taskListsDto).build();
     }
     @PUT
     @Path("/{id}/status")

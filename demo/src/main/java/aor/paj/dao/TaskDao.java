@@ -100,6 +100,28 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         }
     }
 
+    public List<TaskEntity> getTasksByStatusAndOwnerAndCategoryAndStatus(Integer status, UserEntity owner, CategoryEntity category, Integer taskStatus){
+        try {
+            return em.createNamedQuery("Task.findTaskByStatusAndOwnerAndCategoryAndStatus", TaskEntity.class)
+                    .setParameter("status", status)
+                    .setParameter("owner", owner)
+                    .setParameter("category", category)
+                    .setParameter("taskStatus", taskStatus)
+                    .getResultList();
+        } catch (NoResultException e) {
+            return new ArrayList<>();
+        }
+    }
+
+    public TaskEntity getPreviousTask(List<TaskEntity> orderedTasks, TaskEntity currentTask) {
+        int currentIndex = orderedTasks.indexOf(currentTask);
+        if (currentIndex > 0) {
+            return orderedTasks.get(currentIndex - 1);
+        } else {
+            return null;
+        }
+    }
+
     public List<TaskEntity> findTaskByOwnerIdAndStatus(int ownerId, int status) {
         try {
             return em.createNamedQuery("Task.findTaskByOwnerIdAndStatus")

@@ -5,6 +5,7 @@ import aor.paj.dao.TaskDao;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
 import aor.paj.dto.TaskDto;
+import aor.paj.dto.TaskListsDto;
 import aor.paj.dto.UserDto;
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
@@ -32,6 +33,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static aor.paj.utils.MessageType.TASK_CREATE;
 
@@ -345,19 +347,19 @@ public class TaskBean {
         return taskDtos;
     }
 
-    public List<TaskDto> getTasksBasedOnQueryParams(String category, String username, Boolean active) {
-        if (category != null && !category.isEmpty() && username != null && !username.isEmpty()) {
-            return getTasksByCategoryAndOwner(category, username);
-        } else if (category != null && !category.isEmpty()) {
-            return getTasksByCategory(category);
-        } else if (username != null && !username.isEmpty()) {
-            return getTasksByOwner(username);
-        } else if (active != null) {
-            return active ? getActiveTasks() : getInactiveTasks();
-        } else {
-            return getActiveTasks();
-        }
-    }
+//    public List<TaskDto> getTasksBasedOnQueryParams(String category, String username, Boolean active) {
+//        if (category != null && !category.isEmpty() && username != null && !username.isEmpty()) {
+//            return getTasksByCategoryAndOwner(category, username);
+//        } else if (category != null && !category.isEmpty()) {
+//            return getTasksByCategory(category);
+//        } else if (username != null && !username.isEmpty()) {
+//            return getTasksByOwner(username);
+//        } else if (active != null) {
+//            return active ? getActiveTasks() : getInactiveTasks();
+//        } else {
+//            return getActiveTasks();
+//        }
+//    }
 
 
     public boolean handleTaskMove(Session session, JsonObject jsonObject) {
@@ -383,6 +385,7 @@ public class TaskBean {
         // Add "type" & "lastStatus property to taskDtoJson
         taskDtoJson.addProperty("type", MessageType.TASK_MOVE.getValue());
         taskDtoJson.addProperty("lastStatus", lastStatus);
+        taskDtoJson.addProperty("index", jsonObject.get("index").getAsInt());
 
         // Convert taskDtoJson back to string
         String taskDtoJsonString = taskDtoJson.toString();
@@ -418,4 +421,28 @@ public class TaskBean {
 //        notifier.sendToAllSessions(taskDtoJsonString);
 //        return true;
 //    }
+
+    // Para devolver as tarefas já organizadas por estado ou como um tod0 caso sejam para ver em lista. ***
+    public Object getTasksBasedOnQueryParams(String category, String username, Boolean active) {
+        List<TaskDto> allTasks;
+        if (category != null && !category.isEmpty() && username != null && !username.isEmpty()) {
+            allTasks = getTasksByCategoryAndOwner(category, username);
+        } else if (category != null && !category.isEmpty()) {
+            allTasks = getTasksByCategory(category);
+        } else if (username != null && !username.isEmpty()) {
+            allTasks = getTasksByOwner(username);
+        } else if (active != null) {
+            allTasks = active ? getActiveTasks() : getInactiveTasks();
+            return allTasks; //***
+        } else {
+            allTasks = getActiveTasks();
+        }
+
+        TaskListsDto taskLists = new TaskListsDto();
+        taskLists.setTodoTasks(allTasks.stream().filter(task -> task.getStatus() == 100).collect(Collectors.toList()));
+        taskLists.setDoingTasks(allTasks.stream().filter(task -> task.getStatus() == 200).collect(Collectors.toList()));
+        taskLists.setDoneTasks(allTasks.stream().filter(task -> task.getStatus() == 300).collect(Collectors.toList()));
+
+        return taskLists;
+    }
 }

@@ -17,7 +17,10 @@ import aor.paj.entity.TaskEntity;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.mapper.UserMapper;
+import aor.paj.utils.MessageType;
 import aor.paj.utils.ResetPasswordStatus;
+import aor.paj.websocket.Notifier;
+import aor.paj.websocket.bean.HandleWebSockets;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ApplicationScoped;
@@ -42,6 +45,11 @@ public class UserBean {
     @EJB
     TokenDao tokenDao;
 
+    @EJB
+    StatisticBean statisticBean;
+
+
+
     // FOR POPULATE USING
     public boolean addUserFromPopulator(UserDto user) {
 
@@ -60,6 +68,8 @@ public class UserBean {
             //System.out.println("user a ser adicionado: " + userEntity);
             userDao.persist(userEntity);
             logger.info("user a ser adicionado: " + userEntity.getUsername());
+
+            statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
             return true;
     }
     public boolean addUserPO(UserDto user, String role) {
@@ -96,6 +106,7 @@ public class UserBean {
         EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
 
         logger.info("User adicionado: " + userEntity.getUsername()+" & email de verificação enviado para: " + userEntity.getEmail());
+        statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
 
         return true;
     }
@@ -234,6 +245,7 @@ public class UserBean {
             System.out.println("categorias alteradas");
             userDao.remove(userEntity);
             System.out.println("user removido");
+            statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
 
             return true;
             }
@@ -332,7 +344,8 @@ public class UserBean {
     public boolean userConfirmed(String token){
         UserEntity userEntity = tokenDao.findUserByTokenString(token);
            if(userEntity != null){
-                return userEntity.getConfirmed();
+               statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
+               return userEntity.getConfirmed();
             }
         return false;
     }
