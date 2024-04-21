@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @NamedQuery(name = "Task.findTaskByTitle", query = "SELECT t FROM TaskEntity t WHERE t.title = :title")
 @NamedQuery(name = "Task.getAllTasks", query = "SELECT t FROM TaskEntity t")
 @NamedQuery(name = "Task.getActiveTasks", query = "SELECT t FROM TaskEntity t WHERE t.active = true ORDER BY t.priority DESC, t.initialDate, COALESCE(t.finalDate, '9999-12-31')")
-@NamedQuery(name = "Task.getActiveStatusTasks", query = "SELECT t FROM TaskEntity t WHERE t.active = true AND t.status = :status ORDER BY t.priority DESC, t.initialDate, COALESCE(t.finalDate, '9999-12-31')")
+@NamedQuery(name = "Task.getActiveStatusTasks", query = "SELECT COUNT(t) FROM TaskEntity t WHERE t.active = true AND t.status = :status") //ORDER BY t.priority DESC, t.initialDate, COALESCE(t.finalDate, '9999-12-31')")
 @NamedQuery(name = "Task.getInactiveTasks", query = "SELECT t FROM TaskEntity t WHERE t.active = false")
 @NamedQuery(name = "Task.findTaskByOwnerId", query = "SELECT t FROM TaskEntity t WHERE t.owner.id = :id AND t.active = true ORDER BY t.priority DESC, t.initialDate, COALESCE(t.finalDate, '9999-12-31')")
 @NamedQuery(name = "Task.findTaskByCategory", query = "SELECT t FROM TaskEntity t WHERE t.category = :category AND t.active = true ORDER BY t.priority DESC, t.initialDate, COALESCE(t.finalDate, '9999-12-31')")

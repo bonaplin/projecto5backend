@@ -69,11 +69,13 @@ public class TaskDao extends AbstractDao<TaskEntity>{
             return null;
         }
     }
-    public List<TaskEntity> getActiveStatusTasks(int status) {
+    public int getActiveStatusTasks(int status) {
         try {
-            return em.createNamedQuery("Task.getActiveStatusTasks").setParameter("status", status).getResultList();
+            Long result = (Long) em.createNamedQuery("Task.getActiveStatusTasks").setParameter("status", status).getSingleResult();
+            int count = result.intValue();
+            return count;
         } catch (NoResultException e) {
-            return null;
+            return 0;
         }
     }
 
@@ -215,4 +217,12 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         }
         return categoryTaskCount;
     }
+
+    public double getAvgTaskPerUser() {
+        List<Object[]> results = em.createQuery("SELECT t.owner.username, COUNT(t) FROM TaskEntity t WHERE t.active = TRUE GROUP BY t.owner.username").getResultList();
+        return results.stream().mapToLong(result -> (Long) result[1]).average().orElse(0);
+    }
+
+    // query para receber a media de tarefas todo, doing e done por utilizador
+
 }

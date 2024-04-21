@@ -11,8 +11,8 @@ public enum MessageType {
     TASK_DELETE(26),
     LOGOUT(30),
     STATISTIC_USER(31),
-    TYPE_32(32),
-    TYPE_33(33),
+    STATISTIC_TASK(32),
+    STATISTIC_TASK_PER_STATUS(33),
     TYPE_34(34),
     TYPE_40(40);
 

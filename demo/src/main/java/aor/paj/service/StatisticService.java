@@ -40,6 +40,20 @@ public class StatisticService {
         return Response.status(Response.Status.FORBIDDEN).build();
     }
 
+    @GET
+    @Path("/tasks")
+    @Produces("application/json")
+    public Response getTaskStatistics(@HeaderParam("token") String token) {
+        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+
+        if(tokenStatus != TokenStatus.VALID) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        if(tokenBean.isProductOwner(token)){
+            return Response.ok(statisticBean.getAllStatisticsFromTasks()).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).build();
+    }
 
 
 

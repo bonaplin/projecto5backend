@@ -7,15 +7,9 @@ import java.util.List;
 import java.util.UUID;
 
 import aor.paj.controller.EmailSender;
-import aor.paj.dao.CategoryDao;
-import aor.paj.dao.TaskDao;
-import aor.paj.dao.TokenDao;
-import aor.paj.dao.UserDao;
+import aor.paj.dao.*;
 import aor.paj.dto.*;
-import aor.paj.entity.CategoryEntity;
-import aor.paj.entity.TaskEntity;
-import aor.paj.entity.TokenEntity;
-import aor.paj.entity.UserEntity;
+import aor.paj.entity.*;
 import aor.paj.mapper.UserMapper;
 import aor.paj.utils.MessageType;
 import aor.paj.utils.ResetPasswordStatus;
@@ -44,6 +38,12 @@ public class UserBean {
 
     @EJB
     TokenDao tokenDao;
+
+    @EJB
+    MessageDao messageDao;
+
+    @EJB
+    NotificationDao notificationDao;
 
     @EJB
     StatisticBean statisticBean;
@@ -236,20 +236,81 @@ public class UserBean {
         if(username.equals("admin") || username.equals("deleted")){
             return false;
         }
+
+        String deleted = "deleted";
+
         UserEntity userEntity = userDao.findUserByUsername(username);
         System.out.println("user a ser apagado: " + userEntity.getUsername());
-        if (userEntity != null) {
-            changeTaskOwner(username,"deleted");
-            System.out.println("tasks alteradas");
-            changeCategoryOwner(username,"deleted");
-            System.out.println("categorias alteradas");
+        if (userEntity == null) return false;
+
+            changeTaskOwner(username,deleted);
+            changeCategoryOwner(username,deleted);
+
+        changeNotifications(username,deleted);
+        changeMessages(username,deleted);
+
             userDao.remove(userEntity);
             System.out.println("user removido");
             statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
 
             return true;
+
+    }
+    public void changeMessages(String oldUsername, String newUsername){
+        UserEntity oldUserEntity = userDao.findUserByUsername(oldUsername);
+        UserEntity newUserEntity = userDao.findUserByUsername(newUsername);
+        System.out.println("old user: " + oldUserEntity.getUsername());
+        if(oldUserEntity != null && newUserEntity != null) {
+            System.out.println("são dif de null");
+            List<MessageEntity> messages = messageDao.findMessagesByReceiver(oldUserEntity.getUsername());
+            if(messages != null && !messages.isEmpty()) {
+                System.out.println("tem mensagens");
+                for (MessageEntity message : messages) {
+                    message.setReceiver_id(newUserEntity);
+                    messageDao.merge(message);
+                    messageDao.flush();
+                    System.out.println("message alterada: " + message.getMessage());
+                }
             }
-        return false;
+            messages = messageDao.findMessagesBySender(oldUserEntity.getUsername());
+            if(messages != null && !messages.isEmpty()) {
+                System.out.println("tem mensagens");
+                for (MessageEntity message : messages) {
+                    message.setSender_id(newUserEntity);
+                    messageDao.merge(message);
+                    messageDao.flush();
+                    System.out.println("message alterada: " + message.getMessage());
+                }
+            }
+
+        }
+    }
+
+    public void changeNotifications(String oldUsername, String newUsername){
+        UserEntity oldUserEntity = userDao.findUserByUsername(oldUsername);
+        UserEntity newUserEntity = userDao.findUserByUsername(newUsername);
+        if(oldUserEntity != null && newUserEntity != null) {
+            List<NotificationEntity> notifications = notificationDao.findNotificationsByReceiver(oldUserEntity.getUsername());
+            if(notifications != null && !notifications.isEmpty()) {
+                System.out.println("tem notificações");
+                for (NotificationEntity notification : notifications) {
+                    notification.setReceiver(newUserEntity);
+                    notificationDao.merge(notification);
+                    notificationDao.flush();
+                    System.out.println("notification alterada: " + notification.getMessage());
+                }
+            }
+            notifications = notificationDao.findNotificationsBySender(oldUserEntity.getUsername());
+            if(notifications != null && !notifications.isEmpty()) {
+                System.out.println("tem notificações");
+                for (NotificationEntity notification : notifications) {
+                    notification.setSender(newUserEntity);
+                    notificationDao.merge(notification);
+                    notificationDao.flush();
+                    System.out.println("notification alterada: " + notification.getMessage());
+                }
+            }
+        }
     }
 
     public boolean changeCategoryOwner(String oldUsername, String newUsername){

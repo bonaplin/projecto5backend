@@ -24,6 +24,14 @@ public class MessageDao extends AbstractDao<MessageEntity> {
         }
 
     }
+    public List<MessageEntity> findMessagesBySender(String sender) {
+        try{
+            return em.createNamedQuery("Message.findMessagesBySender").setParameter("sender", sender).getResultList();
+        } catch (Exception e){
+            return null;
+        }
+
+    }
 
     public List<MessageEntity> findMessagesBySenderAndReceiver(String senderUsername, String receiverUsername) {
         TypedQuery<MessageEntity> query = em.createNamedQuery("Message.findMessagesBySenderAndReceiver", MessageEntity.class);

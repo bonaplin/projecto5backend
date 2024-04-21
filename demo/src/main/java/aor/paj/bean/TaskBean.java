@@ -61,6 +61,9 @@ public class TaskBean {
     @Inject
     TokenBean tokenBean;
 
+    @EJB
+    StatisticBean statisticBean;
+
     Gson gson = new GsonBuilder()
             .registerTypeAdapter(Instant.class, new InstantAdapter())
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
@@ -97,7 +100,8 @@ public class TaskBean {
         taskDao.persist(taskEntity);
 
         sendNewTask(taskEntity);
-
+        sendNumberOfTasksPerStatus();
+        sendAvgTaskPerUser();
         return true;
     }
 
@@ -150,6 +154,7 @@ public class TaskBean {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskEntity.setStatus(status);
         taskDao.merge(taskEntity);
+        sendNumberOfTasksPerStatus();
     }
     
     //Function that receives a task id and sets the task active to false in the database mysql
@@ -167,23 +172,25 @@ public class TaskBean {
 
         String taskDtoJsonString = taskDtoJson.toString();
         notifier.sendToAllSessions(taskDtoJsonString);
+        sendNumberOfTasksPerStatus();
         return true;
     }
-    public boolean deleteTasks(int id) {
-        TaskEntity taskEntity = taskDao.findTaskById(id);
-        if(taskEntity == null) return false;
-
-        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
-
-        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
-        taskDtoJson.addProperty("type", MessageType.TASK_DELETE.getValue());
-
-        taskDao.remove(taskEntity);
-
-        String taskDtoJsonString = taskDtoJson.toString();
-        notifier.sendToAllSessions(taskDtoJsonString);
-        return true;
-    }
+//    public boolean deleteTasks(int id) {
+//        TaskEntity taskEntity = taskDao.findTaskById(id);
+//        if(taskEntity == null) return false;
+//
+//        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+//
+//        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+//        taskDtoJson.addProperty("type", MessageType.TASK_DELETE.getValue());
+//
+//        taskDao.remove(taskEntity);
+//
+//        String taskDtoJsonString = taskDtoJson.toString();
+//        notifier.sendToAllSessions(taskDtoJsonString);
+//        sendNumberOfTasksPerStatus();
+//        return true;
+//    }
     
     //Function that receives a task id and a token and checks if the user its the owner of task with that id
     public boolean taskBelongsToUser(String token, int id) {
@@ -215,8 +222,7 @@ public class TaskBean {
         taskEntity.setPriority(taskDto.getPriority());
         taskEntity.setCategory(categoryDao.findCategoryByTitle(taskDto.getCategory()));
         taskDao.merge(taskEntity);
-
-        //verificar se o status foi alterado
+        sendNumberOfTasksPerStatus();
         if(!statusAsChanged(taskDto, lastStatus)) handleTaskEdit(taskEntity);
         else handleTaskEditMove(taskEntity, lastStatus);
     }
@@ -234,6 +240,7 @@ public class TaskBean {
         String taskDtoJsonString = taskDtoJson.toString();
 
         // Send taskDtoJsonString to all logged in users
+//        sendNumberOfTasksPerStatus();
         notifier.sendToAllSessions(taskDtoJsonString);
     }
 
@@ -249,12 +256,13 @@ public class TaskBean {
 
         // Convert taskDtoJson back to string
         String taskDtoJsonString = taskDtoJson.toString();
-
+//        sendNumberOfTasksPerStatus();
         // Send taskDtoJsonString to all logged in users
         notifier.sendToAllSessions(taskDtoJsonString);
     }
 
     private boolean statusAsChanged(TaskDto taskDto, int lastStatus) {
+//        sendNumberOfTasksPerStatus();
         return taskDto.getStatus() != lastStatus;
     }
 
@@ -262,6 +270,8 @@ public class TaskBean {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskEntity.setActive(true);
         taskDao.merge(taskEntity);
+        sendAvgTaskPerUser();
+        sendNumberOfTasksPerStatus();
         return true;
     }
 
@@ -278,6 +288,8 @@ public class TaskBean {
 
         String taskDtoJsonString = taskDtoJson.toString();
         notifier.sendToAllSessions(taskDtoJsonString);
+        sendAvgTaskPerUser();
+        sendNumberOfTasksPerStatus();
         return true;
     }
 
@@ -288,6 +300,8 @@ public class TaskBean {
             if (!taskEntity.getActive()) {
                 taskEntity.setActive(true);
                 taskDao.merge(taskEntity);
+                sendAvgTaskPerUser();
+                sendNumberOfTasksPerStatus();
             }
         }
         return true;
@@ -299,6 +313,8 @@ public class TaskBean {
         for (TaskEntity taskEntity : taskEntities) {
             if (!taskEntity.getActive()) {
                 taskDao.remove(taskEntity);
+                sendAvgTaskPerUser();
+                sendNumberOfTasksPerStatus();
             }
         }
         return true;
@@ -338,14 +354,14 @@ public class TaskBean {
         return taskDtos;
     }
 
-    public List<TaskDto> getActiveStatusTasks(int status) {
-        List<TaskEntity> taskEntities = taskDao.getActiveStatusTasks(status);
-        ArrayList<TaskDto> taskDtos = new ArrayList<>();
-        for (TaskEntity taskEntity : taskEntities) {
-            taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
-        }
-        return taskDtos;
-    }
+//    public List<TaskDto> getActiveStatusTasks(int status) {
+//        List<TaskEntity> taskEntities = taskDao.getActiveStatusTasks(status);
+//        ArrayList<TaskDto> taskDtos = new ArrayList<>();
+//        for (TaskEntity taskEntity : taskEntities) {
+//            taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
+//        }
+//        return taskDtos;
+//    }
 
 //    public List<TaskDto> getTasksBasedOnQueryParams(String category, String username, Boolean active) {
 //        if (category != null && !category.isEmpty() && username != null && !username.isEmpty()) {
@@ -392,6 +408,7 @@ public class TaskBean {
 
         // Send taskDtoJsonString to all logged in users
         notifier.sendToAllSessions(taskDtoJsonString);
+//        sendNumberOfTasksPerStatus();
         return true;
     }
 
@@ -445,4 +462,14 @@ public class TaskBean {
 
         return taskLists;
     }
+
+    public void sendAvgTaskPerUser(){
+        statisticBean.sendAvgTaskPerUser(MessageType.STATISTIC_TASK);
+    }
+
+    public void sendNumberOfTasksPerStatus(){
+        statisticBean.sendNumberOfTasksPerStatus(MessageType.STATISTIC_TASK_PER_STATUS);
+    }
+
+
 }
