@@ -67,9 +67,6 @@ public class TaskEntity implements Serializable {
     @JoinColumn(name = "category_id", nullable = false)
     private CategoryEntity category;
 
-//    @Column(name="doneDate", nullable = true, unique = false, updatable = true)
-//    private LocalDate doneDate;
-
     public TaskEntity() {
     }
 
@@ -153,15 +150,6 @@ public class TaskEntity implements Serializable {
         this.category = category;
     }
 
-//    public LocalDate getDoneDate() {
-//        return doneDate;
-//    }
-//
-//    public void setDoneDate(LocalDate doneDate) {
-//        this.doneDate = doneDate;
-//    }
-
-
     public LocalDate getDoneDate() {
         return doneDate;
     }
@@ -169,6 +157,7 @@ public class TaskEntity implements Serializable {
     public void setDoneDate(LocalDate doneDate) {
         this.doneDate = doneDate;
     }
+
 
     @Override
     public String toString() {

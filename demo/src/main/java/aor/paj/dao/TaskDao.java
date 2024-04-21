@@ -3,6 +3,7 @@ package aor.paj.dao;
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
 import aor.paj.entity.UserEntity;
+import aor.paj.utils.State;
 import jakarta.ejb.Stateless;
 import jakarta.persistence.NoResultException;
 
@@ -102,18 +103,18 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         }
     }
 
-    public List<TaskEntity> getTasksByStatusAndOwnerAndCategoryAndStatus(Integer status, UserEntity owner, CategoryEntity category, Integer taskStatus){
-        try {
-            return em.createNamedQuery("Task.findTaskByStatusAndOwnerAndCategoryAndStatus", TaskEntity.class)
-                    .setParameter("status", status)
-                    .setParameter("owner", owner)
-                    .setParameter("category", category)
-                    .setParameter("taskStatus", taskStatus)
-                    .getResultList();
-        } catch (NoResultException e) {
-            return new ArrayList<>();
-        }
-    }
+//    public List<TaskEntity> getTasksByStatusAndOwnerAndCategoryAndStatus(Integer status, UserEntity owner, CategoryEntity category, Integer taskStatus){
+//        try {
+//            return em.createNamedQuery("Task.findTaskByStatusAndOwnerAndCategoryAndStatus", TaskEntity.class)
+//                    .setParameter("status", status)
+//                    .setParameter("owner", owner)
+//                    .setParameter("category", category)
+//                    .setParameter("taskStatus", taskStatus)
+//                    .getResultList();
+//        } catch (NoResultException e) {
+//            return new ArrayList<>();
+//        }
+//    }
 
     public TaskEntity getPreviousTask(List<TaskEntity> orderedTasks, TaskEntity currentTask) {
         int currentIndex = orderedTasks.indexOf(currentTask);
@@ -191,19 +192,31 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         return taskCountByUserAndState;
     }
     public double getAverageCompletionTime() {
+        // Find all tasks that are done
+        System.out.println("getAverageCompletionTime");
         List<TaskEntity> doneTasks = em.createQuery("SELECT t FROM TaskEntity t WHERE t.status = 300", TaskEntity.class).getResultList();
         if (doneTasks.isEmpty()) {
             return 0;
         }
-
+        System.out.println("doneTasks.size() = " + doneTasks.size());
+        // Calculate the total duration of done tasks from initial to done date
         long totalDuration = 0;
         for (TaskEntity task : doneTasks) {
-            long duration = Duration.between(task.getInitialDate(), task.getDoneDate()).toMillis();
-            totalDuration += duration;
+            LocalDate doneDate = task.getDoneDate();
+            if (doneDate != null) {
+                System.out.println("task.getInitialDate() = " + task.getInitialDate());
+                long duration = Duration.between(task.getInitialDate().atStartOfDay(), doneDate.atStartOfDay()).toHours();
+                System.out.println("duration = " + duration);
+                totalDuration += duration;
+            } else {
+                System.out.println("Task with ID: " + task.getId() + " does not have a done date.");
+            }
         }
-
-        return totalDuration / (double) doneTasks.size();
+        // Calculate the average duration
+        double averageDuration = (double) totalDuration / doneTasks.size();
+        return averageDuration;
     }
+
 
     public List<LocalDate> getDoneTaskCompletionDates() {
         return em.createQuery("SELECT t.doneDate FROM TaskEntity t WHERE t.active = true AND t.status = 300 ORDER BY t.doneDate", LocalDate.class).getResultList();
@@ -223,6 +236,13 @@ public class TaskDao extends AbstractDao<TaskEntity>{
         return results.stream().mapToLong(result -> (Long) result[1]).average().orElse(0);
     }
 
-    // query para receber a media de tarefas todo, doing e done por utilizador
-
+    public List<Object[]> getCompletedTasksByTime() {
+        return em.createQuery("SELECT YEAR(t.doneDate), MONTH(t.doneDate), COUNT(t) " +
+                        "FROM TaskEntity t " +
+                        "WHERE t.status = :status " +
+                        "GROUP BY YEAR(t.doneDate), MONTH(t.doneDate) " +
+                        "ORDER BY YEAR(t.doneDate), MONTH(t.doneDate)", Object[].class)
+                .setParameter("status", State.DONE.getValue())
+                .getResultList();
+    }
 }

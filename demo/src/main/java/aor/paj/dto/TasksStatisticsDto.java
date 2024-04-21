@@ -8,6 +8,7 @@ public class TasksStatisticsDto {
     private double todoPerUser;
     private double doingPerUser;
     private double donePerUser;
+    private double avgTimeToBeDone;
 
     public TasksStatisticsDto() {
     }
@@ -46,5 +47,13 @@ public class TasksStatisticsDto {
 
     public void setDonePerUser(double donePerUser) {
         this.donePerUser = donePerUser;
+    }
+
+    public double getAvgTimeToBeDone() {
+        return avgTimeToBeDone;
+    }
+
+    public void setAvgTimeToBeDone(double avgTimeToBeDone) {
+        this.avgTimeToBeDone = avgTimeToBeDone;
     }
 }

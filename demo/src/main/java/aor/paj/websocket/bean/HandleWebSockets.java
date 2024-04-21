@@ -16,15 +16,14 @@ import aor.paj.gson.InstantAdapter;
 //import aor.paj.websocket.dto.MessageSocketDto;
 import aor.paj.utils.MessageType;
 import aor.paj.websocket.Notifier;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.websocket.EncodeException;
 import jakarta.websocket.Session;
 
 import javax.management.Notification;
+import java.awt.*;
 import java.io.IOException;
 import java.time.Instant;
 
@@ -179,6 +178,18 @@ public class HandleWebSockets {
         jsonObject.addProperty("type", messageType.getValue());
 
         // Return the JSON representation of the modified JsonObject
+        return gson.toJson(jsonObject);
+    }
+    public String convertListToJsonString(Object object, MessageType messageType) {
+        // Convert the list to a JsonElement
+        JsonElement jsonElement = gson.toJsonTree(object);
+
+        // Create a new JsonObject to hold the array and the "type" property
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.add("data", jsonElement);
+        jsonObject.addProperty("type", messageType.getValue());
+
+        // Return the JSON representation of the JsonObject
         return gson.toJson(jsonObject);
     }
 

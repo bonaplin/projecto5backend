@@ -155,6 +155,7 @@ public class TaskBean {
         taskEntity.setStatus(status);
         taskDao.merge(taskEntity);
         sendNumberOfTasksPerStatus();
+        sendCompletedTasksOverTime();
     }
     
     //Function that receives a task id and sets the task active to false in the database mysql
@@ -173,24 +174,9 @@ public class TaskBean {
         String taskDtoJsonString = taskDtoJson.toString();
         notifier.sendToAllSessions(taskDtoJsonString);
         sendNumberOfTasksPerStatus();
+        sendCompletedTasksOverTime();
         return true;
     }
-//    public boolean deleteTasks(int id) {
-//        TaskEntity taskEntity = taskDao.findTaskById(id);
-//        if(taskEntity == null) return false;
-//
-//        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
-//
-//        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
-//        taskDtoJson.addProperty("type", MessageType.TASK_DELETE.getValue());
-//
-//        taskDao.remove(taskEntity);
-//
-//        String taskDtoJsonString = taskDtoJson.toString();
-//        notifier.sendToAllSessions(taskDtoJsonString);
-//        sendNumberOfTasksPerStatus();
-//        return true;
-//    }
     
     //Function that receives a task id and a token and checks if the user its the owner of task with that id
     public boolean taskBelongsToUser(String token, int id) {
@@ -302,6 +288,7 @@ public class TaskBean {
                 taskDao.merge(taskEntity);
                 sendAvgTaskPerUser();
                 sendNumberOfTasksPerStatus();
+                sendCompletedTasksOverTime();
             }
         }
         return true;
@@ -315,6 +302,7 @@ public class TaskBean {
                 taskDao.remove(taskEntity);
                 sendAvgTaskPerUser();
                 sendNumberOfTasksPerStatus();
+                sendCompletedTasksOverTime();
             }
         }
         return true;
@@ -354,30 +342,6 @@ public class TaskBean {
         return taskDtos;
     }
 
-//    public List<TaskDto> getActiveStatusTasks(int status) {
-//        List<TaskEntity> taskEntities = taskDao.getActiveStatusTasks(status);
-//        ArrayList<TaskDto> taskDtos = new ArrayList<>();
-//        for (TaskEntity taskEntity : taskEntities) {
-//            taskDtos.add(TaskMapper.convertTaskEntityToTaskDto(taskEntity));
-//        }
-//        return taskDtos;
-//    }
-
-//    public List<TaskDto> getTasksBasedOnQueryParams(String category, String username, Boolean active) {
-//        if (category != null && !category.isEmpty() && username != null && !username.isEmpty()) {
-//            return getTasksByCategoryAndOwner(category, username);
-//        } else if (category != null && !category.isEmpty()) {
-//            return getTasksByCategory(category);
-//        } else if (username != null && !username.isEmpty()) {
-//            return getTasksByOwner(username);
-//        } else if (active != null) {
-//            return active ? getActiveTasks() : getInactiveTasks();
-//        } else {
-//            return getActiveTasks();
-//        }
-//    }
-
-
     public boolean handleTaskMove(Session session, JsonObject jsonObject) {
         int taskID = jsonObject.get("id").getAsInt();
         int status = jsonObject.get("status").getAsInt();
@@ -395,6 +359,10 @@ public class TaskBean {
         TaskEntity taskEntityUpdated = taskDao.findTaskById(taskID);
         TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntityUpdated);
 
+        if(statusAsChanged(taskDto, lastStatus) && status == 300) {
+            taskEntityUpdated.setDoneDate(LocalDate.now());
+            taskDao.merge(taskEntityUpdated);
+        }
         // Convert taskDto to JsonObject
         JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
 
@@ -412,32 +380,6 @@ public class TaskBean {
         return true;
     }
 
-//    public boolean handleEditTask(Session session, JsonObject jsonObject){
-//        int taskID = jsonObject.get("id").getAsInt();
-//        TaskDto taskDto = gson.fromJson(jsonObject, TaskDto.class);
-//        String token = session.getPathParameters().get("token");
-//
-//        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
-//        if(tokenStatus != TokenStatus.VALID) return false;
-//
-//        updateTask(taskDto, taskID);
-//
-//        TaskEntity taskEntityUpdated = taskDao.findTaskById(taskID);
-//        TaskDto taskDtoUpdated = TaskMapper.convertTaskEntityToTaskDto(taskEntityUpdated);
-//
-//        // Convert taskDto to JsonObject
-//        JsonObject taskDtoJson = gson.toJsonTree(taskDtoUpdated).getAsJsonObject();
-//
-//        // Add "type" property to taskDtoJson
-//        taskDtoJson.addProperty("type", MessageType.TASK_MOVE.getValue());
-//
-//        // Convert taskDtoJson back to string
-//        String taskDtoJsonString = taskDtoJson.toString();
-//
-//        // Send taskDtoJsonString to all logged in users
-//        notifier.sendToAllSessions(taskDtoJsonString);
-//        return true;
-//    }
 
     // Para devolver as tarefas já organizadas por estado ou como um tod0 caso sejam para ver em lista. ***
     public Object getTasksBasedOnQueryParams(String category, String username, Boolean active) {
@@ -469,6 +411,9 @@ public class TaskBean {
 
     public void sendNumberOfTasksPerStatus(){
         statisticBean.sendNumberOfTasksPerStatus(MessageType.STATISTIC_TASK_PER_STATUS);
+    }
+    public void sendCompletedTasksOverTime(){
+        statisticBean.sendCompletedTasksOverTime();
     }
 
 

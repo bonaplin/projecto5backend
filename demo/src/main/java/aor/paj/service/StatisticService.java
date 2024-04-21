@@ -3,6 +3,7 @@ package aor.paj.service;
 import aor.paj.bean.StatisticBean;
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
+import aor.paj.dto.RegistrationDataDto;
 import aor.paj.dto.UserStatisticsDto;
 import aor.paj.utils.TokenStatus;
 import aor.paj.websocket.Notifier;
@@ -12,6 +13,8 @@ import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Response;
+
+import java.util.List;
 
 @Path("/statistic")
 public class StatisticService {
@@ -55,6 +58,37 @@ public class StatisticService {
         return Response.status(Response.Status.FORBIDDEN).build();
     }
 
+    @GET
+    @Path("/userchart")
+    @Produces("application/json")
+    public Response getUserChart(@HeaderParam("token") String token) {
+        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+
+        if(tokenStatus != TokenStatus.VALID) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        if(tokenBean.isProductOwner(token)){
+            List<RegistrationDataDto> registrationData = statisticBean.getRegisteredUserOverTime();
+            return Response.ok(registrationData).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).build();
+    }
+
+    @GET
+    @Path("/taskschart")
+    @Produces("application/json")
+    public Response getTaskChart(@HeaderParam("token") String token) {
+        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+
+        if(tokenStatus != TokenStatus.VALID) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        if(tokenBean.isProductOwner(token)){
+            List<RegistrationDataDto> taskStatistics = statisticBean.getCompletedTasksOverTime();
+            return Response.ok(taskStatistics).build();
+        }
+        return Response.status(Response.Status.FORBIDDEN).build();
+    }
 
 
 }

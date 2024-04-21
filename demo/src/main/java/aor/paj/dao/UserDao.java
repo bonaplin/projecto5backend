@@ -111,6 +111,12 @@ public class UserDao extends AbstractDao<UserEntity> {
         return em.createQuery("SELECT u.created FROM UserEntity u WHERE u.active = true ORDER BY u.created", LocalDate.class).getResultList();
     }
 
+    public List<Object[]> getRegistrationByTime() {
+        return em.createQuery("SELECT YEAR(u.created), MONTH(u.created), COUNT(u) " +
+                "FROM UserEntity u " +
+                "GROUP BY YEAR(u.created), MONTH(u.created) " +
+                "ORDER BY YEAR(u.created), MONTH(u.created)").getResultList();
+    }
 
 
 

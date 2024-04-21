@@ -69,7 +69,7 @@ public class UserBean {
             userDao.persist(userEntity);
             logger.info("user a ser adicionado: " + userEntity.getUsername());
 
-            statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
+            statisticBean.sendUserStatistics();
             return true;
     }
     public boolean addUserPO(UserDto user, String role) {
@@ -106,7 +106,7 @@ public class UserBean {
         EmailSender.sendVerificationEmail(userEntity.getEmail(), userEntity.getUsername(), verificationLink);
 
         logger.info("User adicionado: " + userEntity.getUsername()+" & email de verificação enviado para: " + userEntity.getEmail());
-        statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
+        statisticBean.sendUserStatistics();
 
         return true;
     }
@@ -251,7 +251,7 @@ public class UserBean {
 
             userDao.remove(userEntity);
             System.out.println("user removido");
-            statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
+            statisticBean.sendUserStatistics();
 
             return true;
 
@@ -405,7 +405,8 @@ public class UserBean {
     public boolean userConfirmed(String token){
         UserEntity userEntity = tokenDao.findUserByTokenString(token);
            if(userEntity != null){
-               statisticBean.sendUserStatistics(MessageType.STATISTIC_USER);
+               statisticBean.sendUserStatistics();
+               statisticBean.sendRegisteredUserOverTime();
                return userEntity.getConfirmed();
             }
         return false;
