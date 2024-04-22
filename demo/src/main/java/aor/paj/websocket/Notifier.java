@@ -4,6 +4,7 @@ import aor.paj.bean.MessageBean;
 import aor.paj.websocket.bean.HandleWebSockets;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Singleton;
+import jakarta.inject.Inject;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -16,7 +17,7 @@ import java.util.Map;
 
 public class Notifier {
 
-    @EJB
+    @Inject
     private HandleWebSockets handleWebSockets;
 
 

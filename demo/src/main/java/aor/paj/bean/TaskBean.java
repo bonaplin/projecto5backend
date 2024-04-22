@@ -4,14 +4,13 @@ import aor.paj.dao.CategoryDao;
 import aor.paj.dao.TaskDao;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
-import aor.paj.dto.TaskDto;
-import aor.paj.dto.TaskListsDto;
-import aor.paj.dto.UserDto;
+import aor.paj.dto.*;
 import aor.paj.entity.CategoryEntity;
 import aor.paj.entity.TaskEntity;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.gson.InstantAdapter;
+import aor.paj.mapper.CategoryMapper;
 import aor.paj.mapper.TaskMapper;
 import aor.paj.service.LocalDateAdapter;
 import aor.paj.utils.JsonUtils;
@@ -20,6 +19,7 @@ import aor.paj.utils.State;
 import aor.paj.utils.TokenStatus;
 import aor.paj.websocket.Notifier;
 import aor.paj.websocket.bean.HandleWebSockets;
+import com.fasterxml.jackson.databind.cfg.MapperBuilder;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -32,7 +32,9 @@ import jakarta.websocket.Session;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static aor.paj.utils.MessageType.TASK_CREATE;
@@ -376,7 +378,8 @@ public class TaskBean {
 
         // Send taskDtoJsonString to all logged in users
         notifier.sendToAllSessions(taskDtoJsonString);
-//        sendNumberOfTasksPerStatus();
+        //ab33
+        sendNumberOfTasksPerStatus();
         return true;
     }
 
@@ -413,7 +416,19 @@ public class TaskBean {
         statisticBean.sendNumberOfTasksPerStatus(MessageType.STATISTIC_TASK_PER_STATUS);
     }
     public void sendCompletedTasksOverTime(){
+        //ab33
         statisticBean.sendCompletedTasksOverTime();
+    }
+
+    public List<CategoryCountDto> getTasksPerCategory(){
+        List<Object[]> results = taskDao.getTasksByCategory();
+        List<CategoryCountDto> categoryData = new ArrayList<>();
+        for (Object[] result : results) {
+            String name = (String) result[0];
+            Long count = (Long) result[1];
+            categoryData.add(new CategoryCountDto(name, count));
+        }
+        return categoryData;
     }
 
 

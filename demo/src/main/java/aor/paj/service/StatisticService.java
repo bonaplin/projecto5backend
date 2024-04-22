@@ -1,10 +1,14 @@
 package aor.paj.service;
 
 import aor.paj.bean.StatisticBean;
+import aor.paj.bean.TaskBean;
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
+import aor.paj.dto.CategoryCountDto;
+import aor.paj.dto.CategoryDto;
 import aor.paj.dto.RegistrationDataDto;
 import aor.paj.dto.UserStatisticsDto;
+import aor.paj.entity.CategoryEntity;
 import aor.paj.utils.TokenStatus;
 import aor.paj.websocket.Notifier;
 import jakarta.inject.Inject;
@@ -26,6 +30,8 @@ public class StatisticService {
     private TokenBean tokenBean;
     @Inject
     private UserBean userBean;
+    @Inject
+    private TaskBean taskBean;
 
     @GET
     @Path("/user")
@@ -86,6 +92,23 @@ public class StatisticService {
         if(tokenBean.isProductOwner(token)){
             List<RegistrationDataDto> taskStatistics = statisticBean.getCompletedTasksOverTime();
             return Response.ok(taskStatistics).build();
+
+        }
+        return Response.status(Response.Status.FORBIDDEN).build();
+    }
+
+    @GET
+    @Path("/orderCategories")
+    @Produces("application/json")
+    public Response getOrderCategories(@HeaderParam("token") String token) {
+        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+
+        if(tokenStatus != TokenStatus.VALID) {
+            return Response.status(Response.Status.UNAUTHORIZED).build();
+        }
+        if(tokenBean.isProductOwner(token)){
+        List<CategoryCountDto> categories = taskBean.getTasksPerCategory();
+            return Response.ok(categories).build();
         }
         return Response.status(Response.Status.FORBIDDEN).build();
     }

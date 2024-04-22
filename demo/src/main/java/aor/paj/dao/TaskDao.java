@@ -245,4 +245,8 @@ public class TaskDao extends AbstractDao<TaskEntity>{
                 .setParameter("status", State.DONE.getValue())
                 .getResultList();
     }
+
+    public List<Object[]> getTasksByCategory() {
+        return em.createQuery("SELECT t.category.title, COUNT(t) as task_count FROM TaskEntity t GROUP BY t.category.title ORDER BY task_count DESC ").getResultList();
+    }
 }
