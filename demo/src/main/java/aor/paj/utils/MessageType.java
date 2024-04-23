@@ -15,6 +15,7 @@ public enum MessageType {
     STATISTIC_TASK_PER_STATUS(33),
     STATISTIC_REGISTRATION(34),
     STATISTIC_TASK_COMULATIVE(35),
+    STATISTIC_CATEGORY_COUNT(36),
     TYPE_40(40);
 
     private final int value;

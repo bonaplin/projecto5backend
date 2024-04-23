@@ -2,6 +2,7 @@ package aor.paj.bean;
 
 import aor.paj.dao.TaskDao;
 import aor.paj.dao.UserDao;
+import aor.paj.dto.CategoryCountDto;
 import aor.paj.dto.RegistrationDataDto;
 import aor.paj.dto.TasksStatisticsDto;
 import aor.paj.dto.UserStatisticsDto;
@@ -175,6 +176,24 @@ public class StatisticBean {
         }catch (Exception e){
             e.printStackTrace();
         }
+    }
+
+    public void sendCategoryCount(MessageType messageType) {
+        List<CategoryCountDto> categoryCountList = getTasksPerCategory();
+        String json = handleWebSockets.convertListToJsonString(categoryCountList, messageType);
+        notifier.sendToAllProductOwnerSessions(json);
+        System.out.println("json que vai para o frontend:\n\n"+json);
+    }
+
+    public List<CategoryCountDto> getTasksPerCategory(){
+        List<Object[]> results = taskDao.getTasksByCategory();
+        List<CategoryCountDto> categoryData = new ArrayList<>();
+        for (Object[] result : results) {
+            String name = (String) result[0];
+            Long count = (Long) result[1];
+            categoryData.add(new CategoryCountDto(name, count));
+        }
+        return categoryData;
     }
 
 

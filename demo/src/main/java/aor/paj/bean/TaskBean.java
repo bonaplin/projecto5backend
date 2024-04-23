@@ -104,6 +104,8 @@ public class TaskBean {
         sendNewTask(taskEntity);
         sendNumberOfTasksPerStatus();
         sendAvgTaskPerUser();
+        sendCategoryCount();
+
         return true;
     }
 
@@ -158,6 +160,8 @@ public class TaskBean {
         taskDao.merge(taskEntity);
         sendNumberOfTasksPerStatus();
         sendCompletedTasksOverTime();
+        sendCategoryCount();
+
     }
     
     //Function that receives a task id and sets the task active to false in the database mysql
@@ -177,6 +181,8 @@ public class TaskBean {
         notifier.sendToAllSessions(taskDtoJsonString);
         sendNumberOfTasksPerStatus();
         sendCompletedTasksOverTime();
+        sendCategoryCount();
+
         return true;
     }
     
@@ -213,6 +219,8 @@ public class TaskBean {
         sendNumberOfTasksPerStatus();
         if(!statusAsChanged(taskDto, lastStatus)) handleTaskEdit(taskEntity);
         else handleTaskEditMove(taskEntity, lastStatus);
+        sendCategoryCount();
+
     }
 
     private void handleTaskEdit(TaskEntity taskEntity) {
@@ -250,8 +258,12 @@ public class TaskBean {
     }
 
     private boolean statusAsChanged(TaskDto taskDto, int lastStatus) {
+        if(taskDto.getStatus() != lastStatus){
+            sendCategoryCount();
+            return true;
+        }
 //        sendNumberOfTasksPerStatus();
-        return taskDto.getStatus() != lastStatus;
+        return false;
     }
 
     public boolean restoreTask(int id) {
@@ -260,6 +272,7 @@ public class TaskBean {
         taskDao.merge(taskEntity);
         sendAvgTaskPerUser();
         sendNumberOfTasksPerStatus();
+        sendCategoryCount();
         return true;
     }
 
@@ -278,6 +291,7 @@ public class TaskBean {
         notifier.sendToAllSessions(taskDtoJsonString);
         sendAvgTaskPerUser();
         sendNumberOfTasksPerStatus();
+        sendCategoryCount();
         return true;
     }
 
@@ -291,6 +305,7 @@ public class TaskBean {
                 sendAvgTaskPerUser();
                 sendNumberOfTasksPerStatus();
                 sendCompletedTasksOverTime();
+                sendCategoryCount();
             }
         }
         return true;
@@ -305,6 +320,7 @@ public class TaskBean {
                 sendAvgTaskPerUser();
                 sendNumberOfTasksPerStatus();
                 sendCompletedTasksOverTime();
+                sendCategoryCount();
             }
         }
         return true;
@@ -416,20 +432,15 @@ public class TaskBean {
         statisticBean.sendNumberOfTasksPerStatus(MessageType.STATISTIC_TASK_PER_STATUS);
     }
     public void sendCompletedTasksOverTime(){
-        //ab33
         statisticBean.sendCompletedTasksOverTime();
     }
 
-    public List<CategoryCountDto> getTasksPerCategory(){
-        List<Object[]> results = taskDao.getTasksByCategory();
-        List<CategoryCountDto> categoryData = new ArrayList<>();
-        for (Object[] result : results) {
-            String name = (String) result[0];
-            Long count = (Long) result[1];
-            categoryData.add(new CategoryCountDto(name, count));
-        }
-        return categoryData;
+    public void sendCategoryCount(){
+        statisticBean.sendCategoryCount(MessageType.STATISTIC_CATEGORY_COUNT);
     }
+
+
+
 
 
 }

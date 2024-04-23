@@ -107,7 +107,7 @@ public class StatisticService {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
         if(tokenBean.isProductOwner(token)){
-        List<CategoryCountDto> categories = taskBean.getTasksPerCategory();
+        List<CategoryCountDto> categories = statisticBean.getTasksPerCategory();
             return Response.ok(categories).build();
         }
         return Response.status(Response.Status.FORBIDDEN).build();
