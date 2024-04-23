@@ -156,6 +156,9 @@ public class TaskBean {
     //Function that receives a task id and a new task status and updates the task status in the database mysql
     public void updateTaskStatus(int id, int status) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
+        if(status == 300){
+            taskEntity.setDoneDate(LocalDate.now());
+        }
         taskEntity.setStatus(status);
         taskDao.merge(taskEntity);
         sendNumberOfTasksPerStatus();
@@ -183,6 +186,7 @@ public class TaskBean {
         sendCompletedTasksOverTime();
         sendCategoryCount();
 
+
         return true;
     }
     
@@ -192,6 +196,8 @@ public class TaskBean {
         if (tokenEntity != null) {
             UserEntity userEntity = tokenEntity.getUser();
             TaskEntity taskEntity = taskDao.findTaskById(id);
+            System.out.println("TaskEntity: " + taskEntity);
+            System.out.println("UserEntity: " + userEntity);
             if (taskEntity.getOwner().getId() == userEntity.getId()) {
                 return true;
             }
@@ -216,10 +222,12 @@ public class TaskBean {
         taskEntity.setPriority(taskDto.getPriority());
         taskEntity.setCategory(categoryDao.findCategoryByTitle(taskDto.getCategory()));
         taskDao.merge(taskEntity);
-        sendNumberOfTasksPerStatus();
+
         if(!statusAsChanged(taskDto, lastStatus)) handleTaskEdit(taskEntity);
         else handleTaskEditMove(taskEntity, lastStatus);
         sendCategoryCount();
+        sendNumberOfTasksPerStatus();
+
 
     }
 
@@ -270,11 +278,40 @@ public class TaskBean {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskEntity.setActive(true);
         taskDao.merge(taskEntity);
+
+        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+        taskDtoJson.addProperty("type", MessageType.TASK_RESTORE.getValue());
+
+        String taskDtoJsonString = taskDtoJson.toString();
+        notifier.sendToAllSessions(taskDtoJsonString);
+
         sendAvgTaskPerUser();
         sendNumberOfTasksPerStatus();
         sendCategoryCount();
         return true;
     }
+//     public boolean desactivateTask(int id) {
+//        TaskEntity taskEntity = taskDao.findTaskById(id);
+//        if(taskEntity == null) return false;
+//        taskEntity.setActive(false);
+//
+//        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
+//
+//        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
+//        taskDtoJson.addProperty("type", MessageType.TASK_DESACTIVATE.getValue());
+//
+//        taskDao.merge(taskEntity);
+//
+//        String taskDtoJsonString = taskDtoJson.toString();
+//        notifier.sendToAllSessions(taskDtoJsonString);
+//        sendNumberOfTasksPerStatus();
+//        sendCompletedTasksOverTime();
+//        sendCategoryCount();
+//
+//
+//        return true;
+//    }
 
     public boolean deleteTask(int id) {
         TaskEntity taskEntity = taskDao.findTaskById(id);

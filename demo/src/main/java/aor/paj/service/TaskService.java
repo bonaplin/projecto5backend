@@ -105,7 +105,10 @@ public class TaskService {
         }
 
         String role = tokenBean.getUserRole(token);
-        if (!role.equals("dev") && (taskBean.taskBelongsToUser(token, id) || role.equals("sm") || role.equals("po"))) {
+        System.out.println("Role: " + role);
+        System.out.println("vai entrar nos ifs");
+        if ((taskBean.taskBelongsToUser(token, id) || role.equals("sm") || role.equals("po"))) {
+            System.out.println("Desactivating task");
             if (taskBean.desactivateTask(id)) {
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is desactivated"))).build();
             } else {

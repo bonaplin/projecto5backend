@@ -9,6 +9,7 @@ public enum MessageType {
     TASK_EDIT_AND_MOVE(24),
     TASK_DESACTIVATE(25),
     TASK_DELETE(26),
+    TASK_RESTORE(27),
     LOGOUT(30),
     STATISTIC_USER(31),
     STATISTIC_TASK(32),

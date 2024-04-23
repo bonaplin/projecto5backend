@@ -44,8 +44,6 @@ public class HandleWebSockets {
     NotificationBean notificationBean;
     @EJB
     NotificationDao notificationDao;
-//    @EJB
-//    Notifier notifier;
 
     Gson gson = new GsonBuilder()
             .registerTypeAdapter(Instant.class, new InstantAdapter())
