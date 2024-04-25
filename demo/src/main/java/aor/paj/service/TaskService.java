@@ -118,27 +118,6 @@ public class TaskService {
 
         return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
     }
-    //Service that receives a token, a taskdto and a task id and updates the task with the id that is received
-//    @PUT
-//    @Path("/update")
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response updateTask(@HeaderParam("token") String token, TaskDto t, @QueryParam("id") int id) {
-//        if (userBean.isValidUserByToken(token)) {
-//            if(userBean.hasPermissionToEdit(token, id)){
-//                if (TaskValidator.isValidTaskEdit(t)) {
-//                    taskBean.updateTask(t, id);
-//                    return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is updated"))).build();
-//                } else {
-//                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid task"))).build();
-//                }
-//            } else {
-//                return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
-//            }
-//        } else {
-//            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-//        }
-//    }
     @PUT
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -165,48 +144,7 @@ public class TaskService {
 
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is updated"))).build();
     }
-    //Service that receives a token and a task name, validates the token and sets the active of that task to true
-//    @PUT
-//    @Path("/restore")
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response restoreTask(@HeaderParam("token") String token, @QueryParam("name") String name) {
-//        if (userBean.isValidUserByToken(token)) {
-//            String role = userBean.getUserRole(token);
-//            if (role.equals("sm") || role.equals("po")) {
-//                if (taskBean.restoreTask(name)) {
-//                    return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is restored"))).build();
-//                } else {
-//                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot restore task"))).build();
-//                }
-//            } else {
-//                return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
-//            }
-//        } else {
-//            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-//        }
-//    }
-    //Service that receives a token and a task name, validates the token, checks if user = po, and deletes the task from the database
-//    @DELETE
-//    @Path("/delete")
-//    @Consumes(MediaType.APPLICATION_JSON)
-//    @Produces(MediaType.APPLICATION_JSON)
-//    public Response removeTask(@HeaderParam("token") String token, @QueryParam("name") String name) {
-//        if (userBean.isValidUserByToken(token)) {
-//            String role = userBean.getUserRole(token);
-//            if (role.equals("po")) {
-//                if (taskBean.deleteTask(name)) {
-//                    return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is deleted"))).build();
-//                } else {
-//                    return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot delete task"))).build();
-//                }
-//            } else {
-//                return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
-//            }
-//        } else {
-//            return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
-//        }
-//    }
+
     @DELETE
     @Path("/{id}")
     @Consumes(MediaType.APPLICATION_JSON)

@@ -9,7 +9,9 @@ import aor.paj.entity.MessageEntity;
 import aor.paj.entity.UserEntity;
 import aor.paj.utils.MessageType;
 import aor.paj.websocket.Notifier;
+import aor.paj.websocket.bean.HandleWebSockets;
 import aor.paj.websocket.dto.InfoSocket;
+import com.google.gson.JsonObject;
 import jakarta.ejb.Stateless;
 import jakarta.websocket.EncodeException;
 import jakarta.websocket.Session;
@@ -30,6 +32,9 @@ public class MessageBean {
     MessageDao messageDao;
     @EJB
     TokenDao tokenDao;
+
+    @EJB
+    HandleWebSockets handleWebSockets;
     @EJB
     Notifier notifier;
     private Gson gson = new Gson();
@@ -90,11 +95,17 @@ public class MessageBean {
         }
     }
 
-    public List<MessageDto> getMessagesBetweenUsers(String usernameX, String usernameY) {
+    public List<MessageDto> getMessagesBetweenUsers(String usernameX, String usernameY, String token) {
+        UserEntity user = tokenDao.findUserByTokenString(token);
+        if(user == null) return null;
         // Obter mensagens de X para Y
         List<MessageEntity> messagesFromXtoY = messageDao.findMessagesBySenderAndReceiver(usernameX, usernameY);
         // Obter mensagens de Y para X
         List<MessageEntity> messagesFromYtoX = messageDao.findMessagesBySenderAndReceiver(usernameY, usernameX);
+
+        if(!user.getUsername().equals(usernameX) && !user.getUsername().equals(usernameY)) {
+            return null;
+        }
 
         // Combina as duas listas em uma única lista
         List<MessageEntity> allMessages = new ArrayList<>();
@@ -108,6 +119,19 @@ public class MessageBean {
         List<MessageDto> allMessageDtos = new ArrayList<>();
         for (MessageEntity message : allMessages) {
             allMessageDtos.add(convertMessageEntityToMessageDto(message));
+
+            if(message.getReceiver_id().getUsername().equals(user.getUsername()) ){
+                message.setIsRead(true);
+                messageDao.merge(message);
+            }
+        }
+
+        if(allMessageDtos.size() > 0){
+            MessageDto messageDto = allMessageDtos.get(0);
+            String message = handleWebSockets.convertToJsonString(messageDto, MessageType.MESSAGE_READ);
+
+            sendToUser(messageDto.getSender(), message);
+            sendToUser(messageDto.getReceiver(), message);
         }
 
         return allMessageDtos;
@@ -128,5 +152,4 @@ public class MessageBean {
         String messageJson = gson.toJson(infoSocket);
         sendToUser(receiver, messageJson);
     }
-
 }

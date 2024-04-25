@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @NamedQuery(name = "Message.findMessagesByReceiver", query = "SELECT m FROM MessageEntity m WHERE m.receiver_id.username = :receiver")
 @NamedQuery(name = "Message.findMessagesBySender", query = "SELECT m FROM MessageEntity m WHERE m.sender_id.username = :sender")
 @NamedQuery(name = "Message.findMessagesBySenderAndReceiver", query = "SELECT m FROM MessageEntity m WHERE m.sender_id.username = :sender AND m.receiver_id.username = :receiver")
+@NamedQuery(name = "Message.findMessageById", query = "SELECT m FROM MessageEntity m WHERE m.id = :id")
 @Table (name = "message")
 public class MessageEntity implements Serializable {
     private static final long serialVersionUID = 1L;

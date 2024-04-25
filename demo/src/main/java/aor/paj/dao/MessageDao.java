@@ -39,4 +39,12 @@ public class MessageDao extends AbstractDao<MessageEntity> {
         query.setParameter("receiver", receiverUsername);
         return query.getResultList();
     }
+
+    public MessageEntity findMessageById(int id) {
+        try{
+            return em.createNamedQuery("Message.findMessageById", MessageEntity.class).setParameter("id", id).getSingleResult();
+        } catch (Exception e){
+            return null;
+        }
+    }
 }

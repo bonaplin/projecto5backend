@@ -58,22 +58,14 @@ public class HandleWebSockets {
 
         switch (messageType) {
             case MESSAGE_RECEIVER:
-                System.out.println("Type 10");
                 handleNewMessage(session, jsonObject);
                 break;
-            case TASK_CREATE:
-//                handleCreateTask(session, jsonObject);
-                System.out.println("Não é usado");
-                break;
             case TASK_MOVE:
-                System.out.println("Type 20 -> taskmove");
                 taskBean.handleTaskMove(session, jsonObject);
                 break;
-            case LOGOUT:
-                System.out.println("Type 30 - Logout");
-                break;
-            case TYPE_40:
-                System.out.println("Type 30");
+            case MESSAGE_READ_CONFIRMATION:
+                System.out.println("chegou a confirmação q a mensagem foi lida");
+                handleReadConfirmation(session, jsonObject);
                 break;
             default:
                 System.out.println("Unknown type");
@@ -83,9 +75,10 @@ public class HandleWebSockets {
     public JsonObject convertStringToJsonObject(String jsonString) {
         return gson.fromJson(jsonString, JsonObject.class);
     }
+
     //MESSAGE -     - MESSAGE -     - MESSAGE -     - MESSAGE -     - MESSAGE
     private void handleNewMessage(Session session, JsonObject jsonObject) {
-        try{
+        try {
             String messageContent = jsonObject.get("message").getAsString();
             String receiver = jsonObject.get("receiver").getAsString();
 
@@ -106,11 +99,11 @@ public class HandleWebSockets {
             // Cria um novo objeto JSON para enviar a mensagem
             jsonObject.addProperty("time", messageEntity.getTime().toString());
             jsonObject.addProperty("sender", messageEntity.getSender_id().getUsername());
-
+            jsonObject.addProperty("id", messageEntity.getId());
 
             // Envia a mensagem para o destinatário
             messageBean.sendToUser(receiver, jsonObject.toString());
-            sendNotify(sender, receiver, "New Message from " + sender + " at "+ messageEntity.getTime().toString());
+            sendNotify(sender, receiver, "New Message from " + sender + " at " + messageEntity.getTime().toString());
 
             // Envia a mensagem de volta para o remetente
             jsonObject.addProperty("type", MessageType.MESSAGE_SENDER.getValue());
@@ -122,10 +115,11 @@ public class HandleWebSockets {
         }
 
     }
+
     //MESSAGE -     - MESSAGE -     - MESSAGE -     - MESSAGE -     - MESSAGE
     //NOTIFICATION -- NOTIFICATION -- NOTIFICATION -- NOTIFICATION -- NOTIFICATION
     private void sendNotify(String sender, String receiver, String notify) {
-        try{
+        try {
 //            String receiver =  findUserEntityBySession(session).getUsername();
 
             NotificationDto notificationDto = new NotificationDto();
@@ -160,11 +154,11 @@ public class HandleWebSockets {
     //NOTIFICATION -- NOTIFICATION -- NOTIFICATION -- NOTIFICATION -- NOTIFICATION
     private UserEntity findUserEntityBySession(Session session) {
         String token = session.getPathParameters().get("token");
-        if(token == null) return null;
+        if (token == null) return null;
         return tokenDao.findUserByTokenString(token);
     }
 
-    public boolean isProductOwner(String token){
+    public boolean isProductOwner(String token) {
         return tokenDao.findUserByTokenString(token).getRole().equals("po");
     }
 
@@ -178,6 +172,7 @@ public class HandleWebSockets {
         // Return the JSON representation of the modified JsonObject
         return gson.toJson(jsonObject);
     }
+
     public String convertListToJsonString(Object object, MessageType messageType) {
         // Convert the list to a JsonElement
         JsonElement jsonElement = gson.toJsonTree(object);
@@ -190,5 +185,24 @@ public class HandleWebSockets {
         // Return the JSON representation of the JsonObject
         return gson.toJson(jsonObject);
     }
+
+    public void handleReadConfirmation(Session session, JsonObject jsonObject) {
+        int id = jsonObject.get("id").getAsInt();
+        String token = session.getPathParameters().get("token");
+
+        MessageEntity messageEntity = messageDao.findMessageById(id);
+        if (messageEntity == null) return;
+
+        messageEntity.setIsRead(true);
+        messageDao.merge(messageEntity);
+        System.out.println("vai enviar a confirmação de leitura ao sender da mensagem"+jsonObject);
+
+
+        jsonObject.addProperty("type", MessageType.MESSAGE_READ_CONFIRMATION.getValue());
+
+        messageBean.sendToUser(messageEntity.getSender_id().getUsername(), jsonObject.toString());
+        System.out.println("Confirmação de leitura enviada ao sender da mensagem!");
+    }
+
 
 }

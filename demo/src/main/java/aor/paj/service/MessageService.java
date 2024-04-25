@@ -6,6 +6,7 @@ import aor.paj.dto.MessageDto;
 import aor.paj.dto.UserDto;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
+import aor.paj.utils.TokenStatus;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.Response;
@@ -34,8 +35,11 @@ public class MessageService {
 
     @GET
     @Path("/{sender}/{receiver}")
-    public Response getMessages(@PathParam("sender") String sender, @PathParam("receiver") String receiver){
-        List<MessageDto> messages = messageBean.getMessagesBetweenUsers(sender, receiver);
+    public Response getMessages(@PathParam("sender") String sender, @PathParam("receiver") String receiver, @HeaderParam("token") String token){
+        TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
+        if(tokenStatus != TokenStatus.VALID) return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tem de fazer login 1º."))).build();
+
+        List<MessageDto> messages = messageBean.getMessagesBetweenUsers(sender, receiver, token);
         if(messages == null) return Response.status(404).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Mensagens não encontradas."))).build();
         return Response.ok().entity(JsonUtils.convertObjectToJson(messages)).build();
     }

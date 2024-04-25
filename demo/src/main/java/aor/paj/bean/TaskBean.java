@@ -185,6 +185,7 @@ public class TaskBean {
         sendNumberOfTasksPerStatus();
         sendCompletedTasksOverTime();
         sendCategoryCount();
+        System.out.println(taskDtoJsonString);
 
 
         return true;
@@ -344,6 +345,7 @@ public class TaskBean {
                 sendCompletedTasksOverTime();
                 sendCategoryCount();
             }
+            sendMessageActionToAllSocket(MessageType.TASK_RESTORE_ALL);
         }
         return true;
     }
@@ -360,7 +362,16 @@ public class TaskBean {
                 sendCategoryCount();
             }
         }
+        sendMessageActionToAllSocket(MessageType.TASK_DELETE_ALL);
         return true;
+    }
+
+    public void sendMessageActionToAllSocket(MessageType messageType) {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("type", messageType.getValue());
+
+        String json = gson.toJson(jsonObject);
+        notifier.sendToAllSessions(json);
     }
 
 //    //Function that returns list of tasks filtered by category and owner from the database mysql
@@ -402,7 +413,7 @@ public class TaskBean {
         int status = jsonObject.get("status").getAsInt();
 
         String token = session.getPathParameters().get("token");
-
+        tokenBean.isValidUserByToken(token); //set timeout
         TaskEntity taskEntity = taskDao.findTaskById(taskID);
         if(taskEntity == null) return false;
         int lastStatus = taskEntity.getStatus();
