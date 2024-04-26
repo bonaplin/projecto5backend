@@ -83,7 +83,7 @@ public class TokenDao extends AbstractDao<TokenEntity>{
 
     // Remove expired tokens every 5 minutes */5 <- every 5 minutes, * <- every time, hour, minute or second.
 //    @Schedule(hour = "*", minute = "*/5", persistent = false)
-    @Schedule(hour = "*", minute = "*", second = "*/60", persistent = false)
+    @Schedule(hour = "*", minute = "*", second = "*/30", persistent = false)
     public void removeExpiredTokens() {
         System.out.println("Scheduled task: removeExpiredTokens()");
         List<TokenEntity> expiredTokens = findExpiredTokens(Instant.now());

@@ -10,6 +10,7 @@ import aor.paj.utils.JsonUtils;
 import aor.paj.utils.ResetPasswordStatus;
 import aor.paj.utils.TokenStatus;
 import aor.paj.validator.UserValidator;
+import jakarta.ejb.EJB;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;

@@ -3,6 +3,7 @@ package aor.paj.bean;
 import aor.paj.dao.TaskDao;
 import aor.paj.dao.TokenDao;
 import aor.paj.dao.UserDao;
+import aor.paj.dto.TokenExpirationUpdateDto;
 import aor.paj.dto.UserDto;
 import aor.paj.entity.TokenEntity;
 import aor.paj.entity.UserEntity;
@@ -29,9 +30,32 @@ public class TokenBean  {
     @EJB
     private TaskDao taskDao;
 
-    private static final int DEFAULT_TOKEN_EXPIRATION_MINUTES = 30;
-    private static final int PO_TOKEN_EXPIRATION_MINUTES = 60;
+    private static int DEFAULT_TOKEN_EXPIRATION_MINUTES = 5;
+    private static int PO_TOKEN_EXPIRATION_MINUTES = 60;
     private static final int SHORT_TOKEN_EXPIRATION_SECONDS = 10;
+
+    private void setDefaultTokenExpirationMinutes(int minutes, String token){
+        isValidUserByToken(token);
+        if(minutes <= 0) return;
+        else if(minutes >60) return;
+        DEFAULT_TOKEN_EXPIRATION_MINUTES = minutes;
+    }
+
+    private void setPoTokenExpirationMinutes(int minutes, String token){
+        isValidUserByToken(token);
+        if(minutes <= 0) return;
+        else if(minutes >60) return;
+        PO_TOKEN_EXPIRATION_MINUTES = minutes;
+    }
+
+    public static int getDefaultTokenExpirationMinutes() {
+        return DEFAULT_TOKEN_EXPIRATION_MINUTES;
+    }
+
+    public static int getPoTokenExpirationMinutes() {
+        return PO_TOKEN_EXPIRATION_MINUTES;
+    }
+
     @Transactional
     public TokenEntity createToken(String token, int userId) {
 
@@ -146,7 +170,23 @@ public class TokenBean  {
             tokenEntity.setExpiration(Instant.now().plus(Duration.ofMinutes(PO_TOKEN_EXPIRATION_MINUTES)));
         }else{
             tokenEntity.setExpiration(Instant.now().plus(Duration.ofMinutes(DEFAULT_TOKEN_EXPIRATION_MINUTES)));
-//            tokenEntity.setExpiration(Instant.now().plus(Duration.ofSeconds(SHORT_TOKEN_EXPIRATION_SECONDS)));
         }
     }
+
+    public void changeTokenExpiration(TokenExpirationUpdateDto tokenExpirationUpdateDto, String token) {
+        if(tokenExpirationUpdateDto.getDefaultTokenExpirationMinutes()>0 &&
+            tokenExpirationUpdateDto.getDefaultTokenExpirationMinutes() <= 60){
+            setDefaultTokenExpirationMinutes(tokenExpirationUpdateDto.getDefaultTokenExpirationMinutes(), token);
+            System.out.println("entrou no 1if");
+        }
+        if(tokenExpirationUpdateDto.getPoTokenExpirationMinutes()>0 &&
+            tokenExpirationUpdateDto.getPoTokenExpirationMinutes() <= 60){
+            setPoTokenExpirationMinutes(tokenExpirationUpdateDto.getPoTokenExpirationMinutes(), token);
+            System.out.println("entrou no 2if");
+        }
+        System.out.println(DEFAULT_TOKEN_EXPIRATION_MINUTES);
+        System.out.println(PO_TOKEN_EXPIRATION_MINUTES);
+
+    }
+
 }
