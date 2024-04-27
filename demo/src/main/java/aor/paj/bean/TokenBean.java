@@ -57,10 +57,10 @@ public class TokenBean  {
     }
 
     @Transactional
-    public TokenEntity createToken(String token, int userId) {
+    public TokenEntity createToken(String token, String username) {
 
         TokenEntity tokenEntity = new TokenEntity();
-        UserEntity userEntity = userDao.findUserById(userId);
+        UserEntity userEntity = userDao.findUserByUsername(username);
 
         tokenEntity.setUser(userEntity);
         tokenEntity.setToken(token);
@@ -79,7 +79,7 @@ public class TokenBean  {
 
             if (BCrypt.checkpw(password, userEntity.getPassword())) {
                 String token = UUID.randomUUID().toString();
-                createToken(token, userEntity.getId());
+                createToken(token, userEntity.getUsername());
 
                 return token;
             }
@@ -188,5 +188,7 @@ public class TokenBean  {
         System.out.println(PO_TOKEN_EXPIRATION_MINUTES);
 
     }
+
+
 
 }

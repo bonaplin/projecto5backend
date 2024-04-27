@@ -48,6 +48,7 @@ public class UserBean {
     @EJB
     StatisticBean statisticBean;
 
+    private static final int TOKEN_EXPIRATION_TIME = 60;
 
 
     // FOR POPULATE USING
@@ -69,6 +70,7 @@ public class UserBean {
             userDao.persist(userEntity);
             logger.info("user a ser adicionado: " + userEntity.getUsername());
 
+            statisticBean.sendActiveUsers();
             statisticBean.sendUserStatistics();
             return true;
     }
@@ -98,7 +100,7 @@ public class UserBean {
 
         userEntity.setCreated(Instant.now());
 
-        generateNewToken(userEntity, 60);
+        generateNewToken(userEntity);
         userDao.persist(userEntity);
 
 
@@ -107,6 +109,7 @@ public class UserBean {
 
         logger.info("User adicionado: " + userEntity.getUsername()+" & email de verificação enviado para: " + userEntity.getEmail());
         statisticBean.sendUserStatistics();
+        statisticBean.sendActiveUsers();
 
         return true;
     }
@@ -222,6 +225,8 @@ public class UserBean {
         if(userEntity != null){
             userEntity.setActive(status);
             userDao.merge(userEntity);
+            statisticBean.sendActiveUsers();
+
             return true;
         }
         return false;
@@ -413,17 +418,17 @@ public class UserBean {
     }
 
     //Function that generates a new token and expire time
-    private boolean generateNewToken(UserEntity userEntity, int minutes) {
+    private boolean generateNewToken(UserEntity userEntity) {
         String token = UUID.randomUUID().toString();
         userEntity.setToken_verification(token);
-        userEntity.setToken_expiration(Instant.now().plus(Duration.ofMinutes(minutes)));
+        userEntity.setToken_expiration(Instant.now().plus(Duration.ofMinutes(TOKEN_EXPIRATION_TIME)));
         return true;
     }
 
     public boolean sendPasswordResetEmail(String email) {
         UserEntity userEntity = userDao.findUserByEmail(email);
         if (userEntity != null) {
-            generateNewToken(userEntity, 60);
+            generateNewToken(userEntity);
             userDao.merge(userEntity); //update the user with the new token in DB
             String resetLink = "http://localhost:3000/reset-password/" + userEntity.getToken_verification();
             EmailSender.sendPasswordResetEmail(email, userEntity.getUsername(), resetLink);

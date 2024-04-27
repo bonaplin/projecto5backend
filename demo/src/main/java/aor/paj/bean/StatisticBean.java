@@ -35,7 +35,9 @@ public class StatisticBean {
         int unconfirmedUsers = userDao.getUnconfirmedUserCount();
         int confirmedUsers = userDao.getConfirmedUserCount();
         int countUsers = userDao.getUserCount();
-        UserStatisticsDto userStatistics = new UserStatisticsDto(countUsers, confirmedUsers, unconfirmedUsers);
+        int activeUsers = userDao.getActiveUserCount();
+        int inactiveUsers = userDao.getInactiveUserCount();
+        UserStatisticsDto userStatistics = new UserStatisticsDto(countUsers, confirmedUsers, unconfirmedUsers, activeUsers, inactiveUsers);
         return userStatistics;
     }
 
@@ -195,6 +197,25 @@ public class StatisticBean {
         }
         return categoryData;
     }
+
+    public int getActiveUsers() {
+        return userDao.getActiveUserCount();
+    }
+
+    public int getInactiveUsers() {
+        return userDao.getInactiveUserCount();
+    }
+
+    public void sendActiveUsers() {
+        int activeUsers = getActiveUsers();
+        int inactiveUsers = getInactiveUsers();
+        UserStatisticsDto userStatisticsDto = new UserStatisticsDto();
+        userStatisticsDto.setActiveUsers(activeUsers);
+        userStatisticsDto.setInactiveUsers(inactiveUsers);
+        String json = handleWebSockets.convertToJsonString(userStatisticsDto, MessageType.STATISTIC_ACTIVE_USERS);
+        notifier.sendToAllProductOwnerSessions(json);
+    }
+
 
 
 }

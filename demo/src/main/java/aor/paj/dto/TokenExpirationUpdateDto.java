@@ -20,6 +20,13 @@ public class TokenExpirationUpdateDto {
         return poTokenExpirationMinutes;
     }
 
+    public void setDefaultTokenExpirationMinutes(int defaultTokenExpirationMinutes) {
+        this.defaultTokenExpirationMinutes = defaultTokenExpirationMinutes;
+    }
+
+    public void setPoTokenExpirationMinutes(int poTokenExpirationMinutes) {
+        this.poTokenExpirationMinutes = poTokenExpirationMinutes;
+    }
 
     @Override
     public String toString() {

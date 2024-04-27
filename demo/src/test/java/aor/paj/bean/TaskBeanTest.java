@@ -1,37 +1,37 @@
-//package aor.paj.bean;
-//
-//import aor.paj.bean.TaskBean;
-//import aor.paj.dao.TaskDao;
-//import aor.paj.dao.UserDao;
-//import aor.paj.dto.TaskDto;
-//import aor.paj.entity.TaskEntity;
-//import aor.paj.entity.UserEntity;
-//import org.junit.jupiter.api.Test;
-//import org.junit.jupiter.api.extension.ExtendWith;
-//import org.mockito.InjectMocks;
-//import org.mockito.Mock;
-//import org.mockito.junit.jupiter.MockitoExtension;
-//
-//import java.util.ArrayList;
-//import java.util.List;
-//
-//import static org.mockito.Mockito.*;
-//import static org.junit.jupiter.api.Assertions.*;
-//
-//@ExtendWith(MockitoExtension.class)
-//class TaskBeanTest {
-//
-//    @Mock
-//    private TaskDao taskDao;
-//
-//    @InjectMocks
-//    private TaskBean taskBean;
-//
-//    // Mock the UserDao
-//    @Mock
-//    private UserDao userDao;
-//
-//
+package aor.paj.bean;
+
+import aor.paj.bean.TaskBean;
+import aor.paj.dao.TaskDao;
+import aor.paj.dao.UserDao;
+import aor.paj.dto.TaskDto;
+import aor.paj.entity.TaskEntity;
+import aor.paj.entity.UserEntity;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(MockitoExtension.class)
+class TaskBeanTest {
+
+    @Mock
+    private TaskDao taskDao;
+
+    @InjectMocks
+    private TaskBean taskBean;
+
+    // Mock the UserDao
+    @Mock
+    private UserDao userDao;
+
+
 //    @Test // Annotates the method as a test method for JUnit
 //    void testTaskTitleExists() {
 //        // Given
@@ -52,7 +52,7 @@
 //        verify(taskDao).findTaskByTitle(taskDto.getTitle());
 //        // Verify that the method findTaskByTitle of the mock object taskDao was called with the title of the taskDto
 //    }
-//
+
 //    @Test // Annotates the method as a test method for JUnit
 //    void testGetAllTasks() {
 //        // Given
@@ -63,14 +63,14 @@
 //        when(taskDao.getAllTasks()).thenReturn(taskEntities); // Define the behavior of the mock object taskDao. When the method getAllTasks is called, it returns the list of TaskEntity objects
 //
 //        // When
-//        List<TaskDto> taskDtos = taskBean.getAllTasks(); // Call the method getAllTasks and store the returned list of TaskDto objects
+//        List<TaskDto> taskDtos = taskBean.getActiveTasks(); // Call the method getAllTasks and store the returned list of TaskDto objects
 //
 //        // Then
 //        assertFalse(taskDtos.isEmpty()); // Assert that the returned list is not empty
 //        assertEquals(taskEntities.size(), taskDtos.size()); // Assert that the size of the returned list is equal to the size of the list of TaskEntity objects
 //        verify(taskDao).getAllTasks(); // Verify that the method getAllTasks of the mock object taskDao was called
 //    }
-//
+
 //    @Test // Annotates the method as a test method for JUnit
 //    void testDesactivateTask() {
 //        // Given
@@ -129,7 +129,7 @@
 //        // Verify that taskDao.findTaskById was called with the test id
 //        verify(taskDao).findTaskById(id);
 //    }
-//
+
 //    @Test
 //    void testDeleteTask() {
 //        // Given: Define the test inputs
@@ -152,5 +152,5 @@
 //        // Verify that taskDao.remove was called with the test TaskEntity
 //        verify(taskDao).remove(taskEntity);
 //    }
-//
-//}
+
+}

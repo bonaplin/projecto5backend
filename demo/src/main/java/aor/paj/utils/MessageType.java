@@ -22,6 +22,7 @@ public enum MessageType {
     STATISTIC_REGISTRATION(34),
     STATISTIC_TASK_COMULATIVE(35),
     STATISTIC_CATEGORY_COUNT(36),
+    STATISTIC_ACTIVE_USERS(37),
     TYPE_40(40);
 
     private final int value;

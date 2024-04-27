@@ -9,14 +9,35 @@ public class UserStatisticsDto {
     private int countUsers;
     private int confirmedUsers;
     private int unconfirmedUsers;
+    private int activeUsers;
+    private int inactiveUsers;
 
     public UserStatisticsDto() {
     }
 
-    public UserStatisticsDto(int countUsers, int confirmedUsers, int unconfirmedUsers) {
+    public UserStatisticsDto(int countUsers, int confirmedUsers, int unconfirmedUsers, int activeUsers, int inactiveUsers) {
         this.countUsers = countUsers;
         this.confirmedUsers = confirmedUsers;
         this.unconfirmedUsers = unconfirmedUsers;
+        this.activeUsers = activeUsers;
+        this.inactiveUsers = inactiveUsers;
+    }
+    @XmlElement
+    public int getActiveUsers() {
+        return activeUsers;
+    }
+
+    public void setActiveUsers(int activeUsers) {
+        this.activeUsers = activeUsers;
+    }
+
+    @XmlElement
+    public int getInactiveUsers() {
+        return inactiveUsers;
+    }
+
+    public void setInactiveUsers(int inactiveUsers) {
+        this.inactiveUsers = inactiveUsers;
     }
 
     @XmlElement
