@@ -82,8 +82,6 @@ public class UserService {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is not active"))).build();
         }
 
-        logger.info("logado com sucesso");
-
 
         return Response.status(200).entity(JsonUtils.convertObjectToJson(
                 new TokenAndRoleDto(
@@ -211,7 +209,6 @@ public class UserService {
                     userDto.getPhone(),
                     userDto.getRole()
             );
-            log.logUserInfo(token, "User "+selectedUser+" details requested.",1);
             return Response.status(200).entity(userDetails).build();
         } else {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();

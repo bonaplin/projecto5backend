@@ -11,6 +11,7 @@ import aor.paj.mapper.UserMapper;
 import aor.paj.utils.TokenStatus;
 import jakarta.ejb.EJB;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -29,6 +30,9 @@ public class TokenBean  {
     private TokenDao tokenDao;
     @EJB
     private TaskDao taskDao;
+
+    @Inject
+    Log log;
 
     private static int DEFAULT_TOKEN_EXPIRATION_MINUTES = 5;
     private static int PO_TOKEN_EXPIRATION_MINUTES = 60;
@@ -80,7 +84,7 @@ public class TokenBean  {
             if (BCrypt.checkpw(password, userEntity.getPassword())) {
                 String token = UUID.randomUUID().toString();
                 createToken(token, userEntity.getUsername());
-
+                log.logUserInfo(token, "login user.", 1);
                 return token;
             }
         }
@@ -130,6 +134,7 @@ public class TokenBean  {
     public void logout(String token) {
         TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
         if (tokenEntity != null) {
+            log.logUserInfo(token, "logout user.", 1);
             tokenDao.remove(tokenEntity);
         }
     }
