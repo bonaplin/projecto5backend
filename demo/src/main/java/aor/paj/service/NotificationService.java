@@ -23,7 +23,6 @@ public class NotificationService {
         @Path("/")
         public void sendNotification(NotificationDto notificationDto){
             notificationBean.sendNotification(notificationDto);
-            System.out.println("Notification send/: " + notificationDto);
         }
 
         @GET
@@ -34,8 +33,7 @@ public class NotificationService {
             if(tokenStatus != TokenStatus.VALID){
                 return Response.status(Response.Status.UNAUTHORIZED).entity(tokenStatus.getMessage()).build();
             }
-            List<NotificationDto> notifications = notificationBean.getAllNotificationsBytoken(token);
-            System.out.println("Notifications get/: " + notifications);
+            List<NotificationDto> notifications = notificationBean.getUnreadNotificationsByToken(token);
             return Response.status(200).entity(notifications).build();
         }
 

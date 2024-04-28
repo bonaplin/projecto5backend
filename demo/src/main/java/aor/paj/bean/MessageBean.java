@@ -113,7 +113,7 @@ public class MessageBean {
         allMessages.addAll(messagesFromYtoX);
 
         // Ordena todas as mensagens por tempo
-        allMessages.sort(Comparator.comparing(MessageEntity::getTime));
+        allMessages.sort(Comparator.comparing(MessageEntity::getTime, Comparator.nullsFirst(Comparator.naturalOrder())));
 
         // Converte as entidades de mensagem em DTOs
         List<MessageDto> allMessageDtos = new ArrayList<>();
@@ -143,7 +143,7 @@ public class MessageBean {
      * @param receiver
      * @param message informação a enviar
      */
-    public void sendInfo(String receiver, String message, MessageType type){
+    public void sendInfo(String receiver, String message, MessageType type, String token){
         InfoSocket infoSocket = new InfoSocket();
         infoSocket.setType(type.getValue());
         infoSocket.setMessage(message);

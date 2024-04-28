@@ -2,6 +2,7 @@ package aor.paj.service;
 
 import java.util.List;
 
+import aor.paj.bean.Log;
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.*;
@@ -12,26 +13,31 @@ import aor.paj.utils.TokenStatus;
 import aor.paj.validator.UserValidator;
 import jakarta.ejb.EJB;
 import jakarta.inject.Inject;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
 
 //@Path("/user")
 @Path("/users")
 
 public class UserService {
-
-    public UserService() {
-
-    }
-
     @Inject
     UserBean userBean;
     @Inject
     TokenBean tokenBean;
 
+    @Inject
+    Log log;
 
-    //Service that receives a user object and adds it to the list of users
+    public UserService() {
+
+    }
+
+    private static final org.apache.logging.log4j.Logger logger = LogManager.getLogger(UserService.class);
     @POST
     @Path("/")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -39,6 +45,7 @@ public class UserService {
     public Response addUser(UserDto u, @HeaderParam("token") String token, @HeaderParam("role") String roleNewUser) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
+            log.logUserInfo(token, "Try add user.",3);
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
@@ -47,12 +54,14 @@ public class UserService {
                 !UserValidator.isValidPhoneNumber(u.getPhone()) ||
                 !UserValidator.isValidURL(u.getPhotoURL()) ||
                 userBean.userExists(u)) {
+            log.logUserInfo(token, "Try add user.",2);
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid input"))).build();
         }
 
         String role = tokenBean.getUserRole(token);
         if (role.equals("po")) {
             userBean.addUserPO(u, roleNewUser);
+            log.logUserInfo(token, "User "+u.getUsername()+" added.", 1);
         }
 
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
@@ -65,12 +74,16 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response login(@HeaderParam("username") String username, @HeaderParam("password") String password) {
         String token = tokenBean.login(username, password);
+
         if (token == null) {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Login Failed"))).build();
         }
         if (!userBean.getUserByUsername(username).isActive()){
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is not active"))).build();
         }
+
+        logger.info("logado com sucesso");
+
 
         return Response.status(200).entity(JsonUtils.convertObjectToJson(
                 new TokenAndRoleDto(
@@ -89,8 +102,8 @@ public class UserService {
         if (tokenStatus != TokenStatus.VALID) {
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
-
         tokenBean.logout(token);
+        log.logUserInfo(token,"User logged out.",1);
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is logged out"))).build();
     }
 
@@ -101,6 +114,7 @@ public class UserService {
     public Response getAllUsers(@HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
+            log.logUserInfo(token, "Try get all users.",3);
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
 
@@ -197,6 +211,7 @@ public class UserService {
                     userDto.getPhone(),
                     userDto.getRole()
             );
+            log.logUserInfo(token, "User "+selectedUser+" details requested.",1);
             return Response.status(200).entity(userDetails).build();
         } else {
             return Response.status(401).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
@@ -239,6 +254,7 @@ public class UserService {
                 return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid URL format"))).build();
             } else {
                 userBean.updateUser(u);
+                log.logUserInfo(token,  "User "+u.getUsername()+" updated.",1);
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User is updated")).toString()).build();
             }
         }
@@ -254,13 +270,14 @@ public class UserService {
     public Response updatePassword(UserPasswordUpdateDto u, @PathParam("username") @HeaderParam("token") String token) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID) {
+            log.logUserInfo(token, "Try update password.",3);
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage(tokenStatus.getMessage()))).build();
         }
-
         boolean updateTry = userBean.updatePassword(u, token);
         if (!updateTry) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Old password is incorrect"))).build();
         } else {
+            log.logUserInfo(token, "User "+tokenBean.getUserRole(token)+" updated password.",1);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Password is updated")).toString()).build();
         }
     }
@@ -271,10 +288,12 @@ public class UserService {
     public Response changeStatus(@HeaderParam("token") String token, @PathParam("username") String username, UserStatusUpdateDto userStatusUpdateDto) {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if (tokenStatus != TokenStatus.VALID || !tokenBean.getUserByToken(token).getRole().equals("po")) {
+            log.logUserInfo(token,  "Try change status in user "+username+"account.",2);
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Unauthorized"))).build();
         }
 
         if (userBean.changeStatus(username, userStatusUpdateDto.isActive())) {
+            log.logUserInfo(token, "User "+username+" status changed.",1);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Status changed")).toString()).build();
         } else {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Status not changed")).toString()).build();
@@ -292,8 +311,10 @@ public class UserService {
         }
 
         if (userBean.deleteUser(selectedUser)) {
+            log.logUserInfo(token, "User "+selectedUser+" deleted.",1);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User deleted")).toString()).build();
         } else {
+            log.logUserInfo(token, "User "+selectedUser+" not deleted.",2);
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("User not deleted")).toString()).build();
         }
     }
@@ -309,25 +330,13 @@ public class UserService {
         }
 
         if (userBean.deleteTasks(selectedUser)) {
+            log.logUserInfo(token,  "Tasks of user "+selectedUser+" deleted.",1);
             return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tasks deleted")).toString()).build();
         } else {
+            log.logUserInfo(token, "Tasks of user "+selectedUser+" not deleted.",2);
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Tasks not deleted")).toString()).build();
         }
     }
-
-
-//    @GET
-//    @Path("/confirm/{token}")
-//    public Response confirmEmailByToken(@PathParam("token") String token) {
-//        System.out.println("Confirming token: " + token);
-//        boolean isConfirmed = userBean.confirmUser(token);
-//        if (isConfirmed) {
-//            userBean.userConfirmed(token);
-//            return Response.ok("User confirmed successfully").build();
-//        } else {
-//            return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
-//        }
-//    }
 
     @POST
     @Path("/confirm/{token}")
@@ -335,6 +344,7 @@ public class UserService {
         boolean isConfirmed = userBean.confirmUser(token);
         ResetPasswordStatus status = userBean.resetPassword(token, password);
         if (isConfirmed) {
+            log.logUserInfo(token, "User confirmed and password reset.",1);
             return Response.ok(status.getMessage()).build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity(status.getMessage()).build();
@@ -345,8 +355,8 @@ public class UserService {
     @POST
     @Path("/password-reset/{email}")
     public Response resetPassword(@PathParam("email") String email) {
-        System.out.println("Resetting password for email: " + email);
         if(userBean.sendPasswordResetEmail(email)){
+            log.logUserInfo(null, "Email sent for password reset "+email,1);
             return Response.ok("Email sent for password reset").build();
         }
         return Response.status(Response.Status.BAD_REQUEST).entity("User not found").build();
@@ -360,6 +370,7 @@ public class UserService {
         boolean isConfirmed = userBean.confirmUser(token);
         ResetPasswordStatus status = userBean.resetPassword(token, password);
         if (isConfirmed) {
+            log.logUserInfo(token, "Password reset.",1);
             return Response.ok(status.getMessage()).build();
         } else {
             return Response.status(Response.Status.BAD_REQUEST).entity(status.getMessage()).build();
@@ -372,6 +383,7 @@ public class UserService {
     @Produces(MediaType.APPLICATION_JSON)
     public Response addUserFromPopulator(UserDto u) {
         userBean.addUserFromPopulator(u);
+        log.logUserInfo(null,  "User "+u.getUsername()+" added.",1);
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
     }
 }

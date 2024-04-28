@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @NamedQuery(name ="Notification.findNotificationsByReceiver", query = "SELECT n FROM NotificationEntity n WHERE n.receiver = :receiver")
 @NamedQuery(name ="Notification.findNotificationsBySender", query = "SELECT n FROM NotificationEntity n WHERE n.sender = :sender")
 @NamedQuery(name ="Notification.findNotificationsByReceiverUnread", query = "SELECT n FROM NotificationEntity n WHERE n.receiver = :receiver AND n.read = false")
-
 @Table (name = "notification")
 public class NotificationEntity implements Serializable {
     private static final long serialVersionUID = 1L;

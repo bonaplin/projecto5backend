@@ -31,8 +31,6 @@ public class Notifier {
 
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
-//        System.out.println("Websocket session is closed with CloseCode: " +
-//                reason.getCloseCode() + ": " + reason.getReasonPhrase());
         for (String key : sessions.keySet()) {
             if (sessions.get(key) == session) sessions.remove(key);
         }
@@ -66,9 +64,7 @@ public class Notifier {
         for (Session session : sessions.values()) {
             try {
                 String token = session.getPathParameters().get("token");
-                System.out.println("Token do user revistado: "+token);
                 if(handleWebSockets.isProductOwner(token)){
-                    System.out.println("Token do ADMIN: " + token);
                     session.getBasicRemote().sendObject(messageJson);
                 }
 

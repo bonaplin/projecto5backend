@@ -30,7 +30,7 @@ public class TokenBean  {
     @EJB
     private TaskDao taskDao;
 
-    private static int DEFAULT_TOKEN_EXPIRATION_MINUTES = 5;
+    private static int DEFAULT_TOKEN_EXPIRATION_MINUTES = 10;
     private static int PO_TOKEN_EXPIRATION_MINUTES = 60;
     private static final int SHORT_TOKEN_EXPIRATION_SECONDS = 10;
 
@@ -151,11 +151,13 @@ public class TokenBean  {
 
                 setDefaultTokenExpiration(tokenEntity);
 
+                System.out.println("EXPIRAÇÃO: "+tokenEntity.getExpiration());
+                System.out.println("AGORA: "+Instant.now());
+
                 // merge para atualizar a expiração
                 tokenDao.merge(tokenEntity);
                 return TokenStatus.VALID;
             }else {
-                System.out.println("Token expired, cleaned from database");
                 tokenDao.remove(tokenEntity);
                 return TokenStatus.EXPIRED;
             }
@@ -163,6 +165,11 @@ public class TokenBean  {
         return TokenStatus.NOT_FOUND;
     }
 
+    /**
+     * Method to set the time of the token expiration based on the user role.
+     *
+     * @param tokenEntity
+     */
     public void setDefaultTokenExpiration (TokenEntity tokenEntity){
         UserEntity userEntity = tokenEntity.getUser();
 
@@ -173,19 +180,24 @@ public class TokenBean  {
         }
     }
 
+    /**
+     * Method to use the tokenExpirationUpdateDto to change the token expiration.
+     * It will be called by the endpoint
+     *
+     * @param tokenExpirationUpdateDto
+     * @param token
+     */
     public void changeTokenExpiration(TokenExpirationUpdateDto tokenExpirationUpdateDto, String token) {
         if(tokenExpirationUpdateDto.getDefaultTokenExpirationMinutes()>0 &&
             tokenExpirationUpdateDto.getDefaultTokenExpirationMinutes() <= 60){
             setDefaultTokenExpirationMinutes(tokenExpirationUpdateDto.getDefaultTokenExpirationMinutes(), token);
-            System.out.println("entrou no 1if");
+
         }
         if(tokenExpirationUpdateDto.getPoTokenExpirationMinutes()>0 &&
             tokenExpirationUpdateDto.getPoTokenExpirationMinutes() <= 60){
             setPoTokenExpirationMinutes(tokenExpirationUpdateDto.getPoTokenExpirationMinutes(), token);
-            System.out.println("entrou no 2if");
+
         }
-        System.out.println(DEFAULT_TOKEN_EXPIRATION_MINUTES);
-        System.out.println(PO_TOKEN_EXPIRATION_MINUTES);
 
     }
 

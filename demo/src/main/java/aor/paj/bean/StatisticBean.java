@@ -45,7 +45,6 @@ public class StatisticBean {
         UserStatisticsDto userStatisticsDto = getStatisticsUsers();
         String json = handleWebSockets.convertToJsonString(userStatisticsDto, MessageType.STATISTIC_USER);
         notifier.sendToAllProductOwnerSessions(json);
-        System.out.println(json);
     }
 
     /**
@@ -67,7 +66,6 @@ public class StatisticBean {
         tasksStatisticsDto.setDonePerUser(done);
         tasksStatisticsDto.setAvgTimeToBeDone(avgTime);
 
-        System.out.println(tasksStatisticsDto.toString());
         return tasksStatisticsDto;
     }
 
@@ -82,7 +80,6 @@ public class StatisticBean {
         TasksStatisticsDto avgTaskPerUser = getAvgTaskPerUser();
         String json = handleWebSockets.convertToJsonString(avgTaskPerUser, messageType);
         notifier.sendToAllProductOwnerSessions(json);
-        System.out.println(json);
     }
 
     private TasksStatisticsDto getNumberOfTasksPerStatus(){
@@ -105,7 +102,7 @@ public class StatisticBean {
         TasksStatisticsDto tasksStatisticsDto = getNumberOfTasksPerStatus();
         String json = handleWebSockets.convertToJsonString(tasksStatisticsDto, messageType);
         notifier.sendToAllProductOwnerSessions(json);
-        System.out.println(json);
+
     }
 
     public List<RegistrationDataDto> getRegisteredUserOverTime(){
@@ -117,7 +114,6 @@ public class StatisticBean {
             int month = (int) result[1];
             int count = ((Long) result[2]).intValue();
 
-            System.out.println("Year: " + year + " Month: " + month + " Count: " + count);
             registrationDataDto.setYear(year);
             registrationDataDto.setMonth(month);
             registrationDataDto.setCount(count);
@@ -133,10 +129,9 @@ public class StatisticBean {
             return;
         }
         try{
-            System.out.println("Sending registration statistics");
+
             String json = handleWebSockets.convertListToJsonString(registrationList, MessageType.STATISTIC_REGISTRATION);
             notifier.sendToAllProductOwnerSessions(json);
-            System.out.println(json);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -171,10 +166,9 @@ public class StatisticBean {
             return;
         }
         try{
-            System.out.println("Sending task completion statistics");
             String json = handleWebSockets.convertListToJsonString(taskCompletionDataList, MessageType.STATISTIC_TASK_COMULATIVE);
             notifier.sendToAllProductOwnerSessions(json);
-            System.out.println(json);
+
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -184,7 +178,6 @@ public class StatisticBean {
         List<CategoryCountDto> categoryCountList = getTasksPerCategory();
         String json = handleWebSockets.convertListToJsonString(categoryCountList, messageType);
         notifier.sendToAllProductOwnerSessions(json);
-        System.out.println("json que vai para o frontend:\n\n"+json);
     }
 
     public List<CategoryCountDto> getTasksPerCategory(){

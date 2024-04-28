@@ -1,11 +1,13 @@
 package aor.paj.service;
 
+import aor.paj.bean.Log;
 import aor.paj.bean.TaskBean;
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
 import aor.paj.dto.StatusUpdate;
 import aor.paj.dto.TaskDto;
 import aor.paj.dto.TaskListsDto;
+import aor.paj.dto.UserDto;
 import aor.paj.entity.TaskEntity;
 import aor.paj.responses.ResponseMessage;
 import aor.paj.utils.JsonUtils;
@@ -48,12 +50,10 @@ public class TaskService {
         }
 
         if (!TaskValidator.isValidTask(taskDto) || taskBean.taskTitleExists(taskDto)) {
-            System.out.println("Task is not valid");
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Verify the fields. Cannot have the same title."))).build();
         }
 
         if (!taskBean.addTask(token, taskDto)) {
-            System.out.println("Cannot add task");
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot add task"))).build();
         }
 
@@ -91,7 +91,7 @@ public class TaskService {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Invalid status"))).build();
         }
 
-        taskBean.updateTaskStatus(id, status);
+        taskBean.updateTaskStatus(id, status, token);
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task status is updated"))).build();
     }
     @PUT
@@ -105,11 +105,8 @@ public class TaskService {
         }
 
         String role = tokenBean.getUserRole(token);
-        System.out.println("Role: " + role);
-        System.out.println("vai entrar nos ifs");
         if ((taskBean.taskBelongsToUser(token, id) || role.equals("sm") || role.equals("po"))) {
-            System.out.println("Desactivating task");
-            if (taskBean.desactivateTask(id)) {
+            if (taskBean.desactivateTask(id, token)) {
                 return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is desactivated"))).build();
             } else {
                 return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot desactivate task"))).build();
@@ -140,8 +137,7 @@ public class TaskService {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Title already exists"))).build();
         }
 
-        taskBean.updateTask(t, id);
-
+        taskBean.updateTask(t, id, token);
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is updated"))).build();
     }
 
@@ -160,10 +156,9 @@ public class TaskService {
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
         }
 
-        if (!taskBean.deleteTask(id)) {
+        if (!taskBean.deleteTask(id, token)) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot delete task"))).build();
         }
-
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is deleted"))).build();
     }
 
@@ -182,10 +177,9 @@ public class TaskService {
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
         }
 
-        if (!taskBean.restoreAllTasks()) {
+        if (!taskBean.restoreAllTasks(token)) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot restore all tasks"))).build();
         }
-
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All tasks are restored"))).build();
     }
 
@@ -204,10 +198,9 @@ public class TaskService {
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
         }
 
-        if (!taskBean.restoreTask(id)) {
+        if (!taskBean.restoreTask(id,token)) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot restore task"))).build();
         }
-
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Task is restored"))).build();
     }
 
@@ -226,10 +219,9 @@ public class TaskService {
             return Response.status(403).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Forbidden"))).build();
         }
 
-        if (!taskBean.deleteAllTasks()) {
+        if (!taskBean.deleteAllTasks(token)) {
             return Response.status(400).entity(JsonUtils.convertObjectToJson(new ResponseMessage("Cannot delete all tasks"))).build();
         }
-
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("All tasks are deleted"))).build();
     }
 }

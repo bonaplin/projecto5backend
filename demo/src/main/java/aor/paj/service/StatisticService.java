@@ -37,13 +37,13 @@ public class StatisticService {
     @Path("/user")
     @Produces("application/json")
     public Response getUserStatistics(@HeaderParam("token") String token) {
-        System.out.println("Token: "+token);
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
 
         if(tokenStatus != TokenStatus.VALID) {
             return Response.status(Response.Status.UNAUTHORIZED).build();
         }
         if(tokenBean.isProductOwner(token)){
+
             return Response.ok(statisticBean.getStatisticsUsers()).build();
         }
         return Response.status(Response.Status.FORBIDDEN).build();

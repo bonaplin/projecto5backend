@@ -193,23 +193,18 @@ public class TaskDao extends AbstractDao<TaskEntity>{
     }
     public double getAverageCompletionTime() {
         // Find all tasks that are done
-        System.out.println("getAverageCompletionTime");
         List<TaskEntity> doneTasks = em.createQuery("SELECT t FROM TaskEntity t WHERE t.status = 300", TaskEntity.class).getResultList();
         if (doneTasks.isEmpty()) {
             return 0;
         }
-        System.out.println("doneTasks.size() = " + doneTasks.size());
         // Calculate the total duration of done tasks from initial to done date
         long totalDuration = 0;
         for (TaskEntity task : doneTasks) {
             LocalDate doneDate = task.getDoneDate();
             if (doneDate != null) {
-                System.out.println("task.getInitialDate() = " + task.getInitialDate());
                 long duration = Duration.between(task.getInitialDate().atStartOfDay(), doneDate.atStartOfDay()).toHours();
-                System.out.println("duration = " + duration);
                 totalDuration += duration;
             } else {
-                System.out.println("Task with ID: " + task.getId() + " does not have a done date.");
             }
         }
         // Calculate the average duration

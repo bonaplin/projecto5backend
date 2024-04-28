@@ -80,7 +80,6 @@ public class UserDao extends AbstractDao<UserEntity> {
     }
     // Find all unconfirmed users and remove them
     public List<UserEntity> findUnconfirmedUsers() {
-        System.out.println("Finding unconfirmed users");
         List<UserEntity> unconfirmedUsers = em.createQuery("SELECT u FROM UserEntity u WHERE u.confirmed = false", UserEntity.class)
                 .getResultList();
         return unconfirmedUsers;

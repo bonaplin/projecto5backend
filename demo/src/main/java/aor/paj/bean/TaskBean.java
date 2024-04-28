@@ -28,6 +28,8 @@ import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.websocket.Session;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -65,11 +67,14 @@ public class TaskBean {
 
     @EJB
     StatisticBean statisticBean;
+    @Inject
+    Log log;
 
     Gson gson = new GsonBuilder()
             .registerTypeAdapter(Instant.class, new InstantAdapter())
             .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
             .create();
+
 
     /**
      * Function that receives a token and a taskDto and adds a new task to the database mysql
@@ -80,14 +85,11 @@ public class TaskBean {
     public boolean addTask(String token, TaskDto taskDto){
         TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
         if(tokenEntity == null) return false;
-        System.out.println("TokenEntity: " + tokenEntity);
 
 
         UserEntity userEntity = tokenEntity.getUser();
-        System.out.println("UserEntity: " + userEntity);
         CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskDto.getCategory());
 
-        System.out.println(categoryEntity);
         TaskEntity taskEntity = TaskMapper.convertTaskDtoToTaskEntity(taskDto);
 
         taskEntity.setOwner(userEntity);
@@ -105,19 +107,20 @@ public class TaskBean {
         sendNumberOfTasksPerStatus();
         sendAvgTaskPerUser();
         sendCategoryCount();
-
+        log.logUserInfo(token, "Task created with "+taskEntity.getId()+" id", 1);
         return true;
     }
 
+    //websockets
     private void sendNewTask(TaskEntity taskEntity) {
         TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
 
         JsonObject jsonObject = handleWebSockets.convertStringToJsonObject(gson.toJson(taskDto));
-        System.out.println("Sending new task: " + taskDto);
+
         jsonObject.addProperty("owner", taskEntity.getOwner().getUsername());
         jsonObject.addProperty("type", TASK_CREATE.getValue());
         jsonObject.addProperty("id", taskEntity.getId());
-        System.out.println("Sending new task to frontend: " + jsonObject);
+
 
         String json = gson.toJson(jsonObject);
         notifier.sendToAllSessions(json);
@@ -154,7 +157,7 @@ public class TaskBean {
     }
 
     //Function that receives a task id and a new task status and updates the task status in the database mysql
-    public void updateTaskStatus(int id, int status) {
+    public void updateTaskStatus(int id, int status, String token) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         if(status == 300){
             taskEntity.setDoneDate(LocalDate.now());
@@ -165,10 +168,11 @@ public class TaskBean {
         sendCompletedTasksOverTime();
         sendCategoryCount();
 
+        log.logUserInfo(token, "Task status updated with "+id+" id", 1);
     }
     
     //Function that receives a task id and sets the task active to false in the database mysql
-    public boolean desactivateTask(int id) {
+    public boolean desactivateTask(int id, String token) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         if(taskEntity == null) return false;
         taskEntity.setActive(false);
@@ -185,9 +189,7 @@ public class TaskBean {
         sendNumberOfTasksPerStatus();
         sendCompletedTasksOverTime();
         sendCategoryCount();
-        System.out.println(taskDtoJsonString);
-
-
+        log.logUserInfo(token, "Task desactivated with "+id+" id", 1);
         return true;
     }
     
@@ -197,8 +199,7 @@ public class TaskBean {
         if (tokenEntity != null) {
             UserEntity userEntity = tokenEntity.getUser();
             TaskEntity taskEntity = taskDao.findTaskById(id);
-            System.out.println("TaskEntity: " + taskEntity);
-            System.out.println("UserEntity: " + userEntity);
+
             if (taskEntity.getOwner().getId() == userEntity.getId()) {
                 return true;
             }
@@ -212,7 +213,11 @@ public class TaskBean {
         return TaskMapper.convertTaskEntityToTaskDto(taskEntity);
     }
 
-    public void updateTask(TaskDto taskDto, int id) {
+    public void updateTask(TaskDto taskDto, int id, String token) {
+
+        TokenEntity tokenEntity = tokenDao.findTokenByToken(token);
+        if(tokenEntity == null) return;
+
         TaskEntity taskEntity = taskDao.findTaskById(id);
         int lastStatus = taskEntity.getStatus();
         taskEntity.setTitle(taskDto.getTitle());
@@ -228,10 +233,10 @@ public class TaskBean {
         else handleTaskEditMove(taskEntity, lastStatus);
         sendCategoryCount();
         sendNumberOfTasksPerStatus();
-
-
+        log.logUserInfo(token, "Task updated with "+id+" id", 1);
     }
 
+    //websockets
     private void handleTaskEdit(TaskEntity taskEntity) {
         TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
 
@@ -248,7 +253,7 @@ public class TaskBean {
 //        sendNumberOfTasksPerStatus();
         notifier.sendToAllSessions(taskDtoJsonString);
     }
-
+    //websockets
     private void handleTaskEditMove(TaskEntity taskEntity, int lastStatus){
         TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
 
@@ -275,7 +280,7 @@ public class TaskBean {
         return false;
     }
 
-    public boolean restoreTask(int id) {
+    public boolean restoreTask(int id, String token){
         TaskEntity taskEntity = taskDao.findTaskById(id);
         taskEntity.setActive(true);
         taskDao.merge(taskEntity);
@@ -290,31 +295,11 @@ public class TaskBean {
         sendAvgTaskPerUser();
         sendNumberOfTasksPerStatus();
         sendCategoryCount();
+        log.logUserInfo(token, "Task restored with "+id+" id", 1);
         return true;
     }
-//     public boolean desactivateTask(int id) {
-//        TaskEntity taskEntity = taskDao.findTaskById(id);
-//        if(taskEntity == null) return false;
-//        taskEntity.setActive(false);
-//
-//        TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntity);
-//
-//        JsonObject taskDtoJson = gson.toJsonTree(taskDto).getAsJsonObject();
-//        taskDtoJson.addProperty("type", MessageType.TASK_DESACTIVATE.getValue());
-//
-//        taskDao.merge(taskEntity);
-//
-//        String taskDtoJsonString = taskDtoJson.toString();
-//        notifier.sendToAllSessions(taskDtoJsonString);
-//        sendNumberOfTasksPerStatus();
-//        sendCompletedTasksOverTime();
-//        sendCategoryCount();
-//
-//
-//        return true;
-//    }
 
-    public boolean deleteTask(int id) {
+    public boolean deleteTask(int id, String token) {
         TaskEntity taskEntity = taskDao.findTaskById(id);
         if(taskEntity == null) return false;
 
@@ -330,11 +315,12 @@ public class TaskBean {
         sendAvgTaskPerUser();
         sendNumberOfTasksPerStatus();
         sendCategoryCount();
+        log.logUserInfo(token, "Task deleted with "+id+" id", 1);
         return true;
     }
 
     //Function that checks all tasks active = false and sets them to true
-    public boolean restoreAllTasks() {
+    public boolean restoreAllTasks(String token) {
         List<TaskEntity> taskEntities = taskDao.getAllTasks();
         for (TaskEntity taskEntity : taskEntities) {
             if (!taskEntity.getActive()) {
@@ -344,6 +330,7 @@ public class TaskBean {
                 sendNumberOfTasksPerStatus();
                 sendCompletedTasksOverTime();
                 sendCategoryCount();
+                log.logUserInfo(token, "Task id "+taskEntity.getId()+ " restored.", 1);
             }
             sendMessageActionToAllSocket(MessageType.TASK_RESTORE_ALL);
         }
@@ -351,10 +338,11 @@ public class TaskBean {
     }
 
     //Function that deletes all tasks from the database mysql that are active = false, returns true if all tasks were deleted
-    public boolean deleteAllTasks() {
+    public boolean deleteAllTasks(String token) {
         List<TaskEntity> taskEntities = taskDao.getAllTasks();
         for (TaskEntity taskEntity : taskEntities) {
             if (!taskEntity.getActive()) {
+                log.logUserInfo(token, "Task id "+taskEntity.getId()+" deleted.", 1);
                 taskDao.remove(taskEntity);
                 sendAvgTaskPerUser();
                 sendNumberOfTasksPerStatus();
@@ -366,6 +354,7 @@ public class TaskBean {
         return true;
     }
 
+    //websockets
     public void sendMessageActionToAllSocket(MessageType messageType) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty("type", messageType.getValue());
@@ -420,7 +409,7 @@ public class TaskBean {
         TokenStatus tokenStatus = tokenBean.isValidUserByToken(token);
         if(tokenStatus != TokenStatus.VALID) return false;
 
-        updateTaskStatus(taskID, status);
+        updateTaskStatus(taskID, status, token);
 
         TaskEntity taskEntityUpdated = taskDao.findTaskById(taskID);
         TaskDto taskDto = TaskMapper.convertTaskEntityToTaskDto(taskEntityUpdated);
@@ -440,6 +429,7 @@ public class TaskBean {
         // Convert taskDtoJson back to string
         String taskDtoJsonString = taskDtoJson.toString();
 
+        log.logUserInfo(token,  "Task moved with "+taskID+" id", 1);
         // Send taskDtoJsonString to all logged in users
         notifier.sendToAllSessions(taskDtoJsonString);
         //ab33

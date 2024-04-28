@@ -50,7 +50,6 @@ public class HandleWebSockets {
             .create();
 
     public void handleWebSocketJSON(Session session, String json) {
-        System.out.println("Handling WebSocket JSON: " + json);
         JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
         int typeValue = jsonObject.get("type").getAsInt();
 
@@ -64,7 +63,6 @@ public class HandleWebSockets {
                 taskBean.handleTaskMove(session, jsonObject);
                 break;
             case MESSAGE_READ_CONFIRMATION:
-                System.out.println("chegou a confirmação q a mensagem foi lida");
                 handleReadConfirmation(session, jsonObject);
                 break;
             default:
@@ -111,7 +109,6 @@ public class HandleWebSockets {
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Something went wrong!");
         }
 
     }
@@ -120,8 +117,6 @@ public class HandleWebSockets {
     //NOTIFICATION -- NOTIFICATION -- NOTIFICATION -- NOTIFICATION -- NOTIFICATION
     private void sendNotify(String sender, String receiver, String notify) {
         try {
-//            String receiver =  findUserEntityBySession(session).getUsername();
-
             NotificationDto notificationDto = new NotificationDto();
             notificationDto.setReceiver(receiver);
             notificationDto.setMessage(notify);
@@ -142,11 +137,8 @@ public class HandleWebSockets {
             jsonObject.add("id", gson.toJsonTree(notificationEntity.getId()));
 
             messageBean.sendToUser(receiver, jsonObject.toString());
-            System.out.println(jsonObject.toString());
-            System.out.println("Notification sent!");
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("Something went wrong!");
         }
 
     }
@@ -195,13 +187,10 @@ public class HandleWebSockets {
 
         messageEntity.setIsRead(true);
         messageDao.merge(messageEntity);
-        System.out.println("vai enviar a confirmação de leitura ao sender da mensagem"+jsonObject);
-
 
         jsonObject.addProperty("type", MessageType.MESSAGE_READ_CONFIRMATION.getValue());
 
         messageBean.sendToUser(messageEntity.getSender_id().getUsername(), jsonObject.toString());
-        System.out.println("Confirmação de leitura enviada ao sender da mensagem!");
     }
 
 

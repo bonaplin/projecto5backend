@@ -33,6 +33,9 @@ public class CategoryBean {
     @Inject
     UserBean userbean;
 
+    @Inject
+    Log log;
+
     //Function that gets all categories from database my sql
     public List<CategoryDto> getAllCategories() {
         List<CategoryEntity> categoryEntities = categoryDao.getAllCategories();
@@ -41,28 +44,6 @@ public class CategoryBean {
             categoryDtos.add(CategoryMapper.convertCategoryEntityToCategoryDto(categoryEntity));
         }
         return categoryDtos;
-    }
-
-    //Function that returns the categories of tasks that are active in the database my sql, firts gets the tasks that are active and then gets the categories of those tasks
-//    public List<CategoryDto> getActiveCategories() {
-//        List<TaskEntity> taskEntities = taskDao.getActiveTasks();
-//        List<CategoryDto> categoryDtos = new ArrayList<>();
-//        for (TaskEntity taskEntity : taskEntities) {
-//            CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(taskEntity.getCategory().getTitle());
-//            categoryDtos.add(CategoryMapper.convertCategoryEntityToCategoryDto(categoryEntity));
-//        }
-//        return categoryDtos;
-//    }
-
-    //Function that receives a category title, checks if there is any task with the category, if not, deletes the category
-    public boolean deleteCategory(String title) {
-        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(title);
-        List<TaskEntity> taskEntities = taskDao.findTasksByCategory(categoryEntity);
-        if (taskEntities.isEmpty()) {
-            categoryDao.deleteCategory(categoryEntity);
-            return true;
-        }
-        return false;
     }
 
     public boolean deleteCategory(int id) {
@@ -75,17 +56,18 @@ public class CategoryBean {
         return false;
     }
 
-    public boolean updateCategory(CategoryDto categoryDto, String title) {
-        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(title);
-        if (categoryEntity == null) {
-            return false;
-        }
-        categoryEntity.setTitle(categoryDto.getTitle());
-        categoryEntity.setDescription(categoryDto.getDescription());
-        categoryDao.merge(categoryEntity);
-        return true;
-    }
-    public boolean updateCategory(CategoryDto categoryDto, int id) {
+//    public boolean updateCategory(CategoryDto categoryDto, String title) {
+//        CategoryEntity categoryEntity = categoryDao.findCategoryByTitle(title);
+//        if (categoryEntity == null) {
+//            return false;
+//        }
+//        categoryEntity.setTitle(categoryDto.getTitle());
+//        categoryEntity.setDescription(categoryDto.getDescription());
+//        categoryDao.merge(categoryEntity);
+//        log.logUserInfo(token,"Category updated: " + categoryDto.getId(), 1);
+//        return true;
+//    }
+    public boolean updateCategory(CategoryDto categoryDto, int id, String token) {
         CategoryEntity categoryEntity = categoryDao.findCategoryById(id);
         if (categoryEntity == null) {
             return false;
@@ -93,6 +75,7 @@ public class CategoryBean {
         categoryEntity.setTitle(categoryDto.getTitle());
         categoryEntity.setDescription(categoryDto.getDescription());
         categoryDao.merge(categoryEntity);
+        log.logUserInfo(token,"Category updated: " + categoryDto.getId(), 1);
         return true;
     }
 
@@ -114,31 +97,32 @@ public class CategoryBean {
         return true;
     }
 
-    public boolean isValidCategoryUpdate(CategoryDto categoryDto, String originalTitle){
-        if (categoryDto.getTitle() == null || categoryDto.getDescription() == null) {
-            return false;
-        }
-        if (categoryDto.getTitle().isEmpty() || categoryDto.getDescription().isEmpty()) {
-            return false;
-        }
-        if (categoryDto.getTitle().length() > 255 || categoryDto.getDescription().length() > 255) {
-            return false;
-        }
-        if(categoryDao.findCategoryByTitle(categoryDto.getTitle()) != null && !categoryDto.getTitle().toLowerCase().equals(originalTitle.toLowerCase())){
-            return false;
-        }
-
-        return true;
-    }
+//    public boolean isValidCategoryUpdate(CategoryDto categoryDto, String originalTitle){
+//        if (categoryDto.getTitle() == null || categoryDto.getDescription() == null) {
+//            return false;
+//        }
+//        if (categoryDto.getTitle().isEmpty() || categoryDto.getDescription().isEmpty()) {
+//            return false;
+//        }
+//        if (categoryDto.getTitle().length() > 255 || categoryDto.getDescription().length() > 255) {
+//            return false;
+//        }
+//        if(categoryDao.findCategoryByTitle(categoryDto.getTitle()) != null && !categoryDto.getTitle().toLowerCase().equals(originalTitle.toLowerCase())){
+//            return false;
+//        }
+//
+//        return true;
+//    }
     
     //Function that receives a categorydto, converts it to categoryentity using categorydto.getOwner() to get the userentity and adds the category to the database mysql
-    public boolean addCategory(CategoryDto categoryDto) {
+    public boolean addCategory(CategoryDto categoryDto, String token) {
         CategoryEntity categoryEntity = new CategoryEntity();
         UserEntity userEntity = userDao.findUserByUsername(categoryDto.getOwner());
         categoryEntity = CategoryMapper.convertCategoryDtoToCategoryEntity(categoryDto);
         categoryEntity.setOwner(userEntity);
 //        categoryEntity.setId(generateIdDataBase());
         categoryDao.addCategory(categoryEntity);
+        log.logUserInfo(token,"Category added: " + categoryDto.getTitle(), 1);
         return true;
     }
 
@@ -172,14 +156,14 @@ public class CategoryBean {
             categoryDto.setTitle("Backlog");
             categoryDto.setDescription("Backlog category");
             categoryDto.setOwner("admin");
-            addCategory(categoryDto);
+            addCategory(categoryDto,"StartBean");
         }
         if (!categoryDao.findCategoryByName("Java")) {
             CategoryDto categoryDto = new CategoryDto();
             categoryDto.setTitle("Java");
             categoryDto.setDescription("Java category");
             categoryDto.setOwner("admin");
-            addCategory(categoryDto);
+            addCategory(categoryDto,"StartBean");
         }
 
     }

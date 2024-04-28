@@ -18,7 +18,9 @@ import aor.paj.websocket.bean.HandleWebSockets;
 import jakarta.ejb.EJB;
 import jakarta.ejb.Stateless;
 import jakarta.enterprise.context.ApplicationScoped;
+import jakarta.inject.Inject;
 import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.ThreadContext;
 import org.mindrot.jbcrypt.BCrypt;
 
 @Stateless
@@ -48,8 +50,16 @@ public class UserBean {
     @EJB
     StatisticBean statisticBean;
 
+    @Inject
+    Log log;
+
     private static final int TOKEN_EXPIRATION_TIME = 60;
 
+    private void logUserInfo(String username, String ipAddress, String action) {
+        ThreadContext.put("username", username);
+        ThreadContext.put("ipAddress", ipAddress);
+        logger.info(action);
+    }
 
     // FOR POPULATE USING
     public boolean addUserFromPopulator(UserDto user) {
@@ -66,9 +76,8 @@ public class UserBean {
             userEntity.setActive(true);
             userEntity.setConfirmed(true);
             userEntity.setCreated(Instant.now());
-            //System.out.println("user a ser adicionado: " + userEntity);
+
             userDao.persist(userEntity);
-            logger.info("user a ser adicionado: " + userEntity.getUsername());
 
             statisticBean.sendActiveUsers();
             statisticBean.sendUserStatistics();
@@ -245,46 +254,41 @@ public class UserBean {
         String deleted = "deleted";
 
         UserEntity userEntity = userDao.findUserByUsername(username);
-        System.out.println("user a ser apagado: " + userEntity.getUsername());
+
         if (userEntity == null) return false;
 
-            changeTaskOwner(username,deleted);
-            changeCategoryOwner(username,deleted);
+        changeTaskOwner(username,deleted);
+        changeCategoryOwner(username,deleted);
 
         changeNotifications(username,deleted);
         changeMessages(username,deleted);
 
-            userDao.remove(userEntity);
-            System.out.println("user removido");
-            statisticBean.sendUserStatistics();
+        userDao.remove(userEntity);
 
-            return true;
+        statisticBean.sendUserStatistics();
+        statisticBean.sendActiveUsers();
+
+        return true;
 
     }
     public void changeMessages(String oldUsername, String newUsername){
         UserEntity oldUserEntity = userDao.findUserByUsername(oldUsername);
         UserEntity newUserEntity = userDao.findUserByUsername(newUsername);
-        System.out.println("old user: " + oldUserEntity.getUsername());
         if(oldUserEntity != null && newUserEntity != null) {
-            System.out.println("são dif de null");
             List<MessageEntity> messages = messageDao.findMessagesByReceiver(oldUserEntity.getUsername());
             if(messages != null && !messages.isEmpty()) {
-                System.out.println("tem mensagens");
                 for (MessageEntity message : messages) {
                     message.setReceiver_id(newUserEntity);
                     messageDao.merge(message);
                     messageDao.flush();
-                    System.out.println("message alterada: " + message.getMessage());
                 }
             }
             messages = messageDao.findMessagesBySender(oldUserEntity.getUsername());
             if(messages != null && !messages.isEmpty()) {
-                System.out.println("tem mensagens");
                 for (MessageEntity message : messages) {
                     message.setSender_id(newUserEntity);
                     messageDao.merge(message);
                     messageDao.flush();
-                    System.out.println("message alterada: " + message.getMessage());
                 }
             }
 
@@ -297,22 +301,18 @@ public class UserBean {
         if(oldUserEntity != null && newUserEntity != null) {
             List<NotificationEntity> notifications = notificationDao.findNotificationsByReceiver(oldUserEntity.getUsername());
             if(notifications != null && !notifications.isEmpty()) {
-                System.out.println("tem notificações");
                 for (NotificationEntity notification : notifications) {
                     notification.setReceiver(newUserEntity);
                     notificationDao.merge(notification);
                     notificationDao.flush();
-                    System.out.println("notification alterada: " + notification.getMessage());
                 }
             }
             notifications = notificationDao.findNotificationsBySender(oldUserEntity.getUsername());
             if(notifications != null && !notifications.isEmpty()) {
-                System.out.println("tem notificações");
                 for (NotificationEntity notification : notifications) {
                     notification.setSender(newUserEntity);
                     notificationDao.merge(notification);
                     notificationDao.flush();
-                    System.out.println("notification alterada: " + notification.getMessage());
                 }
             }
         }
@@ -338,11 +338,9 @@ public class UserBean {
         if(oldUserEntity != null && newUserEntity != null){
             List<TaskEntity> tasks = taskDao.findTaskByOwnerId(oldUserEntity.getId());
             for(TaskEntity task : tasks){
-                System.out.println("task a ser alterada: " + task.getTitle());
                 task.setOwner(newUserEntity);
 
                 taskDao.merge(task);
-                System.out.println("task alterada: " + task.getTitle());
             }
             return true;
         }
@@ -399,10 +397,8 @@ public class UserBean {
     public boolean confirmUser(String token) {
         UserEntity userEntity = userDao.findUserByToken(token);
         if (userEntity != null) {
-            System.out.println("user encontrado");
             return true;
         }else{
-            System.out.println("user nao encontrado");
             return false;
         }
     }
@@ -439,7 +435,6 @@ public class UserBean {
 
     public ResetPasswordStatus resetPassword(String token, String password){
         UserEntity userEntity = userDao.findUserByToken(token);
-        System.out.println("reset password");
 
         if(userEntity == null){
             return ResetPasswordStatus.USER_NOT_FOUND;
@@ -447,7 +442,6 @@ public class UserBean {
 
         if(!userEntity.getConfirmed()){
             userEntity.setConfirmed(true);
-            System.out.println("user confirmado" + userEntity.getConfirmed());
             userEntity.setCreated(Instant.now());
         }
 
@@ -461,7 +455,6 @@ public class UserBean {
         userEntity.setToken_verification(null);
 
         userEntity.setPassword(BCrypt.hashpw(password, BCrypt.gensalt()));
-        System.out.println(userEntity.getConfirmed());
         userDao.merge(userEntity);
         return ResetPasswordStatus.SUCCESS;
     }
