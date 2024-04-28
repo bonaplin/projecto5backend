@@ -41,7 +41,7 @@ public class Notifier {
         try {
             handleWebSockets.handleWebSocketJSON(session, json);
         } catch (Exception e) {
-            e.printStackTrace();
+//            e.printStackTrace();
             System.out.println("Something went wrong!");
         }
     }

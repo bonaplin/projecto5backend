@@ -89,16 +89,19 @@ public class TokenDao extends AbstractDao<TokenEntity>{
 //    @Schedule(hour = "*", minute = "*/5", persistent = false)
     @Schedule(hour = "*", minute = "*/1", persistent = false)
     public void removeExpiredTokens() {
-        List<TokenEntity> expiredTokens = findExpiredTokens(Instant.now());
+        List<TokenEntity> expiredTokens = new ArrayList<>(findExpiredTokens(Instant.now()));
         for (TokenEntity token : expiredTokens) {
             UserEntity user = token.getUser();
             if(user != null){
-                log.logUserInfo(token.getToken(), "Removing token: " + token.getToken()+" to logout user.", 3);
                 String username = user.getUsername();
                 messageBean.sendInfo(username, "Your account has been disconnected due to inactivity",
-                        MessageType.LOGOUT, token.getToken()
+                        MessageType.LOGOUT
                 );
-                em.remove(token);
+                log.logUserInfo(token.getToken(), "Removing token: " + token.getToken()+" to logout user.", 3);
+                System.out.println("Removing token: " + token.getToken() + " to logout user.");
+                if (em.contains(token)) {
+                    remove(token);
+                }
             }
         }
     }

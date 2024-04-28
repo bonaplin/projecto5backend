@@ -30,7 +30,7 @@ public class TokenBean  {
     @EJB
     private TaskDao taskDao;
 
-    private static int DEFAULT_TOKEN_EXPIRATION_MINUTES = 10;
+    private static int DEFAULT_TOKEN_EXPIRATION_MINUTES = 5;
     private static int PO_TOKEN_EXPIRATION_MINUTES = 60;
     private static final int SHORT_TOKEN_EXPIRATION_SECONDS = 10;
 
@@ -151,8 +151,8 @@ public class TokenBean  {
 
                 setDefaultTokenExpiration(tokenEntity);
 
-                System.out.println("EXPIRAÇÃO: "+tokenEntity.getExpiration());
-                System.out.println("AGORA: "+Instant.now());
+//                System.out.println("EXPIRAÇÃO: "+tokenEntity.getExpiration());
+//                System.out.println("AGORA: "+Instant.now());
 
                 // merge para atualizar a expiração
                 tokenDao.merge(tokenEntity);

@@ -143,7 +143,7 @@ public class MessageBean {
      * @param receiver
      * @param message informação a enviar
      */
-    public void sendInfo(String receiver, String message, MessageType type, String token){
+    public void sendInfo(String receiver, String message, MessageType type){
         InfoSocket infoSocket = new InfoSocket();
         infoSocket.setType(type.getValue());
         infoSocket.setMessage(message);
