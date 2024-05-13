@@ -458,4 +458,13 @@ public class UserBean {
         userDao.merge(userEntity);
         return ResetPasswordStatus.SUCCESS;
     }
+
+    public UserEntity getUserById(int id){
+
+        UserEntity userEntity = userDao.findUserById(id);
+        if(userEntity != null){
+            return userEntity;
+        }
+        return new UserEntity();
+    }
 }

@@ -61,6 +61,7 @@ public class UserEntity implements Serializable {
     @Column(name="confirmed", nullable = false, unique = false, updatable = true)
     private Boolean confirmed = false;
 
+    // imagemDB
     @Lob
     @Column(name = "profile_image_data", nullable = true, columnDefinition = "MEDIUMBLOB")
     private byte[] profileImageData;
