@@ -100,6 +100,13 @@
             <version>2.10.1</version>
         </dependency>
         <!--gson ^-->
+        <!--upload files-->
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <!-- upload files ^-->
     </dependencies>
     <build>
         <plugins>

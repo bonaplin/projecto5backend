@@ -136,8 +136,7 @@ public class UserBean {
         return false;
     }
 
-
-    //Fubction that receives username, retrieves the user from the database and returns the userDto object
+    //Function that receives username, retrieves the user from the database and returns the userDto object
     public UserDto getUserByUsername(String username) {
         UserEntity userEntity = userDao.findUserByUsername(username);
         if (userEntity != null) {
@@ -257,6 +256,7 @@ public class UserBean {
 
         if (userEntity == null) return false;
 
+        System.out.println("DELETE USER");
         changeTaskOwner(username,deleted);
         changeCategoryOwner(username,deleted);
 

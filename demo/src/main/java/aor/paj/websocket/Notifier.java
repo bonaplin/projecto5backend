@@ -32,7 +32,10 @@ public class Notifier {
     @OnClose
     public void toDoOnClose(Session session, CloseReason reason) {
         for (String key : sessions.keySet()) {
-            if (sessions.get(key) == session) sessions.remove(key);
+            if (sessions.get(key) == session){
+                sessions.remove(key);
+                break;
+            }
         }
     }
 
