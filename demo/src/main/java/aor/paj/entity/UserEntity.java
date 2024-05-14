@@ -69,8 +69,18 @@ public class UserEntity implements Serializable {
     @Column(name = "profile_image_type", nullable = true)
     private String profileImageType;
 
+    @Column(name="profile_image_path", nullable = true)
+    private String profileImagePath;
 
     public UserEntity() {
+    }
+
+    public String getProfileImagePath() {
+        return profileImagePath;
+    }
+
+    public void setProfileImagePath(String profileImagePath) {
+        this.profileImagePath = profileImagePath;
     }
 
     public byte[] getProfileImageData() {

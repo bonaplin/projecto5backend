@@ -1,8 +1,12 @@
 package aor.paj.service;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 
+import aor.paj.bean.ImageBean;
 import aor.paj.bean.Log;
 import aor.paj.bean.TokenBean;
 import aor.paj.bean.UserBean;
@@ -13,15 +17,11 @@ import aor.paj.utils.JsonUtils;
 import aor.paj.utils.ResetPasswordStatus;
 import aor.paj.utils.TokenStatus;
 import aor.paj.validator.UserValidator;
-import jakarta.ejb.EJB;
 import jakarta.inject.Inject;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.ThreadContext;
 
 //@Path("/user")
 @Path("/users")
@@ -31,6 +31,8 @@ public class UserService {
     UserBean userBean;
     @Inject
     TokenBean tokenBean;
+    @Inject
+    ImageBean imageBean;
 
     @Inject
     Log log;
@@ -387,7 +389,7 @@ public class UserService {
     }
 // imagemDB
     @GET
-    @Path("{id}/image")
+    @Path("{id}/imageDB")
     @Produces("image/*")
     public Response getUserImage(@PathParam("id") int id) {
         UserEntity userEntity = userBean.getUserById(id);
@@ -398,6 +400,49 @@ public class UserService {
         byte[] imageData = userEntity.getProfileImageData();
         String imageType = userEntity.getProfileImageType();
 
+        return Response.ok(new ByteArrayInputStream(imageData)).type(imageType).build();
+    }
+
+    @POST
+    @Path("/{id}/image")
+    @Consumes("image/*")
+    public Response uploadUserImage(@PathParam("id") int id, @HeaderParam("filename") String originalFileName, InputStream imageData) {
+        try {
+            imageBean.saveUserProfileImage(id, imageData, originalFileName);
+        } catch (IOException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+        return Response.ok().build();
+    }
+
+    @GET
+    @Path("/{id}/image")
+    @Produces("image/*")
+    public Response getUserPicture(@PathParam("id") int id) {
+        System.out.println("Getting user image...");
+        UserEntity userEntity = userBean.getUserById(id);
+        if (userEntity == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+
+        String imagePath = userEntity.getProfileImagePath();
+        System.out.println("Image path: " + imagePath);
+        if (imagePath == null) {
+            return Response.status(Response.Status.NOT_ACCEPTABLE).build();
+        }
+
+        System.out.println("Getting image data... bf imageData");
+        byte[] imageData;
+        try {
+            imageData = imageBean.getImage(imagePath);
+            System.out.println("Getting image data... af imageData");
+        } catch (IOException e) {
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR).build();
+        }
+
+        String imageType = userEntity.getProfileImageType();
+
+        System.out.println(imageType);
         return Response.ok(new ByteArrayInputStream(imageData)).type(imageType).build();
     }
 }
