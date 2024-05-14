@@ -67,6 +67,7 @@ public class TaskBean {
 
     @EJB
     StatisticBean statisticBean;
+
     @Inject
     Log log;
 
@@ -125,7 +126,6 @@ public class TaskBean {
         String json = gson.toJson(jsonObject);
         notifier.sendToAllSessions(json);
     }
-
 
     //Function that receives a taskdto and checks in database mysql if a task with the same title already exists
     public boolean taskTitleExists(TaskDto taskDto) {

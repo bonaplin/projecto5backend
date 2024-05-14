@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -20,15 +21,17 @@ public class ImageBean {
 
     private static final String IMAGE_DIRECTORY = "projeto-5/images";
 
-    public String saveImage(InputStream imageData, String originalFileName) throws IOException {
+    public String saveImage(InputStream imageData, String originalFileName, int id) throws IOException {
         String fileExtension = getFileExtension(originalFileName);
-        String fileName = UUID.randomUUID().toString() + "." + fileExtension;
-        Path imagePath = Paths.get(IMAGE_DIRECTORY, fileName);
+        String fileName = "profile." + fileExtension;
+        String directory = IMAGE_DIRECTORY + "/" + id;
+        Path imagePath = Paths.get(directory, fileName);
 
         if (!Files.exists(imagePath.getParent())) {
             Files.createDirectories(imagePath.getParent());
         }
-        Files.copy(imageData, imagePath);
+        Files.copy(imageData, imagePath, StandardCopyOption.REPLACE_EXISTING);
+
         return imagePath.toString();
     }
 
@@ -48,7 +51,7 @@ public class ImageBean {
         }
 
         String imageType = "image/" + getFileExtension(originalFileName);
-        String imagePath = saveImage(imageData, originalFileName);
+        String imagePath = saveImage(imageData, originalFileName, userId);
 
         userEntity.setProfileImagePath(imagePath);
         userEntity.setProfileImageType(imageType);

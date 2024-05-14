@@ -11,7 +11,7 @@ import java.util.Properties;
 public class EmailSender {
 
     private static final String username = "botsemgps@gmail.com";
-    private static final String password = "xlvi nhlq blnp olzf"; // replace with your actual password
+    private static final String password = "xlvi nhlq blnp olzf";
 //    private static final String password = System.getenv("SMTP_PASSWORD");
 
 
