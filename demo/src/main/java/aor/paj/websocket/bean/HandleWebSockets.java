@@ -30,6 +30,7 @@ import java.time.Instant;
 @Stateless
 public class HandleWebSockets {
 
+    //teste
     @EJB
     MessageBean messageBean;
     @EJB
