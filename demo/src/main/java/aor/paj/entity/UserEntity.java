@@ -61,11 +61,6 @@ public class UserEntity implements Serializable {
     @Column(name="confirmed", nullable = false, unique = false, updatable = true)
     private Boolean confirmed = false;
 
-    // imagemDB
-    @Lob
-    @Column(name = "profile_image_data", nullable = true, columnDefinition = "MEDIUMBLOB")
-    private byte[] profileImageData;
-
     @Column(name = "profile_image_type", nullable = true)
     private String profileImageType;
 
@@ -81,14 +76,6 @@ public class UserEntity implements Serializable {
 
     public void setProfileImagePath(String profileImagePath) {
         this.profileImagePath = profileImagePath;
-    }
-
-    public byte[] getProfileImageData() {
-        return profileImageData;
-    }
-
-    public void setProfileImageData(byte[] profileImageData) {
-        this.profileImageData = profileImageData;
     }
 
     public String getProfileImageType() {

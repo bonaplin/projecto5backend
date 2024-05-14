@@ -387,21 +387,6 @@ public class UserService {
         log.logUserInfo(null,  "User "+u.getUsername()+" added.",1);
         return Response.status(200).entity(JsonUtils.convertObjectToJson(new ResponseMessage("A new user is created"))).build();
     }
-// imagemDB
-    @GET
-    @Path("{id}/imageDB")
-    @Produces("image/*")
-    public Response getUserImage(@PathParam("id") int id) {
-        UserEntity userEntity = userBean.getUserById(id);
-        if (userEntity == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-
-        byte[] imageData = userEntity.getProfileImageData();
-        String imageType = userEntity.getProfileImageType();
-
-        return Response.ok(new ByteArrayInputStream(imageData)).type(imageType).build();
-    }
 
     @POST
     @Path("/{id}/image")
